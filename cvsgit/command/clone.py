@@ -45,6 +45,10 @@ class clone(Cmd):
             self.usage_error(_('too many arguments'))
 
     def run(self):
+        if os.path.exists(self.directory):
+            self.fatal(_("destination path '%s' already exists") % \
+                       self.directory)
+
         git = Git(self.directory)
         git.init()
         try:
@@ -64,10 +68,13 @@ class clone(Cmd):
                 print 'Generating changesets...'
                 for changeset in db.changesets():
                     gfi.commit(cvs, changeset)
-            finally:
                 gfi.close()
-
-            print 'Success!'
+            except:
+                try:
+                    gfi.close()
+                except Exception, (e):
+                    print '%s: warning: %s' % (self.option_parser.prog, e)
+                raise
         except:
             if not self.options.no_cleanup:
                 git.destroy()

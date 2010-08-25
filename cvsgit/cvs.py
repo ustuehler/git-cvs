@@ -79,7 +79,9 @@ class CVSROOT(object):
         filename += ',v'
         rcsfile = os.path.join(self.prefix, filename)
         if not os.path.isfile(rcsfile):
-            rcsfile = os.path.join(self.prefix, 'Attic', filename)
+            rcsfile = os.path.join(self.prefix,
+                os.path.dirname(filename), 'Attic',
+                os.path.basename(filename))
         if not os.path.isfile(rcsfile):
             raise RuntimeError, _('no RCS file found for %s') % filename
 

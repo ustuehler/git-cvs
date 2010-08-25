@@ -2,6 +2,7 @@
 
 import os
 import string
+import sys
 import textwrap
 from optparse import OptionParser
 from cvsgit.i18n import _
@@ -34,6 +35,7 @@ class Cmd(object):
         self.option_parser = OptionParser(
             prog=os.path.basename(argv[0]),
             description=self.description,
+            usage=self.usage,
             add_help_option=False)
 
         self.add_option('--help', action='help', help=\
@@ -49,6 +51,10 @@ class Cmd(object):
 
     def usage_error(self, msg):
         self.option_parser.error(msg)
+
+    def fatal(self, msg):
+        sys.stderr.write(_('%s: fatal: %s\n') % (self.option_parser.prog, msg))
+        sys.exit(1)
 
     def initialize_options(self):
         raise RuntimeError, \

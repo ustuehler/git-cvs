@@ -67,7 +67,7 @@ class GitFastImport(object):
         #self.write('from refs/heads/%s^0\n' % self.branch)
 
         for c in commit.changes:
-            print '%s %s %s' % (c.state, c.file, c.revision)
+            print '\t%s %s %s' % (c.state, c.file, c.revision)
             if c.state == FILE_DELETED:
                 self.write('D %s\n' % c.file)
             else:
@@ -79,6 +79,7 @@ class GitFastImport(object):
         assert(type(data) == types.StringType)
         self.write('data %d\n' % len(data))
         self.write(data)
+        self.write('\n')
 
     def write(self, data):
         self.pipe.stdin.write(data)
