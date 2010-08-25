@@ -68,7 +68,7 @@ class Git(object):
     def fast_import(self):
         env = os.environ.copy()
         env['GIT_DIR'] = self.git_dir
-        pipe = Popen(['git', 'fast-import',
+        pipe = Popen(['git', 'fast-import', '--quiet',
                       '--date-format=now'], # FIXME
                      stdin=PIPE, env=env)
         return GitFastImport(self, pipe)
