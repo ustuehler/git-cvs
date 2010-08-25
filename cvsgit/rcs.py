@@ -21,12 +21,16 @@ class RCSRevision(object):
 class RCSFile(rcsparse.Sink):
     "Represents a single RCS file."
 
-    def __init__(self, filename, prefix=''):
+    def __init__(self, filename, prefix='', encoding='iso8859-1'):
         """'prefix' is a path prefix to prepend to 'filename' when
         accessing the file.  This allows 'filename' to be a relative
-        path, relative to a CVS repository root, for example."""
+        path, relative to a CVS repository root, for example.
+
+        'encoding' sets the encoding of log messages and delta text in
+        RCS files."""
         self.filename = filename
         self.prefix = prefix
+        self.encoding = encoding
 
     def revisions(self):
         "Yield all revisions in the RCS file."
@@ -52,4 +56,5 @@ class RCSFile(rcsparse.Sink):
     def set_revision_info(self, revision, log, text):
         "Part of the RCS parser callback interface."
         assert(self.parsed.has_key(revision))
-        self.parsed[revision] += [log, text]
+        self.parsed[revision] += [unicode(log, self.encoding),
+                                  unicode(text, self.encoding)]

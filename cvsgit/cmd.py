@@ -4,6 +4,7 @@ import os
 import string
 import textwrap
 from optparse import OptionParser
+from cvsgit.i18n import _
 
 class Cmd(object):
     """Abstract base class for commands."""
@@ -29,16 +30,22 @@ class Cmd(object):
             import sys
             self.main(sys.argv)
 
-
     def main(self, argv):
         self.option_parser = OptionParser(
             prog=os.path.basename(argv[0]),
-            description=self.description)
+            description=self.description,
+            add_help_option=False)
+
+        self.add_option('--help', action='help', help=\
+            _("Show this help and exit."))
 
         self.initialize_options()
         self.options, self.args = self.option_parser.parse_args(argv[1:])
         self.finalize_options()
         self.run()
+
+    def add_option(self, *args, **kwargs):
+        return self.option_parser.add_option(*args, **kwargs)
 
     def usage_error(self, msg):
         self.option_parser.error(msg)
