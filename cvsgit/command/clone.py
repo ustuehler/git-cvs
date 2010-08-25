@@ -30,8 +30,10 @@ class clone(Cmd):
               "CVS committers."))
         self.add_option('--tz', metavar='TIMEZONE', help=\
             _("Set the time zone for dates recorded in RCS files."))
-        self.add_option('--no-cleanup', action='store_true', help=\
-            _("Don't delete the partial Git repository on error."))
+        self.add_option('--incremental', action='store_true', help=\
+            _("Leave the partial Git repository around if the clone "
+              "command is interruped and attempt to finish a clone "
+              "operation that was previously interrupted."))
 
     def finalize_options(self):
         if len(self.args) < 1:
@@ -45,7 +47,7 @@ class clone(Cmd):
             self.usage_error(_('too many arguments'))
 
     def run(self):
-        if os.path.exists(self.directory):
+        if os.path.exists(self.directory) and not self.options.incremental:
             self.fatal(_("destination path '%s' already exists") % \
                        self.directory)
 
@@ -65,6 +67,7 @@ class clone(Cmd):
             gfi = git.fast_import(domain=self.options.domain,
                                   tz=self.options.tz)
             try:
+                # TODO: here, ---incremental needs to be respected
                 print 'Generating changesets...'
                 for changeset in db.changesets():
                     gfi.commit(cvs, changeset)
@@ -76,7 +79,7 @@ class clone(Cmd):
                     print '%s: warning: %s' % (self.option_parser.prog, e)
                 raise
         except:
-            if not self.options.no_cleanup:
+            if not self.options.incremental:
                 git.destroy()
             raise
 
