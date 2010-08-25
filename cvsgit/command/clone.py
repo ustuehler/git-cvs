@@ -28,6 +28,8 @@ class clone(Cmd):
             default='local', help=\
             _("Set the default e-mail domain to use for unknown"
               "CVS committers."))
+        self.add_option('--tz', metavar='TIMEZONE', help=\
+            _("Set the time zone for dates recorded in RCS files."))
         self.add_option('--no-cleanup', action='store_true', help=\
             _("Don't delete the partial Git repository on error."))
 
@@ -43,22 +45,29 @@ class clone(Cmd):
             self.usage_error(_('too many arguments'))
 
     def run(self):
-        git = Git(self.directory, domain=self.options.domain)
+        git = Git(self.directory)
         git.init()
         try:
             db = Db(os.path.join(git.git_dir, 'cvsgit.db'))
             cvs = CVSROOT(self.repository)
 
-            for revision in cvs.revisions():
-                db.add_revision(revision)
-            db.commit()
-
-            gfi = git.fast_import()
             try:
+                print 'Parsing RCS revisions...'
+                for revision in cvs.revisions():
+                    db.add_revision(revision)
+            finally:
+                db.commit()
+
+            gfi = git.fast_import(domain=self.options.domain,
+                                  tz=self.options.tz)
+            try:
+                print 'Generating changesets...'
                 for changeset in db.changesets():
                     gfi.commit(cvs, changeset)
             finally:
                 gfi.close()
+
+            print 'Success!'
         except:
             if not self.options.no_cleanup:
                 git.destroy()
