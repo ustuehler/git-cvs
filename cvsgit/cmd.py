@@ -31,7 +31,7 @@ class Cmd(object):
             import sys
             self.main(sys.argv)
 
-    def main(self, argv):
+    def _main(self, argv):
         self.option_parser = OptionParser(
             prog=os.path.basename(argv[0]),
             description=self.description,
@@ -44,7 +44,14 @@ class Cmd(object):
         self.initialize_options()
         self.options, self.args = self.option_parser.parse_args(argv[1:])
         self.finalize_options()
-        self.run()
+        sys.exit(self.run())
+
+    def main(self, argv):
+        try:
+            self._main(argv)
+        except KeyboardInterrupt:
+            # In good old tradition: 128 + signal number (SIGINT=2)
+            sys.exit(128 + 2)
 
     def add_option(self, *args, **kwargs):
         return self.option_parser.add_option(*args, **kwargs)

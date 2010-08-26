@@ -1,7 +1,13 @@
 """RCS interface module for CVSGit."""
 
 import os.path
-import rcsparse
+
+from cvsgit.changeset import Change, FILE_ADDED, FILE_MODIFIED, \
+    FILE_DELETED
+
+# Our 'rcsparse' module is actually a simple copy of the RCS parser
+# code from cvs2svn.
+from cvsgit import rcsparse
 
 class RCSRevision(object):
     "Represents a single RCS revision in an RCS file."
@@ -21,40 +27,49 @@ class RCSRevision(object):
 class RCSFile(rcsparse.Sink):
     "Represents a single RCS file."
 
-    def __init__(self, filename, prefix='', encoding='iso8859-1'):
-        """'prefix' is a path prefix to prepend to 'filename' when
-        accessing the file.  This allows 'filename' to be a relative
-        path, relative to a CVS repository root, for example.
-
-        'encoding' sets the encoding of log messages and delta text in
-        RCS files."""
+    def __init__(self, filename, encoding='iso8859-1'):
+        """'encoding' sets the encoding of log messages and delta text
+        in RCS files."""
         self.filename = filename
-        self.prefix = prefix
         self.encoding = encoding
 
-    def revisions(self):
-        "Yield all revisions in the RCS file."
-        f = file(os.path.join(self.prefix, self.filename), 'r')
-        try:
-            self.parsed = {}
-            rcsparse.parse(f, self)
-            revisions = self.parsed.values()
-            del self.parsed
+    def changes(self):
+        """Return the list of Change objects corresponding to all
+        revisions defined in this RCS file. The order of changes is
+        arbitrary."""
 
-            for revision in revisions:
-                yield(RCSRevision(self, *revision))
+        f = file(os.path.join(self.filename), 'r')
+        try:
+            self.change = {}
+            rcsparse.parse(f, self)
+            changes = self.change.values()
+            del self.change
+            return changes
         finally:
             f.close()
 
     def define_revision(self, revision, timestamp, author, state,
                         branches, next):
         "Part of the RCS parser callback interface."
-        assert(not self.parsed.has_key(revision))
-        self.parsed[revision] = [revision, timestamp, author, state,
-                                 branches, next]
+
+        # XXX: looks ugly; there must be a better way?
+        if state == 'dead':
+            state = FILE_DELETED
+        elif revision == '1.1':
+            state = FILE_ADDED
+        else:
+            state = FILE_MODIFIED
+
+        assert(not self.change.has_key(revision))
+        self.change[revision] = Change(timestamp=timestamp,
+                                       author=author,
+                                       log=None,
+                                       filename=self.filename,
+                                       revision=revision,
+                                       state=state)
 
     def set_revision_info(self, revision, log, text):
         "Part of the RCS parser callback interface."
-        assert(self.parsed.has_key(revision))
-        self.parsed[revision] += [unicode(log, self.encoding),
-                                  unicode(text, self.encoding)]
+
+        assert(self.change.has_key(revision))
+        self.change[revision].log = unicode(log, self.encoding)

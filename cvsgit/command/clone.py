@@ -4,13 +4,14 @@ import os.path
 import sys
 
 from cvsgit.cmd import Cmd
-from cvsgit.cvs import CVSROOT
-from cvsgit.db import Db
+from cvsgit.cvs import CVS
 from cvsgit.git import Git
+from cvsgit.meta import MetaDb
 from cvsgit.i18n import _
 
 class clone(Cmd):
-    __doc__ = _("""Clone a CVS repository or module into a Git repository.
+    __doc__ = _(
+    """Clone a CVS repository or module into a Git repository.
 
     Usage: %prog <repository> [<directory>]
 
@@ -24,8 +25,7 @@ class clone(Cmd):
     def initialize_options(self):
         self.repository = None
         self.directory = None
-        self.add_option('--domain', metavar='DOMAIN',
-            default='local', help=\
+        self.add_option('--domain', metavar='DOMAIN', help=\
             _("Set the default e-mail domain to use for unknown"
               "CVS committers."))
         self.add_option('--tz', metavar='TIMEZONE', help=\
@@ -54,30 +54,20 @@ class clone(Cmd):
         git = Git(self.directory)
         git.init()
         try:
-            db = Db(os.path.join(git.git_dir, 'cvsgit.db'))
-            cvs = CVSROOT(self.repository)
+            metadb = MetaDb(git)
+            metadb.set_source(self.repository)
 
-            try:
-                print 'Parsing RCS revisions...'
-                for revision in cvs.revisions():
-                    db.add_revision(revision)
-            finally:
-                db.commit()
+            cvs = CVS(metadb)
+            cvs.pull_changes()
+            cvs.generate_changesets()
 
-            gfi = git.fast_import(domain=self.options.domain,
-                                  tz=self.options.tz)
-            try:
-                # TODO: here, ---incremental needs to be respected
-                print 'Generating changesets...'
-                for changeset in db.changesets():
-                    gfi.commit(cvs, changeset)
-                gfi.close()
-            except:
-                try:
-                    gfi.close()
-                except Exception, (e):
-                    print '%s: warning: %s' % (self.option_parser.prog, e)
-                raise
+            params = {}
+            params['tz'] = self.options.tz
+            params['domain'] = self.options.domain
+
+            for changeset in cvs.changesets():
+                git.import_changeset(changeset, **params)
+                cvs.mark_changeset(changeset)
         except:
             if not self.options.incremental:
                 git.destroy()
