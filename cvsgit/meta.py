@@ -156,7 +156,7 @@ class MetaDb(object):
                  FROM changeset cs
                  INNER JOIN change c ON c.changeset_id = cs.id
                  WHERE cs.mark IS NULL
-                 ORDER BY cs.id, cs.start_time"""
+                 ORDER BY cs.start_time, cs.id"""
 
         changeset = None
         for row in self.dbh.execute(sql):
@@ -166,14 +166,16 @@ class MetaDb(object):
                             filename=row[6],
                             revision=row[7],
                             state=row[8])
-            if changeset is None:
+
+            if changeset is None or changeset.id != row[0]:
+                if changeset:
+                    yield(changeset)
+
                 changeset = ChangeSet(change, id=row[0])
                 changeset.start_time = row[1]
                 changeset.end_time = row[2]
-            elif changeset.id != row[0]:
-                yield(changeset)
-                changeset = None
             else:
                 changeset.changes.append(change)
+
         if changeset:
             yield(changeset)

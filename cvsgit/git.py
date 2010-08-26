@@ -73,7 +73,12 @@ class GitFastImport(object):
         when = self.raw_date(changeset.timestamp)
         when_s = time.strftime('%c', time.localtime(changeset.timestamp))
 
-        print 'committer %s <%s> %s' % (name, email, when_s)
+        teaser = changeset.log.splitlines()[0]
+        if len(teaser) > 68:
+            teaser = teaser[:40] + '...'
+        print '[%d] %s <%s> %s' % (changeset.id, name, email, when_s)
+        print '\t%s' % teaser
+
         self.write('commit refs/heads/%s\n' % self.branch)
         self.write('mark :%s\n' % changeset.id)
         self.write('committer %s <%s> %s\n' % (name, email, when))

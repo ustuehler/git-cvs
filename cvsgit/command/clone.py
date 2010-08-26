@@ -56,15 +56,19 @@ class clone(Cmd):
         try:
             metadb = MetaDb(git)
             metadb.set_source(self.repository)
-
             cvs = CVS(metadb)
+
+            print 'Pulling changes from CVS...'
             cvs.pull_changes()
+
+            print 'Calculating changesets...'
             cvs.generate_changesets()
 
             params = {}
             params['tz'] = self.options.tz
             params['domain'] = self.options.domain
 
+            print 'Importing changesets into Git...'
             for changeset in cvs.changesets():
                 git.import_changeset(changeset, **params)
                 cvs.mark_changeset(changeset)
