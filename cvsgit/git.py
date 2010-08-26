@@ -60,12 +60,13 @@ class Git(object):
             f.close()
 
 class GitFastImport(object):
-    def __init__(self, pipe, branch='master',
-                 domain=None, tz=None):
+    def __init__(self, pipe, branch='master', domain=None, tz=None,
+                 verbose=False):
         self.pipe = pipe
         self.branch = branch
         self.domain = domain
         self.tz = tz
+        self.verbose = verbose
 
     def add_changeset(self, changeset):
         name = self.author_name(changeset.author)
@@ -73,21 +74,25 @@ class GitFastImport(object):
         when = self.raw_date(changeset.timestamp)
         when_s = time.strftime('%c', time.localtime(changeset.timestamp))
 
-        teaser = changeset.log.splitlines()[0]
-        if len(teaser) > 68:
-            teaser = teaser[:40] + '...'
-        print '[%d] %s <%s> %s' % (changeset.id, name, email, when_s)
-        print '\t%s' % teaser
+        if self.verbose:
+            teaser = changeset.log.splitlines()[0]
+            if len(teaser) > 68:
+                teaser = teaser[:40] + '...'
+            print '[%d] %s %s' % (changeset.id, name, when_s)
+            print '\t%s' % teaser
 
         self.write('commit refs/heads/%s\n' % self.branch)
         self.write('mark :%s\n' % changeset.id)
         self.write('committer %s <%s> %s\n' % (name, email, when))
         self.data(changeset.log.encode('utf-8'))
+
+        # XXX: this is a hack; find out if the branch exists
         if changeset.id != 1:
             self.write('from refs/heads/%s^0\n' % self.branch)
 
         for c in changeset.changes:
-            print '\t%s %s %s' % (c.state, c.filename, c.revision)
+            if self.verbose:
+                print '\t%s %s %s' % (c.state, c.filename, c.revision)
             if c.state == FILE_DELETED:
                 self.write('D %s\n' % c.filename)
             else:

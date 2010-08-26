@@ -74,19 +74,34 @@ class CVS(object):
                     yield(os.path.join(dirpath, filename))
 
     def changed_rcs_filenames(self):
-        """Like rcs_filenames() but yields only the names of RCS files
+        """Like rcs_filenames() but return only the names of RCS files
         which have changed since the last time we pulled changes from
-        them."""
+        them.
 
-        # TODO: skip unchanged RCS files
+        Unlike rcs_filenames() this is not a generator function so the
+        result can first be counted and then iterated over (useful for
+        progress reports)."""
+
+        # TODO: skip unchanged RCS files (by timestamp/size)
+        filenames = []
         for filename in self.rcs_filenames():
-            yield(filename)
+            filenames.append(filename)
+        return filenames
 
-    def pull_changes(self):
+    def pull_changes(self, onprogress=None):
         """Pull new revisions from the CVS repository and add them to
         the meta database."""
 
-        for filename in self.changed_rcs_filenames():
+        filenames = self.changed_rcs_filenames()
+        if onprogress:
+            total = len(filenames)
+            count = 0
+
+        for filename in filenames:
+            if onprogress:
+                onprogress(count, total)
+                count += 1
+
             rcsfile = RCSFile(os.path.join(self.prefix, filename))
             # For the working copy path it does not matter if the RCS
             # file is in the 'Attic' directory or not, so strip it.
@@ -99,18 +114,33 @@ class CVS(object):
                     change.filename = filename
                     self.metadb.add_change(change)
 
-    def generate_changesets(self):
+        if onprogress:
+            onprogress(total, total)
+
+    def generate_changesets(self, onprogress=None):
         """Convert changes stored in the meta database into sets of
         related changes and store the resulting changesets in the meta
         database as well.  The individual changes referenced in a
         changeset will be deleted from the meta database."""
 
+        if onprogress:
+            total = self.metadb.count_changes()
+            count = 0
+
         csg = ChangeSetGenerator()
         for change in self.metadb.changes_by_timestamp():
+            if onprogress:
+                onprogress(count, total)
+                count += 1
+
             for cs in csg.integrate(change):
                 self.metadb.add_changeset(cs)
+
         for cs in csg.finalize():
             self.metadb.add_changeset(cs)
+
+        if onprogress:
+            onprogress(total, total)
 
     def changesets(self):
         """Yield changesets reconstructed earlier from individual file
@@ -144,3 +174,19 @@ class CVS(object):
 
         assert(changeset.mark != None)
         self.metadb.mark_changeset(changeset)
+
+    def export_changesets(self, receiver, params={}, onprogress=None):
+        if onprogress:
+            total = self.metadb.count_changesets()
+            count = 0
+            onprogress(count, total)
+
+        for changeset in self.changesets():
+            if onprogress:
+                onprogress(count, total)
+
+            receiver.import_changeset(changeset, **params)
+            self.mark_changeset(changeset)
+
+        if onprogress:
+            onprogress(total, total)

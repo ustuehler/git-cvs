@@ -132,6 +132,12 @@ class MetaDb(object):
 
         self.dbh.commit()
 
+    def count_changes(self):
+        "Return the number of free changes (not bound in a changeset)."
+
+        sql = 'SELECT COUNT(*) FROM change WHERE changeset_id IS NULL'
+        return self.dbh.execute(sql).fetchone()[0]
+
     def changes_by_timestamp(self):
         """Yield a list of free changes recorded in the database and
         not bound to a changeset, ordered by their timestamp."""
@@ -145,6 +151,12 @@ class MetaDb(object):
                          filename=row[3],
                          revision=row[4],
                          state=row[5]))
+
+    def count_changesets(self):
+        "Return the number of unmarked changesets (not imported)."
+
+        sql = 'SELECT COUNT(*) FROM changeset WHERE mark IS NULL'
+        return self.dbh.execute(sql).fetchone()[0]
 
     def changesets_by_start_time(self):
         """Yield a list of all unmarked changesets currently recorded
