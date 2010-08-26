@@ -20,7 +20,7 @@ class Progress(object):
            time.time() - self.last_progress > 1:
             if count == total:
                 print '\r%s: %s (%d/%d)' % \
-                    (msg, _('done'), count, total)
+                    (msg, _('done.'), count, total)
             else:
                 print '\r%s: %3.0f%% (%d/%d)' % \
                     (msg, count * 100.0 / total, count, total),
@@ -83,9 +83,9 @@ class clone(Cmd):
             params['verbose'] = self.options.verbose
 
             progress = Progress()
-            progress(_('Finding changed files'), 0, 1) # XXX
+            progress(_('Counting files'), 0, 1) # XXX
             cvs.pull_changes(onprogress=lambda count, total:
-                progress(_('Pulling changes from CVS'), count, total))
+                progress(_('Pulling changes'), count, total))
             cvs.generate_changesets(onprogress=lambda count, total:
                 progress(_('Calculating changesets'), count, total))
             cvs.export_changesets(git, params, onprogress=lambda count, total:
