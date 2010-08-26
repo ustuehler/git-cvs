@@ -86,7 +86,7 @@ class clone(Cmd):
             cvs.pull_changes(onprogress=lambda count, total:
                 progress(_('Pulling changes from CVS'), count, total))
             cvs.generate_changesets(onprogress=lambda count, total:
-                progress(_('Calculating changets'), count, total))
+                progress(_('Calculating changesets'), count, total))
             cvs.export_changesets(git, params, onprogress=lambda count, total:
                 progress(('Importing changesets'), count, total))
         except:

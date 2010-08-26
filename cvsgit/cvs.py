@@ -124,8 +124,10 @@ class CVS(object):
         changeset will be deleted from the meta database."""
 
         if onprogress:
+            onprogress(0, 1)
             total = self.metadb.count_changes()
             count = 0
+            onprogress(count, total)
 
         csg = ChangeSetGenerator()
         for change in self.metadb.changes_by_timestamp():
@@ -177,6 +179,7 @@ class CVS(object):
 
     def export_changesets(self, receiver, params={}, onprogress=None):
         if onprogress:
+            onprogress(0, 1)
             total = self.metadb.count_changesets()
             count = 0
             onprogress(count, total)
