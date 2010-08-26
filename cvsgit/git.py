@@ -106,7 +106,7 @@ class GitFastImport(object):
             if len(teaser) > 68:
                 teaser = teaser[:40] + '...'
             print '[%d] %s %s' % (changeset.id, name, when_s)
-            print '\t%s' % teaser
+            print '\t%s' % teaser.encode('ascii', 'replace')
 
         self.write('commit refs/heads/%s\n' % self.branch)
         self.write('mark :%s\n' % changeset.id)
