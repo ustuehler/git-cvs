@@ -182,17 +182,9 @@ class CVS(object):
         if onprogress:
             onprogress(0, 1)
             total = self.metadb.count_changesets()
-            count = 0
-            if total > 0:
-                onprogress(count, total)
 
-        for changeset in self.changesets():
-            if onprogress:
-                onprogress(count, total)
-                count += 1
-
-            receiver.import_changeset(changeset, **params)
-            self.mark_changeset(changeset)
+        receiver.import_changesets(self.changesets(), params=params,
+                                   onprogress=onprogress, total=total)
 
         if onprogress:
             onprogress(total, total)

@@ -32,16 +32,29 @@ class ChangeSet(object):
         change."""
 
         self.id = id
-        self.mark = mark
-        self.provider = provider
+        self._mark = mark
+        self._provider = provider
         self.start_time = change.timestamp
         self.end_time = change.timestamp
         self.changes = [change]
 
-    def blob(self, change):
-        if self.provider is None:
+    def get_provider(self):
+        if self._provider is None:
             raise RuntimeError, \
                 'no provider has been set for this changeset'
+        return self._provider
+    def set_provider(self, provider):
+        self._provider = provider
+    provider = property(get_provider, set_provider)
+
+    def get_mark(self):
+        return self._mark
+    def set_mark(self, mark):
+        self._mark = mark
+        self.provider.mark_changeset(self)
+    mark = property(get_mark, set_mark)
+
+    def blob(self, change):
         return self.provider.blob(change)
 
     def get_timestamp(self):

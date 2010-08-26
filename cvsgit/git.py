@@ -38,26 +38,40 @@ class Git(object):
     def config_set(self, varname, value):
         check_call(['git', 'config', varname, value], cwd=self.wc_dir)
 
-    def import_changeset(self, changeset, **kwargs):
+    def import_changesets(self, changesets, params={},
+                          onprogress=None, total=None):
+
         pipe = Popen(['git', 'fast-import',
                       '--export-marks=.git/cvsgit.marks',
                       '--quiet'],
                      stdin=PIPE, cwd=self.wc_dir)
 
-        fi = GitFastImport(pipe, **kwargs)
+        fi = GitFastImport(pipe, **params)
+        changesets_seen = []
         try:
-            fi.add_changeset(changeset)
+            for changeset in changesets:
+                if onprogress and total:
+                    onprogress(len(changesets_seen), total)
+
+                changesets_seen.append(changeset)
+                fi.add_changeset(changeset)
         finally:
-            fi.close()
+            try:
+                fi.close()
+            finally:
+                self.mark_changesets(changesets_seen)
+
         if fi.returncode != 0:
             raise RuntimeError, _('git fast-import failed')
 
+    def mark_changesets(self, imported_changesets):
         f = file(os.path.join(self.git_dir, 'cvsgit.marks'), 'r')
         try:
             for line in f.readlines():
                 mark, sha1 = line.rstrip().split()
-                if mark == ':' + str(changeset.id):
-                    changeset.mark = sha1
+                for changeset in imported_changesets:
+                    if mark == ':' + str(changeset.id):
+                        changeset.mark = sha1
         finally:
             f.close()
 
@@ -69,6 +83,7 @@ class GitFastImport(object):
         self.domain = domain
         self.tz = tz
         self.verbose = verbose
+        self.last_changeset = None
 
     def add_changeset(self, changeset):
         name = self.author_name(changeset.author)
@@ -88,9 +103,13 @@ class GitFastImport(object):
         self.write('committer %s <%s> %s\n' % (name, email, when))
         self.data(changeset.log.encode('utf-8'))
 
-        # XXX: this is a hack; find out if the branch exists
         if changeset.id != 1:
-            self.write('from refs/heads/%s^0\n' % self.branch)
+            # FIXME: this is a hack; find out if the branch exists
+            if self.last_changeset is None:
+                self.write('from refs/heads/%s^0\n' % self.branch)
+            else:
+                self.write('from :%s\n' % self.last_changeset.id)
+        self.last_changeset = changeset
 
         for c in changeset.changes:
             if self.verbose:
