@@ -187,6 +187,7 @@ class CVS(object):
         for changeset in self.changesets():
             if onprogress:
                 onprogress(count, total)
+                count += 1
 
             receiver.import_changeset(changeset, **params)
             self.mark_changeset(changeset)
