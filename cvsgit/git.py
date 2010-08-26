@@ -4,6 +4,7 @@ import os
 import time
 import types
 
+from signal import signal, SIGINT, SIG_IGN
 from subprocess import Popen, PIPE, check_call
 
 from cvsgit.changeset import FILE_DELETED
@@ -47,22 +48,35 @@ class Git(object):
     def import_changesets(self, changesets, params={},
                           onprogress=None, total=None):
 
-        pipe = Popen(['git', 'fast-import',
-                      '--export-marks=cvsgit.marks',
-                      '--quiet'],
-                     stdin=PIPE, cwd=self.git_dir)
+        class SignalIndicator():
+            def __init__(self):
+                self.count = 0
+            def __call__(self, signalnum, frame):
+                self.count += 1
+            def isset(self):
+                return self.count > 0
+
+        pipe = Popen(['git', 'fast-import', '--export-marks=cvsgit.marks',
+                      '--quiet'], stdin=PIPE, cwd=self.git_dir,
+                      preexec_fn=lambda: signal(SIGINT, SIG_IGN))
+
+        sigint_flag = SignalIndicator()
+	old_sigaction = signal(SIGINT, sigint_flag)
 
         fi = GitFastImport(pipe, **params)
-
         changesets_seen = []
         try:
             for changeset in changesets:
-                if onprogress and total:
+                if onprogress and total and not params.get('verbose'):
                     onprogress(len(changesets_seen), total)
 
                 changesets_seen.append(changeset)
                 fi.add_changeset(changeset)
+
+                if sigint_flag.isset():
+                    raise KeyboardInterrupt()
         finally:
+            signal(SIGINT, old_sigaction)
             try:
                 fi.close()
             finally:
@@ -104,7 +118,7 @@ class GitFastImport(object):
         if self.verbose:
             teaser = changeset.log.splitlines()[0]
             if len(teaser) > 68:
-                teaser = teaser[:40] + '...'
+                teaser = teaser[:68] + '...'
             print '[%d] %s %s' % (changeset.id, name, when_s)
             print '\t%s' % teaser.encode('ascii', 'replace')
 
