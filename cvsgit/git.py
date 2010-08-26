@@ -19,7 +19,9 @@ class Git(object):
         self.branch = branch
 
     def init(self):
-        check_call(['git', 'init', self.wc_dir])
+        # Old version of 'git init' does not accept a directory argument.
+        check_call(['mkdir', '-p', self.wc_dir])
+        check_call(['git', 'init'], cwd=self.wc_dir)
 
     def destroy(self):
         check_call(['rm', '-rf', self.wc_dir])
