@@ -28,7 +28,7 @@ class Git(object):
 
     def config_get(self, varname, default=None):
         pipe = Popen(['git', 'config', '--get', varname],
-                     stdout=PIPE, cwd=self.wc_dir)
+                     stdout=PIPE, cwd=self.git_dir)
         stdout, stderr = pipe.communicate()
         if pipe.returncode != 0:
             return default
@@ -36,17 +36,18 @@ class Git(object):
             return stdout
 
     def config_set(self, varname, value):
-        check_call(['git', 'config', varname, value], cwd=self.wc_dir)
+        check_call(['git', 'config', varname, value], cwd=self.git_dir)
 
     def import_changesets(self, changesets, params={},
                           onprogress=None, total=None):
 
         pipe = Popen(['git', 'fast-import',
-                      '--export-marks=.git/cvsgit.marks',
+                      '--export-marks=cvsgit.marks',
                       '--quiet'],
-                     stdin=PIPE, cwd=self.wc_dir)
+                     stdin=PIPE, cwd=self.git_dir)
 
         fi = GitFastImport(pipe, **params)
+
         changesets_seen = []
         try:
             for changeset in changesets:
@@ -65,7 +66,10 @@ class Git(object):
             raise RuntimeError, _('git fast-import failed')
 
     def mark_changesets(self, imported_changesets):
-        f = file(os.path.join(self.git_dir, 'cvsgit.marks'), 'r')
+        filename = os.path.join(self.git_dir, 'cvsgit.marks')
+        if not os.path.isfile(filename):
+            return
+        f = file(filename, 'r')
         try:
             for line in f.readlines():
                 mark, sha1 = line.rstrip().split()
@@ -121,8 +125,12 @@ class GitFastImport(object):
                 self.data(changeset.blob(c))
 
     def close(self):
-        self.pipe.stdin.close()
-        self.returncode = self.pipe.wait()
+        try:
+            self.pipe.stdin.close()
+            self.pipe.wait()
+        except:
+            pass
+        self.returncode = self.pipe.returncode
 
     def offutc(self, seconds):
         oldtz = os.environ.get('TZ')
