@@ -127,7 +127,8 @@ class CVS(object):
             onprogress(0, 1)
             total = self.metadb.count_changes()
             count = 0
-            onprogress(count, total)
+            if total > 0:
+                onprogress(count, total)
 
         csg = ChangeSetGenerator()
         for change in self.metadb.changes_by_timestamp():
@@ -182,7 +183,8 @@ class CVS(object):
             onprogress(0, 1)
             total = self.metadb.count_changesets()
             count = 0
-            onprogress(count, total)
+            if total > 0:
+                onprogress(count, total)
 
         for changeset in self.changesets():
             if onprogress:
