@@ -19,9 +19,11 @@ class Progress(object):
         if count == 0 or count == total or \
            time.time() - self.last_progress > 1:
             if count == total:
-                print '\r%s: %s' % (msg, _('done'))
+                print '\r%s: %s (%d/%d)' % \
+                    (msg, _('done'), count, total)
             else:
-                print '\r%s: %.0f%%' % (msg, count * 100.0 / total),
+                print '\r%s: %3.0f%% (%d/%d)' % \
+                    (msg, count * 100.0 / total, count, total),
             sys.stdout.flush()
             self.last_progress = time.time()
 
