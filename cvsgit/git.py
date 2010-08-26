@@ -14,14 +14,20 @@ class Git(object):
         # Turn wc_dir into an absolute path as soon as possible.  If
         # any other code uses os.chdir(), wc_dir is no longer valid.
         self.wc_dir = os.path.abspath(wc_dir)
-        self.git_dir = os.path.join(wc_dir, '.git')
+        if self.wc_dir.endswith('.git'):
+            self.git_dir = self.wc_dir
+        else:
+            self.git_dir = os.path.join(wc_dir, '.git')
         self.domain = domain
         self.branch = branch
 
     def init(self):
         # Old version of 'git init' does not accept a directory argument.
         check_call(['mkdir', '-p', self.wc_dir])
-        check_call(['git', 'init'], cwd=self.wc_dir)
+        if self.wc_dir == self.git_dir:
+            check_call(['git', 'init', '--bare'], cwd=self.wc_dir)
+        else:
+            check_call(['git', 'init'], cwd=self.wc_dir)
 
     def destroy(self):
         check_call(['rm', '-rf', self.wc_dir])
