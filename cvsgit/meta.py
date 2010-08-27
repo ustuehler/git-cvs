@@ -53,6 +53,9 @@ class MetaDb(object):
                   'changeset_id INTEGER, ' \
                   'PRIMARY KEY (filename, revision))'
             dbh.execute(sql)
+            sql = 'CREATE INDEX IF NOT EXISTS change__changeset_id ' \
+                  'ON change (changeset_id)'
+            dbh.execute(sql)
 
             # Create the table that defines the attributes of complete
             # changesets.  'id' will be referenced by one or more rows
@@ -62,6 +65,10 @@ class MetaDb(object):
                   'start_time DATETIME NOT NULL, ' \
                   'end_time DATETIME NOT NULL, ' \
                   'mark VARCHAR)'
+            dbh.execute(sql)
+            sql = 'CREATE UNIQUE INDEX IF NOT EXISTS ' \
+                  'changeset__id__start_time__mark ' \
+                  'ON changeset (id, start_time, mark)'
             dbh.execute(sql)
 
             # Create the table that stores stat() information for all
@@ -212,6 +219,7 @@ class MetaDb(object):
                     yield(changeset)
 
                 changeset = ChangeSet(change, id=row[0])
+                changeset.provider = self
                 changeset.start_time = row[1]
                 changeset.end_time = row[2]
             else:
