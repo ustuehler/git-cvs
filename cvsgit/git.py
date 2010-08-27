@@ -85,21 +85,24 @@ class Git(object):
         if fi.returncode != 0:
             raise RuntimeError, _('git fast-import failed')
 
-    def mark_changesets(self, imported_changesets):
+    def mark_changesets(self, changesets):
         filename = os.path.join(self.git_dir, 'cvsgit.marks')
         if not os.path.isfile(filename):
             return
+
+        marks = {}
         f = file(filename, 'r')
         try:
-            marks = {}
             for line in f.readlines():
                 mark, sha1 = line.rstrip().split()
                 marks[int(mark[1:])] = sha1
-            for changeset in imported_changesets:
-                if marks.has_key(changeset.id):
-                    changeset.set_mark(marks[changeset.id])
         finally:
             f.close()
+
+        for changeset in changesets:
+            if marks.has_key(changeset.id):
+                sha1 = marks[changeset.id]
+                changeset.set_mark(sha1)
 
 class GitFastImport(object):
     def __init__(self, pipe, branch='master', domain=None, tz=None,
