@@ -57,36 +57,47 @@ class CVS(object):
         self.module = module
         self.prefix = os.path.join(self.root, self.module)
 
-    def rcs_filenames(self):
-        """Yield the relative pathnames of all RCS files found in the
-        tracked CVS repository or module."""
+        self.statcache = {}
+
+    # Helper function to check with the statcache and the stat()
+    # system call if a file or directory is unmodified.
+    def _unmodified(self, path):
+        st = os.stat(os.path.join(self.prefix, path))
+        identity = (st.st_mtime, st.st_size,)
+        return self.statcache.has_key(path) and \
+                self.statcache[path] == identity
+
+    def changed_rcs_filenames(self):
+        """Return the list of RCS filenames which need to be scanned for
+        new changes to import."""
 
         # Helper function to raise the OSError reported by os.walk().
         def raise_error(e): raise e
 
+        self.statcache = self.metadb.load_statcache()
+        result = []
+
         for dirpath, dirnames, filenames in \
                 os.walk(self.prefix, onerror=raise_error):
+
             # Convert from absolute to relative path.
             assert(dirpath.startswith(self.prefix))
             dirpath = dirpath[len(self.prefix)+1:]
+
+            # TODO: fill stat() cache for directories
+            #if self._unmodified(dirpath):
+            #    continue
+
             for filename in filenames:
                 if filename.endswith(',v'):
-                    yield(os.path.join(dirpath, filename))
+                    filename = os.path.join(dirpath, filename)
 
-    def changed_rcs_filenames(self):
-        """Like rcs_filenames() but return only the names of RCS files
-        which have changed since the last time we pulled changes from
-        them.
+                    if self._unmodified(filename):
+                        continue
 
-        Unlike rcs_filenames() this is not a generator function so the
-        result can first be counted and then iterated over (useful for
-        progress reports)."""
+                    result.append(filename)
 
-        # TODO: skip unchanged RCS files (by timestamp/size)
-        filenames = []
-        for filename in self.rcs_filenames():
-            filenames.append(filename)
-        return filenames
+        return result
 
     def pull_changes(self, onprogress=None):
         """Pull new revisions from the CVS repository and add them to
@@ -97,15 +108,20 @@ class CVS(object):
             total = len(filenames)
             count = 0
 
-        for filename in filenames:
+        for rcs_filename in filenames:
             if onprogress:
                 onprogress(count, total)
                 count += 1
 
-            rcsfile = RCSFile(os.path.join(self.prefix, filename))
             # For the working copy path it does not matter if the RCS
             # file is in the 'Attic' directory or not, so strip it.
-            filename = re.sub('(Attic/)?([^/]+),v$', '\\2', filename)
+            filename = re.sub('(Attic/)?([^/]+),v$', '\\2', rcs_filename)
+
+            rcs_abspath = os.path.join(self.prefix, rcs_filename)
+            st = os.stat(rcs_abspath)
+            identity = (st.st_mtime, st.st_size,)
+            rcsfile = RCSFile(rcs_abspath)
+
             for change in rcsfile.changes():
                 # TODO: handle branches other than HEAD
                 if change.revision.count('.') == 1:
@@ -113,6 +129,12 @@ class CVS(object):
                     # instead of the RCS filename.
                     change.filename = filename
                     self.metadb.add_change(change)
+
+            # Flush changes to disk after each RCS file; otherwise,
+            # interruption would cause us to scan RCS files again
+            # (which isn't bad but costs time).
+            self.metadb.update_statcache({rcs_filename:identity})
+            self.metadb.commit()
 
         if onprogress:
             onprogress(total, total)

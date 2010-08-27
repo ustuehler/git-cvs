@@ -76,11 +76,11 @@ class Git(object):
                 if sigint_flag.isset():
                     raise KeyboardInterrupt()
         finally:
-            signal(SIGINT, old_sigaction)
             try:
                 fi.close()
             finally:
                 self.mark_changesets(changesets_seen)
+                signal(SIGINT, old_sigaction)
 
         if fi.returncode != 0:
             raise RuntimeError, _('git fast-import failed')
@@ -91,11 +91,13 @@ class Git(object):
             return
         f = file(filename, 'r')
         try:
+            marks = {}
             for line in f.readlines():
                 mark, sha1 = line.rstrip().split()
-                for changeset in imported_changesets:
-                    if mark == ':' + str(changeset.id):
-                        changeset.mark = sha1
+                marks[int(mark[1:])] = sha1
+            for changeset in imported_changesets:
+                if marks.has_key(changeset.id):
+                    changeset.set_mark(marks[changeset.id])
         finally:
             f.close()
 

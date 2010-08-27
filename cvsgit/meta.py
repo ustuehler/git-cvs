@@ -64,10 +64,39 @@ class MetaDb(object):
                   'mark VARCHAR)'
             dbh.execute(sql)
 
+            # Create the table that stores stat() information for all
+            # paths in the CVS repository.  This allows the CVS change
+            # scanner to skip unmodified RCS files and directories.
+            sql = 'CREATE TABLE IF NOT EXISTS statcache (' \
+                  'path VARCHAR PRIMARY KEY, ' \
+                  'mtime INTEGER NOT NULL, ' \
+                  'size INTEGER NOT NULL)'
+            dbh.execute(sql)
+
             self._dbh = dbh
         return self._dbh
     
     dbh = property(get_dbh)
+
+    def load_statcache(self):
+        """Load the complete stat() cache and return it as a dictionary
+        of the form {path:(mtime, size)}."""
+
+        sql = 'SELECT path, mtime, size FROM statcache'
+        statcache = {}
+        for row in self.dbh.execute(sql):
+            statcache[row[0]] = row[1:]
+        return statcache
+
+    def update_statcache(self, statcache):
+        """'statcache' is a dictionary of {path:(mtime, size)} to insert
+        into or update in the meta database's stat() cache."""
+
+        sql = 'INSERT OR REPLACE INTO statcache ' \
+              '(path, mtime, size) VALUES (?,?,?)'
+        for path in statcache.keys():
+            values = (path,) + statcache[path]
+            self.dbh.execute(sql, values)
 
     def add_change(self, change):
         """Insert a single file change into the database.
@@ -158,17 +187,16 @@ class MetaDb(object):
         sql = 'SELECT COUNT(*) FROM changeset WHERE mark IS NULL'
         return self.dbh.execute(sql).fetchone()[0]
 
-    def changesets_by_start_time(self):
-        """Yield a list of all unmarked changesets currently recorded
-        in the database, ordered by their start time."""
+    def _select_changesets(self, where):
 
+        where = where % {'changeset':'cs'}
         sql = """SELECT cs.id, cs.start_time, cs.end_time,
                         c.timestamp, c.author, c.log,
                         c.filename, c.revision, c.state 
                  FROM changeset cs
                  INNER JOIN change c ON c.changeset_id = cs.id
-                 WHERE cs.mark IS NULL
-                 ORDER BY cs.start_time, cs.id"""
+                 WHERE %s
+                 ORDER BY cs.start_time, cs.id""" % where
 
         changeset = None
         for row in self.dbh.execute(sql):
@@ -191,3 +219,18 @@ class MetaDb(object):
 
         if changeset:
             yield(changeset)
+
+    def head_changeset(self):
+        """Return the "head" changeset, the one with the highest value
+        of 'id' ('mark' is ignored) or None if there is no changeset."""
+
+        where = '%(changeset)s.id IS MAX(%(changeset)s.id)'
+        for cs in self._select_changesets(where):
+            return cs
+
+    def changesets_by_start_time(self):
+        """Yield a list of all unmarked changesets currently recorded
+        in the database, ordered by their start time."""
+
+	where = '%(changeset)s.mark IS NULL'
+        return self._select_changesets(where)
