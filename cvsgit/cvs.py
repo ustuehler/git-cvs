@@ -2,6 +2,7 @@
 
 import os.path
 import re
+import time
 
 from subprocess import Popen, PIPE
 
@@ -57,7 +58,19 @@ class CVS(object):
         self.module = module
         self.prefix = os.path.join(self.root, self.module)
 
+        self.parse_options()
+
         self.statcache = {}
+
+    def parse_options(self):
+        f = file(os.path.join(self.root, 'CVSROOT', 'options'), 'r')
+        try:
+            for line in f.readlines():
+                option, value = line.split('=', 2)
+                if option == 'tag':
+                    self.localid = value.strip()
+        finally:
+            f.close()
 
     # Helper function to check with the statcache and the stat()
     # system call if a file or directory is unmodified.
@@ -189,9 +202,41 @@ class CVS(object):
         if not os.path.isfile(rcsfile):
             raise RuntimeError, _('no RCS file found for %s') % filename
 
+        #
+        # We use co(1) instead of cvs(1) to fetch the full text of a
+        # particular revision since cvs(1) needs an existing working
+        # copy (then we could use "cvs up -p -r <rev>").  The problem
+        # with co(1) is that it does not expand RCS keywords in the
+        # same way as cvs(1) would do.  In particular, co(1) will not
+        # expand the "local ID" keyword that can be set through the
+        # "tag=XYZ" option in CVSROOT/options.  We will do that here
+        # but leave the rest of the keywords to be expanded by co(1).
+        #
         argv = ['co', '-q', '-p' + change.revision, rcsfile]
-        output = Popen(argv, stdout=PIPE).communicate()[0]
-        return output
+        pipe = Popen(argv, stdout=PIPE)
+        line = pipe.stdout.readline()
+        data = ''
+        while line:
+            data += self.expand_keywords(line, change)
+            line = pipe.stdout.readline()
+        return data
+
+    def expand_keywords(self, line, change):
+        return re.sub('\$([^$]+)\$',
+            lambda match: self.expand_keyword_match(match, change),
+            line)
+
+    def expand_keyword_match(self, match, change):
+        if match.group(1) == self.localid:
+            timestamp = time.gmtime(change.timestamp)
+            return '$%s: %s,v %s %s %s %s $' % \
+                (self.localid,
+                 os.path.basename(change.filename),
+                 change.revision,
+                 time.strftime('%Y/%m/%d %H:%M:%S', timestamp),
+                 change.author, change.state)
+        else:
+            return match.group(0)
 
     def mark_changeset(self, changeset):
         """Mark 'changeset' as having been committed to "the other
