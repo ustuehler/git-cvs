@@ -21,9 +21,10 @@ ADVANTAGES OVER PLAIN CVS(1) AND CVSSYNC(1)
  * Pull upstream changes really fast.  "cvs update" in /usr/src takes
    X minutes on my laptop while a "git pull" takes only Y seconds.
 
- * To see what's new after a "git pull", you can use
+ * To see what's new after a "git pull", including the actual diffs,
+   you can use
 
-   $ git log --stat ORIG_HEAD..
+   $ git log --stat -p ORIG_HEAD..
 
    This isn't possible with cvs(1) at all.
 
