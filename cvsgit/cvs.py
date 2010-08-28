@@ -58,6 +58,7 @@ class CVS(object):
         self.module = module
         self.prefix = os.path.join(self.root, self.module)
 
+        self.localid = None
         self.parse_options()
 
         self.statcache = {}
@@ -227,7 +228,7 @@ class CVS(object):
             line)
 
     def expand_keyword_match(self, match, change):
-        if match.group(1) == self.localid:
+        if self.localid and match.group(1) == self.localid:
             timestamp = time.gmtime(change.timestamp)
             return '$%s: %s,v %s %s %s %s $' % \
                 (self.localid,
