@@ -1,0 +1,33 @@
+ADVANTAGES OVER PLAIN CVS(1) AND CVSSYNC(1)
+===========================================
+
+ * Easy viewing of committed diffs.  With cvsync(1) or by monitoring
+   source-changes@ you get ChangeLog entries but they only contain the
+   list of affected files and a log message, without even the revision
+   numbers of the affected files.  In Git you can do
+
+   $ git log
+
+   to get what you get from the ChangeLog entries and
+
+   $ git show HEAD~1
+
+   to show the diff for the second to last commit.
+
+ * Check the status of the working copy really fast.  "cvs status" in
+   /usr/src takes about X minutes on my laptop while "git status" takes
+   only 1.2 seconds.
+
+ * Pull upstream changes really fast.  "cvs update" in /usr/src takes
+   X minutes on my laptop while a "git pull" takes only Y seconds.
+
+
+DRAWBACKS
+=========
+
+ * A full (not sparse) clone of the Git repository for src is about
+   2.5G big and that's in addition to the 780M for a complete checkout
+   and 1.8G for the mirror of /cvs/src.
+
+ * cvsync/rsync and cvsgit have to run somewhere, but that could be a
+   dedicated server.
