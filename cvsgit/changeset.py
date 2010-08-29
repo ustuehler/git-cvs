@@ -10,13 +10,16 @@ FILE_MODIFIED = 'M'
 
 class Change(object):
 
-    def __init__(self, timestamp, author, log, filename, revision, state):
+    def __init__(self, timestamp, author, log, filestatus, filename,
+                 revision, state, mode):
         self.timestamp = timestamp
         self.author = author
         self.log = log
+        self.filestatus = filestatus
         self.filename = filename
         self.revision = revision
         self.state = state
+        self.mode = mode
 
 class ChangeSet(object):
 

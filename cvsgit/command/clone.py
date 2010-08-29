@@ -12,10 +12,13 @@ from cvsgit.i18n import _
 
 class Progress(object):
 
-    def __init__(self):
+    def __init__(self, enabled):
+        self.enabled = enabled
         self.last_progress = 0
 
     def __call__(self, msg, count, total):
+        if not self.enabled:
+            return
         if count == 0 or count == total or \
            time.time() - self.last_progress > 1:
             if count == total:
@@ -51,6 +54,8 @@ class clone(Cmd):
             _("Keep the incomplete Git repository if this command "
               "is interrupted and continue from the last checkpoint "
               "if the Git repository exists in the beginning."))
+        self.add_option('--progress', action='store_true', help=\
+            _("Display a progress meter."))
         self.add_option('--verbose', action='store_true', help=\
             _("Display each changeset as it is imported."))
 
@@ -82,7 +87,7 @@ class clone(Cmd):
             params['domain'] = self.options.domain
             params['verbose'] = self.options.verbose
 
-            progress = Progress()
+            progress = Progress(self.options.progress)
             progress(_('Counting files'), 0, 1) # XXX
             cvs.pull_changes(onprogress=lambda count, total:
                 progress(_('Pulling changes'), count, total))
@@ -90,6 +95,8 @@ class clone(Cmd):
                 progress(_('Calculating changesets'), count, total))
             cvs.export_changesets(git, params, onprogress=lambda count, total:
                 progress(('Importing changesets'), count, total))
+            if not git.bare:
+                git.checkout()
         except:
             if not self.options.incremental:
                 git.destroy()

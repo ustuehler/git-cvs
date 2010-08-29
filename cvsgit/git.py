@@ -17,21 +17,26 @@ class Git(object):
         self.wc_dir = os.path.abspath(wc_dir)
         if self.wc_dir.endswith('.git'):
             self.git_dir = self.wc_dir
+            self.bare = True
         else:
             self.git_dir = os.path.join(wc_dir, '.git')
+            self.bare = False
         self.domain = domain
         self.branch = branch
 
     def init(self):
         # Old version of 'git init' does not accept a directory argument.
         check_call(['mkdir', '-p', self.wc_dir])
-        if self.wc_dir == self.git_dir:
+        if self.bare:
             check_call(['git', 'init', '--bare'], cwd=self.wc_dir)
         else:
             check_call(['git', 'init'], cwd=self.wc_dir)
 
     def destroy(self):
         check_call(['rm', '-rf', self.wc_dir])
+
+    def checkout(self, *args):
+        check_call(['git', 'checkout'] + list(args), cwd=self.wc_dir)
 
     def config_get(self, varname, default=None):
         pipe = Popen(['git', 'config', '--get', varname],
@@ -118,13 +123,14 @@ class GitFastImport(object):
         name = self.author_name(changeset.author)
         email = self.author_email(changeset.author)
         when = self.raw_date(changeset.timestamp)
-        when_s = time.strftime('%c', time.localtime(changeset.timestamp))
 
         if self.verbose:
+            tstamp = time.strftime('%Y-%m-%d %H:%M:%S',
+                time.gmtime(changeset.timestamp))
+            print '[%d] %s %s' % (changeset.id, tstamp, name)
             teaser = changeset.log.splitlines()[0]
             if len(teaser) > 68:
                 teaser = teaser[:68] + '...'
-            print '[%d] %s %s' % (changeset.id, name, when_s)
             print '\t%s' % teaser.encode('ascii', 'replace')
 
         self.write('commit refs/heads/%s\n' % self.branch)
@@ -142,8 +148,8 @@ class GitFastImport(object):
 
         for c in changeset.changes:
             if self.verbose:
-                print '\t%s %s %s' % (c.state, c.filename, c.revision)
-            if c.state == FILE_DELETED:
+                print '\t%s %s %s' % (c.filestatus, c.filename, c.revision)
+            if c.filestatus == FILE_DELETED:
                 self.write('D %s\n' % c.filename)
             else:
                 self.write('M 644 inline %s\n' % c.filename)

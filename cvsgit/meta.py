@@ -47,9 +47,11 @@ class MetaDb(object):
                   'timestamp DATETIME NOT NULL, ' \
                   'author VARCHAR NOT NULL, ' \
                   'log TEXT NOT NULL, ' \
+                  'filestatus CHAR(1) NOT NULL, ' \
                   'filename VARCHAR NOT NULL, ' \
                   'revision VARCHAR NOT NULL, ' \
                   'state VARCHAR(8) NOT NULL, ' \
+                  'mode CHAR(1) NOT NULL, ' \
                   'changeset_id INTEGER, ' \
                   'PRIMARY KEY (filename, revision))'
             dbh.execute(sql)
@@ -116,14 +118,16 @@ class MetaDb(object):
         commit() to ensure that the changes get flushed to disk."""
 
         sql = 'INSERT OR IGNORE INTO change ' \
-              '(timestamp, author, log, filename, revision, state) ' \
-              'VALUES (?,?,?,?,?,?)'
+              '(timestamp, author, log, filestatus, filename, ' \
+              'revision, state, mode) VALUES (?,?,?,?,?,?,?,?)'
         values = (change.timestamp,
                   change.author,
                   change.log,
+                  change.filestatus,
                   change.filename,
                   change.revision,
-                  change.state,)
+                  change.state,
+                  change.mode,)
         self.dbh.execute(sql, values)
 
     def add_changeset(self, changeset):
@@ -178,15 +182,18 @@ class MetaDb(object):
         """Yield a list of free changes recorded in the database and
         not bound to a changeset, ordered by their timestamp."""
 
-        sql = 'SELECT timestamp, author, log, filename, revision, state ' \
-              'FROM change WHERE changeset_id IS NULL ORDER BY timestamp'
+        sql = 'SELECT timestamp, author, log, filestatus, filename, ' \
+              'revision, state, mode FROM change WHERE changeset_id IS ' \
+              'NULL ORDER BY timestamp'
         for row in self.dbh.execute(sql):
             yield(Change(timestamp=row[0],
                          author=row[1],
                          log=row[2],
-                         filename=row[3],
-                         revision=row[4],
-                         state=row[5]))
+                         filestatus=row[3],
+                         filename=row[4],
+                         revision=row[5],
+                         state=row[6],
+                         mode=row[7]))
 
     def count_changesets(self):
         "Return the number of unmarked changesets (not imported)."
@@ -199,7 +206,8 @@ class MetaDb(object):
         where = where % {'changeset':'cs'}
         sql = """SELECT cs.id, cs.start_time, cs.end_time,
                         c.timestamp, c.author, c.log,
-                        c.filename, c.revision, c.state 
+                        c.filestatus, c.filename,
+                        c.revision, c.state, c.mode
                  FROM changeset cs
                  INNER JOIN change c ON c.changeset_id = cs.id
                  WHERE %s
@@ -210,9 +218,11 @@ class MetaDb(object):
             change = Change(timestamp=row[3],
                             author=row[4],
                             log=row[5],
-                            filename=row[6],
-                            revision=row[7],
-                            state=row[8])
+                            filestatus=row[6],
+                            filename=row[7],
+                            revision=row[8],
+                            state=row[9],
+                            mode=row[10])
 
             if changeset is None or changeset.id != row[0]:
                 if changeset:

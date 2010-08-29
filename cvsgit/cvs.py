@@ -137,12 +137,10 @@ class CVS(object):
             rcsfile = RCSFile(rcs_abspath)
 
             for change in rcsfile.changes():
-                # TODO: handle branches other than HEAD
-                if change.revision.count('.') == 1:
-                    # Record the file's actual working copy path
-                    # instead of the RCS filename.
-                    change.filename = filename
-                    self.metadb.add_change(change)
+                # Record the file's actual working copy path, which
+                # RCS alone cannot know about.
+                change.filename = filename
+                self.metadb.add_change(change)
 
             # Flush changes to disk after each RCS file; otherwise,
             # interruption would cause us to scan RCS files again
@@ -215,6 +213,9 @@ class CVS(object):
         #
         argv = ['co', '-q', '-p' + change.revision, rcsfile]
         pipe = Popen(argv, stdout=PIPE)
+        if change.mode == 'b':
+            return pipe.communicate()[0]
+
         line = pipe.stdout.readline()
         data = ''
         while line:
@@ -230,12 +231,12 @@ class CVS(object):
     def expand_keyword_match(self, match, change):
         if self.localid and match.group(1) == self.localid:
             timestamp = time.gmtime(change.timestamp)
-            return '$%s: %s,v %s %s %s %s $' % \
+            return ('$%s: %s,v %s %s %s %s $' % \
                 (self.localid,
                  os.path.basename(change.filename),
                  change.revision,
                  time.strftime('%Y/%m/%d %H:%M:%S', timestamp),
-                 change.author, change.state)
+                 change.author, change.state)).encode('ascii')
         else:
             return match.group(0)
 
