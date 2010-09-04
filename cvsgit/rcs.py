@@ -96,7 +96,10 @@ class RCSFile(rcsparse.Sink):
         while branch:
             for revision in self.branch_revisions(branch):
                 if revision == '1.1' and '1.1.1.1' in \
-                        self.revs[revision][REV_BRANCHES]:
+                        self.revs[revision][REV_BRANCHES] and \
+                        self.log[revision] == 'Initial revision':
+                    # TODO: Time stamps of revisions 1.1 and 1.1.1.1
+                    # revision should also match, so verify?
                     # This revision seems to have been created by an
                     # import into the vendor branch.  The actual log
                     # message is that of the initial revision on the
@@ -107,11 +110,7 @@ class RCSFile(rcsparse.Sink):
                     # Since the initial vendor branch revision
                     # contains the real log message for the initial
                     # import, there is no need to trace the vendor
-                    # branch back to the 1.1 revision.  (The initial
-                    # import on the vendor branch in a way preceeds
-                    # the creation of the initial revision on trunk,
-                    # even though that isn't reflected by the revision
-                    # numbering scheme.)
+                    # branch back to the 1.1 revision.
                     yield(revision)
                     return
                 else:
