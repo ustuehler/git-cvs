@@ -37,3 +37,12 @@ DRAWBACKS
 
  * cvsync/rsync and cvsgit have to run somewhere, but that could be a
    dedicated server.
+
+LIBRARIES FOR PARSING RCS FILES AND OTHER RESOURCES
+===================================================
+
+ * rcsparse from cvs2svn (included here)
+ * tparse from ViewVC
+ * http://ww2.fs.ei.tum.de/~corecode/hg/rcsparse
+
+ * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.151.8450
