@@ -20,8 +20,8 @@ class RCSFile(rcsparse.Sink):
     "Represents a single RCS file."
 
     def __init__(self, filename, encoding='iso8859-1'):
-        """'encoding' sets the encoding of log messages and delta text
-        in RCS files."""
+        """'encoding' sets the encoding assumed of log messages and
+        delta text in RCS files."""
         self.filename = filename
         self.encoding = encoding
         self.parse()
@@ -52,12 +52,19 @@ class RCSFile(rcsparse.Sink):
         #print self.filename
         for revision in self.revision_trail(self.default_branch()):
             rev = self.revs[revision]
-            #self.print_revision(revision)
+            #self._print_revision(revision)
 
-            if revision == '1.1.1.1' or revision == '1.1':
+            if rev[REV_STATE] == 'dead':
+                if revision == '1.1':
+                    # This file was initially added on a branch and so
+                    # the initial trunk revision was marked 'dead'. We
+                    # do not count this as a change since it wasn't
+                    # added and hasn't existed before.
+                    continue
+                else:
+                    filestatus = FILE_DELETED
+            elif revision == '1.1.1.1' or revision == '1.1':
                 filestatus = FILE_ADDED
-            elif rev[REV_STATE] == 'dead':
-                filestatus = FILE_DELETED
             else:
                 # XXX: Resurrections of dead revisions aren't flagged
                 # as FILE_ADDED.
@@ -151,14 +158,20 @@ class RCSFile(rcsparse.Sink):
         return None
 
     # XXX only for debugging; remove later
-    def print_revision(self, revision):
+    def _print_revision(self, revision):
         import time
         rev = self.revs[revision]
         print 'revision:', revision
         print '  timestamp:', time.strftime("%Y-%m-%d %H:%M", time.gmtime(rev[REV_TIMESTAMP]))
         print '  branches:', rev[REV_BRANCHES]
         print '  next:', rev[REV_NEXT]
+        print '  state:', rev[REV_STATE]
         print '  log:', self.log[revision].splitlines()[0]
+
+    # XXX only for debugging; remove later
+    def _revisions(self):
+        for revision in self.revs.keys():
+            yield(revision)
 
     # rcsparse.Sink methods:
 

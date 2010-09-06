@@ -1,0 +1,384 @@
+head	1.1;
+access;
+symbols
+	OPENBSD_3_8:1.1.0.6
+	OPENBSD_3_7:1.1.0.4
+	OPENBSD_3_6:1.1.0.2;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2005.10.30.07.11.45;	author sturm;	state dead;
+branches
+	1.1.2.1
+	1.1.4.1
+	1.1.6.1;
+next	;
+
+1.1.2.1
+date	2005.10.30.07.11.45;	author sturm;	state Exp;
+branches;
+next	;
+
+1.1.4.1
+date	2005.10.30.07.22.47;	author sturm;	state Exp;
+branches;
+next	;
+
+1.1.6.1
+date	2005.11.01.11.33.12;	author sturm;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@file patch-copyin_c was initially added on branch OPENBSD_3_6.
+@
+text
+@@
+
+
+1.1.6.1
+log
+@Debian/Ubuntu patches for CAN-2005-1111 (chmod races) and
+CAN-2005-1229 (path traversal)
+
+ok brad@@
+@
+text
+@a0 101
+$OpenBSD$
+--- copyin.c.orig	Mon Jan 14 00:44:19 2002
++++ copyin.c	Fri Oct 28 22:54:18 2005
+@@@@ -376,6 +376,48 @@@@ swab_array (ptr, count)
+ /* Current time for verbose table.  */
+ static time_t current_time;
+ 
++/* Return a safer suffix of FILE_NAME, or "." if it has no safer
++   suffix.  Check for fully specified file names and other atrocities.  */
++static const char *
++safer_name_suffix (char const *file_name)
++{
++  char const *p;
++
++  /* Skip leading file name components that contain "..", and leading slashes.  */
++  size_t prefix_len = 0;
++
++  for (p = file_name; *p;)
++    {
++      if (p[0] == '.' && p[1] == '.' && ((p[2] == '/') || !p[2]))
++	prefix_len = p + 2 - file_name;
++
++      do
++	{
++	  if (*p++ == '/')
++	    break;
++	}
++      while (*p);
++    }
++
++  for (p = file_name + prefix_len; *p == '/'; p++)
++    continue;
++  prefix_len = p - file_name;
++
++  if (prefix_len)
++    {
++      char *prefix = alloca (prefix_len + 1);
++      memcpy (prefix, file_name, prefix_len);
++      prefix[prefix_len] = '\0';
++
++      error (0, 0, ("Removing leading `%s' from member names"), prefix);
++    }
++
++  if (!*p)
++    p = ".";
++
++  return p;
++}
++
+ /* Read the collection from standard input and create files
+    in the file system.  */
+ 
+@@@@ -489,19 +531,12 @@@@ process_copy_in ()
+ 
+       /* Do we have to ignore absolute paths, and if so, does the filename
+          have an absolute path?  */
+-      if (no_abs_paths_flag && file_hdr.c_name && file_hdr.c_name [0] == '/')
++      if (no_abs_paths_flag && file_hdr.c_name && file_hdr.c_name [0])
+ 	{
+-	  char *p;
++	  const char *p = safer_name_suffix (file_hdr.c_name);
+ 
+-	  p = file_hdr.c_name;
+-	  while (*p == '/')
+-	    ++p;
+-	  if (*p == '\0')
++	  if (p != file_hdr.c_name)
+ 	    {
+-	      strcpy (file_hdr.c_name, ".");
+-	    }
+-	  else
+-	    {
+               /* Debian hack: file_hrd.c_name is sometimes set to
+                  point to static memory by code in tar.c.  This
+                  causes a segfault.  Therefore, memmove is used
+@@@@ -1586,19 +1621,20 @@@@ create_final_defers ()
+ 	  continue;
+ 	}
+ 
+-      if (close (out_file_des) < 0)
+-	error (0, errno, "%s", d->header.c_name);
+-
+       /* File is now copied; set attributes.  */
+       if (!no_chown_flag)
+-	if ((chown (d->header.c_name,
++	if ((fchown (out_file_des,
+ 		    set_owner_flag ? set_owner : d->header.c_uid,
+ 	       set_group_flag ? set_group : d->header.c_gid) < 0)
+ 	    && errno != EPERM)
+ 	  error (0, errno, "%s", d->header.c_name);
+       /* chown may have turned off some permissions we wanted. */
+-      if (chmod (d->header.c_name, (int) d->header.c_mode) < 0)
++      if (fchmod (out_file_des, (int) d->header.c_mode) < 0)
+ 	error (0, errno, "%s", d->header.c_name);
++
++      if (close (out_file_des) < 0)
++	error (0, errno, "%s", d->header.c_name);
++
+       if (retain_time_flag)
+ 	{
+ 	  times.actime = times.modtime = d->header.c_mtime;
+@
+
+
+1.1.4.1
+log
+@Debian/Ubuntu patches for CAN-2005-1111 (chmod races) and
+CAN-2005-1229 (path traversal)
+
+ok brad@@
+@
+text
+@a0 101
+$OpenBSD$
+--- copyin.c.orig	Mon Jan 14 00:44:19 2002
++++ copyin.c	Fri Oct 28 22:54:18 2005
+@@@@ -376,6 +376,48 @@@@ swab_array (ptr, count)
+ /* Current time for verbose table.  */
+ static time_t current_time;
+ 
++/* Return a safer suffix of FILE_NAME, or "." if it has no safer
++   suffix.  Check for fully specified file names and other atrocities.  */
++static const char *
++safer_name_suffix (char const *file_name)
++{
++  char const *p;
++
++  /* Skip leading file name components that contain "..", and leading slashes.  */
++  size_t prefix_len = 0;
++
++  for (p = file_name; *p;)
++    {
++      if (p[0] == '.' && p[1] == '.' && ((p[2] == '/') || !p[2]))
++	prefix_len = p + 2 - file_name;
++
++      do
++	{
++	  if (*p++ == '/')
++	    break;
++	}
++      while (*p);
++    }
++
++  for (p = file_name + prefix_len; *p == '/'; p++)
++    continue;
++  prefix_len = p - file_name;
++
++  if (prefix_len)
++    {
++      char *prefix = alloca (prefix_len + 1);
++      memcpy (prefix, file_name, prefix_len);
++      prefix[prefix_len] = '\0';
++
++      error (0, 0, ("Removing leading `%s' from member names"), prefix);
++    }
++
++  if (!*p)
++    p = ".";
++
++  return p;
++}
++
+ /* Read the collection from standard input and create files
+    in the file system.  */
+ 
+@@@@ -489,19 +531,12 @@@@ process_copy_in ()
+ 
+       /* Do we have to ignore absolute paths, and if so, does the filename
+          have an absolute path?  */
+-      if (no_abs_paths_flag && file_hdr.c_name && file_hdr.c_name [0] == '/')
++      if (no_abs_paths_flag && file_hdr.c_name && file_hdr.c_name [0])
+ 	{
+-	  char *p;
++	  const char *p = safer_name_suffix (file_hdr.c_name);
+ 
+-	  p = file_hdr.c_name;
+-	  while (*p == '/')
+-	    ++p;
+-	  if (*p == '\0')
++	  if (p != file_hdr.c_name)
+ 	    {
+-	      strcpy (file_hdr.c_name, ".");
+-	    }
+-	  else
+-	    {
+               /* Debian hack: file_hrd.c_name is sometimes set to
+                  point to static memory by code in tar.c.  This
+                  causes a segfault.  Therefore, memmove is used
+@@@@ -1586,19 +1621,20 @@@@ create_final_defers ()
+ 	  continue;
+ 	}
+ 
+-      if (close (out_file_des) < 0)
+-	error (0, errno, "%s", d->header.c_name);
+-
+       /* File is now copied; set attributes.  */
+       if (!no_chown_flag)
+-	if ((chown (d->header.c_name,
++	if ((fchown (out_file_des,
+ 		    set_owner_flag ? set_owner : d->header.c_uid,
+ 	       set_group_flag ? set_group : d->header.c_gid) < 0)
+ 	    && errno != EPERM)
+ 	  error (0, errno, "%s", d->header.c_name);
+       /* chown may have turned off some permissions we wanted. */
+-      if (chmod (d->header.c_name, (int) d->header.c_mode) < 0)
++      if (fchmod (out_file_des, (int) d->header.c_mode) < 0)
+ 	error (0, errno, "%s", d->header.c_name);
++
++      if (close (out_file_des) < 0)
++	error (0, errno, "%s", d->header.c_name);
++
+       if (retain_time_flag)
+ 	{
+ 	  times.actime = times.modtime = d->header.c_mtime;
+@
+
+
+1.1.2.1
+log
+@add Debian/Ubuntu patches for CAN-2005-1111 (chmod races) and
+CAN-2005-1229 (path traversal)
+
+ok brad@@
+@
+text
+@a0 101
+$OpenBSD$
+--- copyin.c.orig	Mon Jan 14 00:44:19 2002
++++ copyin.c	Fri Oct 28 22:54:18 2005
+@@@@ -376,6 +376,48 @@@@ swab_array (ptr, count)
+ /* Current time for verbose table.  */
+ static time_t current_time;
+ 
++/* Return a safer suffix of FILE_NAME, or "." if it has no safer
++   suffix.  Check for fully specified file names and other atrocities.  */
++static const char *
++safer_name_suffix (char const *file_name)
++{
++  char const *p;
++
++  /* Skip leading file name components that contain "..", and leading slashes.  */
++  size_t prefix_len = 0;
++
++  for (p = file_name; *p;)
++    {
++      if (p[0] == '.' && p[1] == '.' && ((p[2] == '/') || !p[2]))
++	prefix_len = p + 2 - file_name;
++
++      do
++	{
++	  if (*p++ == '/')
++	    break;
++	}
++      while (*p);
++    }
++
++  for (p = file_name + prefix_len; *p == '/'; p++)
++    continue;
++  prefix_len = p - file_name;
++
++  if (prefix_len)
++    {
++      char *prefix = alloca (prefix_len + 1);
++      memcpy (prefix, file_name, prefix_len);
++      prefix[prefix_len] = '\0';
++
++      error (0, 0, ("Removing leading `%s' from member names"), prefix);
++    }
++
++  if (!*p)
++    p = ".";
++
++  return p;
++}
++
+ /* Read the collection from standard input and create files
+    in the file system.  */
+ 
+@@@@ -489,19 +531,12 @@@@ process_copy_in ()
+ 
+       /* Do we have to ignore absolute paths, and if so, does the filename
+          have an absolute path?  */
+-      if (no_abs_paths_flag && file_hdr.c_name && file_hdr.c_name [0] == '/')
++      if (no_abs_paths_flag && file_hdr.c_name && file_hdr.c_name [0])
+ 	{
+-	  char *p;
++	  const char *p = safer_name_suffix (file_hdr.c_name);
+ 
+-	  p = file_hdr.c_name;
+-	  while (*p == '/')
+-	    ++p;
+-	  if (*p == '\0')
++	  if (p != file_hdr.c_name)
+ 	    {
+-	      strcpy (file_hdr.c_name, ".");
+-	    }
+-	  else
+-	    {
+               /* Debian hack: file_hrd.c_name is sometimes set to
+                  point to static memory by code in tar.c.  This
+                  causes a segfault.  Therefore, memmove is used
+@@@@ -1586,19 +1621,20 @@@@ create_final_defers ()
+ 	  continue;
+ 	}
+ 
+-      if (close (out_file_des) < 0)
+-	error (0, errno, "%s", d->header.c_name);
+-
+       /* File is now copied; set attributes.  */
+       if (!no_chown_flag)
+-	if ((chown (d->header.c_name,
++	if ((fchown (out_file_des,
+ 		    set_owner_flag ? set_owner : d->header.c_uid,
+ 	       set_group_flag ? set_group : d->header.c_gid) < 0)
+ 	    && errno != EPERM)
+ 	  error (0, errno, "%s", d->header.c_name);
+       /* chown may have turned off some permissions we wanted. */
+-      if (chmod (d->header.c_name, (int) d->header.c_mode) < 0)
++      if (fchmod (out_file_des, (int) d->header.c_mode) < 0)
+ 	error (0, errno, "%s", d->header.c_name);
++
++      if (close (out_file_des) < 0)
++	error (0, errno, "%s", d->header.c_name);
++
+       if (retain_time_flag)
+ 	{
+ 	  times.actime = times.modtime = d->header.c_mtime;
+@
+
