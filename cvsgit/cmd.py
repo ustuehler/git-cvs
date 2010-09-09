@@ -46,6 +46,15 @@ class Cmd(object):
         self.finalize_options()
         sys.exit(self.run())
 
+    def eval(self, *args):
+        try:
+            self.main([self.__class__.__name__] + list(args))
+        except SystemExit, e:
+            if e.code is None or e.code == 0:
+                return 0
+            else:
+                return e.code
+
     def main(self, argv):
         try:
             self._main(argv)

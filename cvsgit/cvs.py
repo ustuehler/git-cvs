@@ -54,9 +54,14 @@ class CVS(object):
             else:
                 module = os.path.join(os.path.basename(cvsroot), module)
             cvsroot = parent
+
         self.root = cvsroot
         self.module = module
-        self.prefix = os.path.join(self.root, self.module)
+
+        if module == '':
+            self.prefix = self.root
+        else:
+            self.prefix = os.path.join(self.root, self.module)
 
         self.localid = None
         self.parse_options()
@@ -64,7 +69,15 @@ class CVS(object):
         self.statcache = {}
 
     def parse_options(self):
-        f = file(os.path.join(self.root, 'CVSROOT', 'options'), 'r')
+        """Extract relevant information from the CVSROOT/options file,
+        if it exsits.  At the moment, the only information that is
+        used from the file is the custom Id tag keyword 'tag'."""
+
+        filename = os.path.join(self.root, 'CVSROOT', 'options')
+        if not os.path.isfile(filename):
+            return
+
+        f = file(filename, 'r')
         try:
             for line in f.readlines():
                 option, value = line.split('=', 2)
@@ -102,16 +115,67 @@ class CVS(object):
             #if self._unmodified(dirpath):
             #    continue
 
+            # Are we in an Attic directory? Then we must check each
+            # filename for a "zombie" copy in the parent directory
+            # and decide which one to use.
+            in_attic = os.path.basename(dirpath) == 'Attic'
+            if in_attic:
+                parent = os.path.dirname(dirpath)
+
             for filename in filenames:
-                if filename.endswith(',v'):
-                    filename = os.path.join(dirpath, filename)
+                # Ignore all non-RCS files.
+                if not filename.endswith(',v'):
+                    continue
 
-                    if self._unmodified(filename):
-                        continue
+                #
+                # Perform the zombie check:
+                #
+                # 1.) If the zombie is in the parent directory, remove
+                #     it from 'result' and add the one in the Attic.
+                #
+                # 2.) If the zombie is in the Attic, leave the good one
+                #     in 'result' and ignore the one in the Attic.
+                #
+                # 3.) If neither of the two files can be classified as
+                #     a zombie, raise an error.
+                #
+                if in_attic and self._zombie_check(result, parent, filename):
+                    # This is case 2.) above: skip the Attic filename.
+                    continue
 
+                filename = os.path.join(dirpath, filename)
+                if not self._unmodified(filename):
                     result.append(filename)
 
         return result
+
+    def _zombie_check(self, result, parent, filename):
+        """Check a path for zombie files.  If a path exists in the Attic
+        and the parent directory, one of them must be a zombie copy.  If
+        it cannot be determined which one is the zombie and which one is
+        the real copy, raise an error.
+
+        This function should only be called during an os.walk() run when
+        searching for files an Attic directory.  This guarantees that we
+        have already seen the other copy in the parent directory, if one
+        exists.  The return value is True if the zombie is in the Attic
+        and False if the zombie is in the parent directory."""
+
+        trunkfile = os.path.join(parent, filename)
+        if not os.path.isfile(trunkfile):
+            # No zombie present; the file exists only in Attic.
+            return False
+
+        atticfile = os.path.join(parent, 'Attic', filename)
+        # FIXME: Not a reliable test. We should make sure that the
+        # zombie contains a subset of the revisions of the real copy.
+        if os.path.getsize(trunkfile) < os.path.getsize(atticfile):
+            result.remove(trunkfile)
+            return False
+
+        raise RuntimeError, \
+            _("invalid path: %s (%s)") % (trunkfile, \
+            _('exists in Attic and parent directory'))
 
     def pull_changes(self, onprogress=None):
         """Pull new revisions from the CVS repository and add them to

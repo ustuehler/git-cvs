@@ -1,0 +1,55 @@
+head	1.1;
+access;
+symbols
+	OPENBSD_4_5:1.1.0.2
+	OPENBSD_4_5_BASE:1.1
+	OPENBSD_4_6:1.1.0.4
+	OPENBSD_4_6_BASE:1.1
+	OPENBSD_4_7:1.1.0.6
+	OPENBSD_4_7_BASE:1.1
+	OPENBSD_4_8:1.1.0.8
+	OPENBSD_4_8_BASE:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2008.10.17.10.04.32;	author ajacoutot;	state Exp;
+branches;
+next	;
+
+
+
+desc
+@@
+
+
+1.1
+log
+@- update to 2.1.8
+
+from pea (MAINTAINER)
+@
+text
+@$OpenBSD$
+--- doc/Makefile.orig	Fri Oct 17 09:47:06 2008
++++ doc/Makefile	Fri Oct 17 09:48:02 2008
+@@@@ -21,7 +21,7 @@@@ SCRIPT_HTMLS = $(SCRIPT_TXTS:.txt=.html)
+ 
+ COMMON = common.switches.txt common.config.txt common.logutriga.txt
+ 
+-GETATTRS = python ./getattrs.py
++GETATTRS = ${MODPY_BIN} ./getattrs.py
+ 
+ all: man
+ 
+@@@@ -94,7 +94,7 @@@@ endif
+ 
+ %.xml: %.txt $(COMMON)
+ 	$(ASCIIDOC) -b docbook -d manpage `$(GETATTRS) $<` -o - $< \
+-	| python fixman.py > $@@
++	| ${MODPY_BIN} fixman.py > $@@
+ 
+ %.1: %.xml
+ 	$(XMLTO) man $<
+@

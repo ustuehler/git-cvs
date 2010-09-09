@@ -1,0 +1,82 @@
+head	1.2;
+access;
+symbols
+	ajacoutot_20080414:1.1.1.1 pea:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2008.06.05.11.26.32;	author ajacoutot;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2008.04.14.15.32.46;	author ajacoutot;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2008.04.14.15.32.46;	author ajacoutot;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@- update to skytools-2.1.7
+- use MODPY_EGG_VERSION
+- fix RCS tag
+
+from Pierre-Emmanuel Andre (MAINTAINER)
+@
+text
+@$OpenBSD: patch-Makefile,v 1.1 2008/04/14 15:32:46 ajacoutot Exp $
+--- Makefile.orig	Thu Apr 10 11:03:49 2008
++++ Makefile	Thu Apr 10 11:04:25 2008
+@@@@ -38,7 +38,7 @@@@ modules-install: config.mak
+ 
+ python-install: config.mak modules-all
+ 	$(PYTHON) setup.py install --prefix=$(prefix) --root=$(DESTDIR)/
+-	make -C doc DESTDIR=$(DESTDIR) install
++	$(MAKE) -C doc DESTDIR=$(DESTDIR) install
+ 
+ python-install python-all: python/skytools/installer_config.py
+ python/skytools/installer_config.py: python/skytools/installer_config.py.in config.mak
+@@@@ -78,7 +78,7 @@@@ deb83:
+ 	debuild -uc -us -b
+ 
+ tgz: config.mak clean
+-	make -C doc man
++	$(MAKE) -C doc man
+ 	$(PYTHON) setup.py sdist -t source.cfg -m source.list
+ 
+ debclean: distclean
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+$OpenBSD$
+@
+
+
+1.1.1.1
+log
+@PostgreSQL management tools from Skype: WAL shipping, queueing,
+replication. The tools are named walmgr, PgQ and Londiste.
+
+from Pierre-Emmanuel Andre <pea at raveland dot org> (MAINTAINER), thanks!
+@
+text
+@@
