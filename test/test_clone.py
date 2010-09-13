@@ -13,10 +13,8 @@ class Test(unittest.TestCase):
             rmtree(self.tmpdir)
 
     def testZombieDetection(self):
-        # This RCS file contains no revisions on the "trunk", i.e. the
-        # first trunk revision 1.1 is explicitly marked 'dead' but it
-        # is still a branchpoint for OpenBSD release branches in which
-        # the path exists.
+        # This repository has a zombie copy of a file that was actually
+        # moved to Attic.
         cvsroot = join(dirname(__file__), 'data', 'zombie')
         # TODO: Discard command output to keep the test output clean.
         self.assertEquals(clone().eval(cvsroot, self.tmpdir), 0)
