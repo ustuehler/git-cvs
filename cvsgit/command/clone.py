@@ -90,7 +90,7 @@ class clone(Cmd):
             progress = Progress(self.options.progress)
             progress(_('Counting files'), 0, 1) # XXX
             cvs.pull_changes(onprogress=lambda count, total:
-                progress(_('Pulling changes'), count, total))
+                progress(_('Parsing RCS files'), count, total))
             cvs.generate_changesets(onprogress=lambda count, total:
                 progress(_('Calculating changesets'), count, total))
             cvs.export_changesets(git, params, onprogress=lambda count, total:
