@@ -48,8 +48,6 @@ class clone(Cmd):
         self.directory = None
         self.add_option('--domain', metavar='DOMAIN', help=\
             _("Set the e-mail domain to use for unknown authors."))
-        self.add_option('--tz', metavar='TIMEZONE', help=\
-            _("Set the time zone for dates recorded in RCS files."))
         self.add_option('--incremental', action='store_true', help=\
             _("Keep the incomplete Git repository if this command "
               "is interrupted and continue from the last checkpoint "
@@ -83,7 +81,6 @@ class clone(Cmd):
             cvs = CVS(metadb)
 
             params = {}
-            params['tz'] = self.options.tz
             params['domain'] = self.options.domain
             params['verbose'] = self.options.verbose
 

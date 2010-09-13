@@ -110,12 +110,10 @@ class Git(object):
                 changeset.set_mark(sha1)
 
 class GitFastImport(object):
-    def __init__(self, pipe, branch='master', domain=None, tz=None,
-                 verbose=False):
+    def __init__(self, pipe, branch='master', domain=None, verbose=False):
         self.pipe = pipe
         self.branch = branch
         self.domain = domain
-        self.tz = tz
         self.verbose = verbose
         self.last_changeset = None
 
@@ -163,36 +161,10 @@ class GitFastImport(object):
             pass
         self.returncode = self.pipe.returncode
 
-    def offutc(self, seconds):
-        oldtz = os.environ.get('TZ')
-        try:
-            if self.tz:
-                os.environ['TZ'] = self.tz
-                time.tzset()
-
-            # Enable if RCS returns the timestamp in local time, not UTC.
-            #seconds -= time.timezone
-
-            if time.localtime(seconds)[8] == 1: # is DST?
-                offutc_sec = time.altzone
-            else:
-                offutc_sec = time.timezone
-
-            offutc = offutc_sec / 60 / 60 * 100
-            offutc += offutc_sec / 60 % 60
-            return offutc
-
-        finally:
-            if oldtz:
-                os.environ['TZ'] = oldtz
-            elif self.tz:
-                del os.environ['TZ']
-            time.tzset()
-
     def raw_date(self, seconds):
-        """Convert 'seconds' from source time zone to Git's native
-        date format."""
-        return '%s %+.4d' % (seconds, self.offutc(seconds))
+        """Convert 'seconds' from seconds since the epoch to Git's
+        native date format."""
+        return '%s +0000' % (seconds)
 
     def author_name(self, author):
         return author
