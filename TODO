@@ -1,2 +1,3 @@
 * Rename 'cvsgit' to 'git-cvs' to mimmic the 'git-svn' bridge command.
+* http://andialbrecht.wordpress.com/2009/03/17/creating-a-man-page-with-distutils-and-optparse/
 * Handle branches and tags.
