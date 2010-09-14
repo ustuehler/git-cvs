@@ -1,4 +1,4 @@
-"""Command to clone a CVS repository into a Git repository."""
+"""Command to clone a CVS repository or module as a Git repository."""
 
 import os.path
 import sys
@@ -36,9 +36,9 @@ class clone(Cmd):
 
     Usage: %prog <repository> [<directory>]
 
-    Clones an entire CVS repository or module into a Git repository.
-    The source argument <repository> is must be a local path pointing
-    at the CVS repository root or a module directory within.  The
+    Clones an entire CVS repository or a module into a Git repository.
+    The source argument <repository> must be a local path pointing at
+    the CVS repository root or a module directory within.  The
     destination argument <directory> is selected automatically, based
     on the last component of the source path.
     """)
