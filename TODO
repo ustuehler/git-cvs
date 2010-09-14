@@ -1,0 +1,2 @@
+* Rename 'cvsgit' to 'git-cvs' to mimmic the 'git-svn' bridge command.
+* Handle branches and tags.
