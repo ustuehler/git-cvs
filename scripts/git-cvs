@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+"""Git subcommand to provide operations on CVS repositories."""
+
+from glob import glob
+import os
+import sys
+
+from cvsgit.cmd import Cmd
+from cvsgit.i18n import _
+import cvsgit.command
+
+class CLI(Cmd):
+    """Operate on a CVS repository using Git.
+
+    Usage: %prog <command> [options] [arguments]
+
+    git-cvs is a conduit for changesets between CVS and Git.  It
+    currently provides only a unidirectional flow of changes between
+    a CVS repository and a Git repository.
+
+    git-cvs can track the HEAD branch (aka the "trunk") in a CVS
+    repository."""
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        if len(self.args) > 0:
+            self.run_command(self.args)
+        else:
+            self.print_available_commands()
+
+    def run_command(self, argv):
+        command = argv[0]
+        klass = self.get_command_class(command)
+        if klass is None:
+            self.usage_error(_('invalid command: %s') % command)
+        else:
+            klass().main(argv)
+
+    def print_available_commands(self):
+        print _("Available commands:")
+        for command in self.get_command_names():
+            print "  " + command
+
+    def get_command_names(self):
+        modules = {}
+        for path in cvsgit.command.__path__:
+            pattern = os.path.join(path, '[!_]*.py')
+            for filename in glob(pattern):
+                module_name = os.path.basename(filename)[:-3]
+                modules[module_name] = True
+        return modules.keys()
+
+    def get_command_class(self, command):
+        klass_name = command
+        module_name = '%s.%s' % ('cvsgit.command', command)
+        try:
+            __import__(module_name)
+            module = sys.modules[module_name]
+        except ImportError:
+            return None
+        try:
+            klass = getattr(module, klass_name)
+        except AttributeError:
+            raise RuntimeError(
+                _("invalid command '%s' (no class '%s' in module '%s')") \
+                % (command, klass_name, module_name))
+        return klass
+
+if __name__ == '__main__':
+    CLI()
