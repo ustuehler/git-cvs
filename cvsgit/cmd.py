@@ -38,6 +38,11 @@ class Cmd(object):
             usage=self.usage,
             add_help_option=False)
 
+        # Turn off GNU-style mix of arguments and options.  We have
+        # subcommands that accept --help, so the main command should
+        # not interpret --help after a subcommand name.
+        self.option_parser.allow_interspersed_args = False
+
         self.add_option('--help', action='help', help=\
             _("Show this help and exit."))
 
