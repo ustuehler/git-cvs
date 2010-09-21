@@ -1,3 +1,4 @@
+* Rename cvsgit.meta package to cvsgit.sql (for a three-letter acronym) :)
 * Rename 'cvsgit' to 'git-cvs' to mimmic the 'git-svn' bridge command.
 * Install 'git-cvs' in Git's --exec-path (optional?).
 * http://andialbrecht.wordpress.com/2009/03/17/creating-a-man-page-with-distutils-and-optparse/
