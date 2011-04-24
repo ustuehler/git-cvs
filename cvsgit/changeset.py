@@ -61,7 +61,12 @@ class ChangeSet(object):
         return self.provider.blob(change)
 
     def get_timestamp(self):
-        return self.start_time
+        # At first, this method returned start_time, but it make more
+        # sense to return end_time, which is when the last RCS change
+        # happend that affected this changeset.  This should make it
+        # more likely that a "cvs checkout -D <timestamp>" yields the
+        # expected result when <timestamp> is that of the changeset.
+        return self.end_time
 
     def get_author(self):
         return self.changes[0].author
