@@ -133,6 +133,14 @@ class Git(object):
                 shutil.rmtree(directory)
             raise
 
+    def destroy(self):
+        if self.is_bare_repository():
+            directory = self.git_dir
+        else:
+            directory = self.work_tree
+        if os.path.exists(directory):
+            shutil.rmtree(directory)
+
     def _git_env(self, work_tree=True):
         env = os.environ.copy()
         env['GIT_DIR'] = self.git_dir
