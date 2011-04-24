@@ -187,6 +187,7 @@ class CVS(object):
             count = 0
 
         for rcs_filename in filenames:
+          try:
             if onprogress:
                 onprogress(count, total)
                 count += 1
@@ -211,6 +212,12 @@ class CVS(object):
             # (which isn't bad but costs time).
             self.metadb.update_statcache({rcs_filename:identity})
             self.metadb.commit()
+          except:
+            # XXX: Print the file name where this error happened,
+            # regardless of whether the error is actually printed,
+            # just as a quick & dirty debugging aid.
+            print "(Error while processing %s)" % rcs_filename
+            raise
 
         if onprogress:
             onprogress(total, total)
