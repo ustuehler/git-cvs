@@ -133,11 +133,14 @@ class Git(object):
                 shutil.rmtree(directory)
             raise
 
-    def _git_env(self):
+    def _git_env(self, work_tree=True):
         env = os.environ.copy()
         env['GIT_DIR'] = self.git_dir
-        if env.has_key('GIT_WORK_TREE'):
-            del env['GIT_WORK_TREE']
+        if self.is_bare_repository() or not work_tree:
+            if env.has_key('GIT_WORK_TREE'):
+                del env['GIT_WORK_TREE']
+        else:
+            env['GIT_WORK_TREE'] = self.work_tree
         return env
 
     def _git_call(self, args):
@@ -148,7 +151,7 @@ class Git(object):
 
     def config_get(self, varname, default=None):
         pipe = Popen(['git', 'config', '--get', varname],
-                     stdout=PIPE, env=self._git_env())
+                     stdout=PIPE, env=self._git_env(False))
         stdout, stderr = pipe.communicate()
         if pipe.returncode != 0:
             return default
