@@ -34,7 +34,7 @@ class clone(Cmd):
     __doc__ = _(
     """Clone a CVS repository or module into a Git repository.
 
-    Usage: %prog <repository> [<directory>]
+    Usage: %prog [options] <repository> [<directory>]
 
     Clones an entire CVS repository or a module into a Git repository.
     The source argument <repository> must be a local path pointing at
