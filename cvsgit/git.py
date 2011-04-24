@@ -170,7 +170,7 @@ class Git(object):
         self._git_call(['config', varname, value])
 
     def import_changesets(self, changesets, params={},
-                          onprogress=None, total=None):
+                          onprogress=None, total=None, count=None):
 
         class SignalIndicator():
             def __init__(self):
@@ -189,10 +189,21 @@ class Git(object):
         sigint_flag = SignalIndicator()
 	old_sigaction = signal(SIGINT, sigint_flag)
 
+        if count != None and total != None and total > count:
+            total = count
+
         fi = GitFastImport(pipe, **params)
         changesets_seen = []
         try:
             for changeset in changesets:
+                if count != None:
+                    if count > 0:
+                        count -= 1
+                    else:
+                        if onprogress and total and not params.get('verbose'):
+                            onprogress(total, total)
+                        break
+
                 if onprogress and total and not params.get('verbose'):
                     onprogress(len(changesets_seen), total)
 

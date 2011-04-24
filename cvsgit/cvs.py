@@ -318,13 +318,15 @@ class CVS(object):
         assert(changeset.mark != None)
         self.metadb.mark_changeset(changeset)
 
-    def export_changesets(self, receiver, params={}, onprogress=None):
+    def export_changesets(self, receiver, params={}, onprogress=None,
+                          count=None):
         if onprogress:
             onprogress(0, 1)
             total = self.metadb.count_changesets()
 
         receiver.import_changesets(self.changesets(), params=params,
-                                   onprogress=onprogress, total=total)
+                                   onprogress=onprogress, total=total,
+                                   count=count)
 
         if onprogress:
             onprogress(total, total)

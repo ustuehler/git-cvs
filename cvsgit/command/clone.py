@@ -46,6 +46,8 @@ class clone(Cmd):
     def initialize_options(self):
         self.repository = None
         self.directory = None
+        self.add_option('--count', metavar='COUNT', help=\
+            _("Stop importing after COUNT new commits."))
         self.add_option('--domain', metavar='DOMAIN', help=\
             _("Set the e-mail domain to use for unknown authors."))
         self.add_option('--incremental', action='store_true', help=\
@@ -91,7 +93,8 @@ class clone(Cmd):
             cvs.generate_changesets(onprogress=lambda count, total:
                 progress(_('Calculating changesets'), count, total))
             cvs.export_changesets(git, params, onprogress=lambda count, total:
-                progress(('Importing changesets'), count, total))
+                progress(_('Importing changesets'), count, total),
+                count=int(self.options.count))
             if not git.is_bare_repository():
                 git.checkout()
         except:
