@@ -70,6 +70,9 @@ class clone(Cmd):
         else:
             self.usage_error(_('too many arguments'))
 
+        if self.options.count:
+            self.options.count = int(self.options.count)
+
     def run(self):
         if os.path.exists(self.directory) and not self.options.incremental:
             self.fatal(_("destination path '%s' already exists") % \
@@ -94,7 +97,7 @@ class clone(Cmd):
                 progress(_('Calculating changesets'), count, total))
             cvs.export_changesets(git, params, onprogress=lambda count, total:
                 progress(_('Importing changesets'), count, total),
-                count=int(self.options.count))
+                count=self.options.count)
             if not git.is_bare_repository():
                 git.checkout()
         except:
