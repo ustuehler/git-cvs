@@ -22,14 +22,14 @@ class MetaDb(object):
 
     def get_source(self):
         if self._source is None:
-            self._source = git.config_get('cvsgit.source')
+            self._source = self.git.config_get('cvs.source')
             if self._source is None:
                 raise RuntimeError, \
-                    _("missing 'cvsgit.source' in Git config")
+                    _("missing 'cvs.source' in Git config")
         return self._source
 
     def set_source(self, source):
-        self.git.config_set('cvsgit.source', source)
+        self.git.config_set('cvs.source', source)
         self._source = source
 
     source = property(get_source, set_source)
