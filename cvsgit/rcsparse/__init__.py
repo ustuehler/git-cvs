@@ -17,10 +17,13 @@ from common import *
 try:
   from tparse import parse
 except ImportError:
-  try:
-    from texttools import Parser
-  except ImportError:
-    from default import Parser
+  # Support for the texttools module was removed to let nosetests
+  # run all doctests successfully and because it wasn't used before
+  # in the cvsgit project.
+  #try:
+  #  from texttools import Parser
+  #except ImportError:
+  from default import Parser
 
   def parse(file, sink):
     return Parser().parse(file, sink)
