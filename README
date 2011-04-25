@@ -14,6 +14,10 @@ ADVANTAGES OVER PLAIN CVS(1) AND CVSSYNC(1)
 
    to show the diff for the second to last commit.
 
+ * See all subtree changes.
+
+   $ git log -p sys/arch/i386
+
  * Check the status of the working copy really fast.  "cvs status" in
    /usr/src takes about X minutes on my laptop while "git status" takes
    only 1.2 seconds.
