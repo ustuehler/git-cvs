@@ -9,6 +9,16 @@ FILE_DELETED = 'D'
 FILE_MODIFIED = 'M'
 
 class Change(object):
+    """Represents a single change in an RCS file.
+
+    For example:
+    >>> Change(1303768248, "jack", "ToDo list added", FILE_ADDED,
+    ... "todo.txt", "1.1", "state???", "mode???").author
+    'jack'
+
+    The time stamp should be in UTC time zone. The state and mode
+    arguments in the above example are bogus, which illustrates
+    that this class is really just a dumb container."""
 
     def __init__(self, timestamp, author, log, filestatus, filename,
                  revision, state, mode):
