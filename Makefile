@@ -20,6 +20,6 @@ coverage:
 	coverage xml
 
 lint:
-	-pylint -f parseable cvsgit > pylint.txt
+	-pylint --rcfile scripts/pylintrc -f parseable cvsgit > pylint.txt
 
 .PHONY: all build clean test coverage lint
