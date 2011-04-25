@@ -102,6 +102,16 @@ class ChangeSetGenerator(object):
     be presented in ascending order of their timestamp."""
 
     def __init__(self, quiet_period=QUIET_PERIOD):
+        """Construct a new ChangeSetGenerator instance.
+
+        We don't want CVS commits spanning multiple files that were
+        not finished while we synced the CVS mirror to be accepted
+        as complete changesets.  The "quiet period" guards against
+        such incomplete change sets by requiring that any CVS change
+        must be older than the current system time minus the quiet
+        period (in seconds).  (Assuming that the system time and
+        CVS time stamps are not totally bogus, of course.)"""
+
         self.quiet_period = quiet_period
         self.changesets = []
 
