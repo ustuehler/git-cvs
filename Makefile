@@ -3,8 +3,6 @@ PYTHON?=python
 all: test
 
 test:
-	@for f in test/test_*.py; do \
-	    env PYTHONPATH=`pwd` ${PYTHON} $$f; \
-	done
+	env PYTHONPATH=`pwd` ${PYTHON} tests/run.py
 
 .PHONY: all test
