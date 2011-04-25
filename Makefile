@@ -16,7 +16,7 @@ test:
 	nosetests --with-xunit --with-doctest
 
 coverage:
-	nosetests --with-xunit --with-doctest --with-coverage --cover-erase --cover-inclusive
+	nosetests --with-xunit --with-doctest --with-coverage --cover-erase --cover-inclusive --cover-package=cvsgit
 	coverage xml
 
 lint:
