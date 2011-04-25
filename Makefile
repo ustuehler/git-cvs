@@ -13,10 +13,10 @@ clean:
 	rm -f pylint.txt
 
 test:
-	nosetests --with-doctest --with-xunit
+	nosetests --with-xunit --with-doctest
 
 coverage:
-	nosetests --with-doctest --with-coverage --cover-erase --cover-inclusive
+	nosetests --with-xunit --with-doctest --with-coverage --cover-erase --cover-inclusive
 	coverage xml
 
 lint:
