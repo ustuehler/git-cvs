@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
         # moved to Attic.
         cvsroot = join(dirname(__file__), 'data', 'zombie')
         # TODO: Discard command output to keep the test output clean.
-        self.assertEquals(clone().eval('--quiet', cvsroot, self.tmpdir), 0)
+        self.assertEquals(clone().eval('--quiet-git', cvsroot, self.tmpdir), 0)
         # TODO: Verify that the correct file was picked and the zombie
         # got ignored.
 
