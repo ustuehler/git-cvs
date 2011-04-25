@@ -100,13 +100,16 @@ class Git(object):
                 self._is_bare_repository = False
         return self._is_bare_repository
 
-    def init(self):
+    def init(self, quiet=False):
         """Initialize or reinitialize the repository."""
 
         if self._is_bare_repository:
             args = ['--bare']
         else:
             args = []
+
+        if quiet:
+            args.append('-q')
 
         env = os.environ.copy()
         if env.has_key('GIT_DIR'):

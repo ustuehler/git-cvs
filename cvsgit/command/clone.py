@@ -56,6 +56,8 @@ class clone(Cmd):
               "if the Git repository exists in the beginning."))
         self.add_option('--progress', action='store_true', help=\
             _("Display a progress meter."))
+        self.add_option('--quiet-git', action='store_true', help=\
+            _("Turn off informational messages from Git."))
         self.add_option('--verbose', action='store_true', help=\
             _("Display each changeset as it is imported."))
 
@@ -79,7 +81,7 @@ class clone(Cmd):
                        self.directory)
 
         git = Git(self.directory)
-        git.init()
+        git.init(quiet=self.options.quiet_git)
         try:
             metadb = MetaDb(git)
             metadb.set_source(self.repository)
