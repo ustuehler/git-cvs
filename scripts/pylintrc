@@ -34,6 +34,8 @@ load-plugins=
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
 #disable=
+# XXX: Disable "[W0311] Bad indentation." since we use a lot of foreign code.
+disable=W0311
 
 
 [REPORTS]
