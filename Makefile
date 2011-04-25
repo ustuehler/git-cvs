@@ -16,7 +16,7 @@ test:
 	nosetests --with-doctest --with-xunit
 
 coverage:
-	coverage run tests/run.py --with-xunit
+	nosetests --with-doctest --with-coverage --cover-erase --cover-inclusive
 	coverage xml
 
 lint:
