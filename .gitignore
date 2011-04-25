@@ -4,3 +4,4 @@
 .coverage
 coverage.xml
 nosetests.xml
+pylint.txt
