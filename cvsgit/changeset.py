@@ -9,7 +9,7 @@ FILE_DELETED = 'D'
 FILE_MODIFIED = 'M'
 
 class Change(object):
-    """Represents a single change in an RCS file.
+    """Representation of a single change in an RCS file.
 
     For example:
     >>> Change(1303768248, "jack", "ToDo list added", FILE_ADDED,
@@ -18,7 +18,10 @@ class Change(object):
 
     The time stamp should be in UTC time zone. The state and mode
     arguments in the above example are bogus, which illustrates
-    that this class is really just a dumb container."""
+    that this class is really just a dumb container.
+
+    Change objects are integrated into a ChangeSet by a
+    ChangeSetGenerator."""
 
     def __init__(self, timestamp, author, log, filestatus, filename,
                  revision, state, mode):
@@ -32,6 +35,33 @@ class Change(object):
         self.mode = mode
 
 class ChangeSet(object):
+    """A set of Change objects that represent a CVS commit.
+
+    The ChangeSet class represents a set of related RCS changes
+    that appear to have been made in the same CVS commit.  The
+    ChangeSetGenerator class constructs instances of ChangeSet.
+
+    One or more Change objects can be integrated into a ChangeSet
+    like so:
+    >>> c1 = Change(1303768248, "jack", "Initial commit", FILE_ADDED,
+    ... "todo.txt", "1.1", "state???", "mode???")
+    >>> c2 = Change(1303768249, "jack", "Initial commit", FILE_ADDED,
+    ... "README", "1.1", "state???", "mode???")
+    >>> cs = ChangeSet(c1)
+    >>> cs.integrate(c2)
+    True
+    >>> cs.log
+    'Initial commit'
+    >>> cs.timestamp
+    1303768249
+    >>> cs.timestamp == cs.end_time
+    True
+    >>> cs.start_time < cs.end_time
+    True
+
+    Note that the timestamp returned is that of the last change in
+    the set, because that is most likely the time when the CVS commit
+    was actually completed."""
 
     def __init__(self, change, id=None, mark=None, provider=None):
         """'id' is an arbitrary value to distinguish this changeset.
