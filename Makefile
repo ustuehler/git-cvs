@@ -13,7 +13,7 @@ clean:
 	rm -f pylint.txt
 
 test:
-	${PYTHON} tests/run.py
+	nosetests --with-doctest --with-xunit
 
 coverage:
 	coverage run tests/run.py --with-xunit
