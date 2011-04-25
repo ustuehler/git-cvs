@@ -12,6 +12,3 @@ class Test(unittest.TestCase):
         # the path exists.
         f = RCSFile(join(dirname(__file__), 'data', 'patch-copyin_c,v'))
         for c in f.changes(): self.assertTrue(False)
-
-if __name__ == '__main__':
-    unittest.main()

@@ -20,6 +20,3 @@ class Test(unittest.TestCase):
         self.assertEquals(clone().eval('--quiet-git', cvsroot, self.tmpdir), 0)
         # TODO: Verify that the correct file was picked and the zombie
         # got ignored.
-
-if __name__ == '__main__':
-    unittest.main()
