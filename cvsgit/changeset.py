@@ -86,16 +86,23 @@ class ChangeSet(object):
             raise RuntimeError, \
                 'no provider has been set for this changeset'
         return self._provider
+
     def set_provider(self, provider):
         self._provider = provider
-    provider = property(get_provider, set_provider)
+
+    provider = property(get_provider, set_provider, None,
+                        'source VCS of this changeset')
 
     def get_mark(self):
         return self._mark
+
     def set_mark(self, mark):
         self._mark = mark
         self.provider.mark_changeset(self)
-    mark = property(get_mark, set_mark)
+
+    mark = property(get_mark, set_mark, None,
+                    """anything but None marks the changeset as
+                    integrated into the target VCS""")
 
     def blob(self, change):
         return self.provider.blob(change)
