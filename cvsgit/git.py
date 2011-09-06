@@ -7,10 +7,11 @@ import shutil
 import sys
 
 from signal import signal, SIGINT, SIG_IGN
-from subprocess import Popen, PIPE, check_call
+from subprocess import Popen, PIPE
 
 from cvsgit.changeset import FILE_DELETED
 from cvsgit.i18n import _
+from cvsgit.error import Error
 
 def stripnl(string):
     if string.endswith('\n'):
@@ -18,151 +19,162 @@ def stripnl(string):
     else:
         raise RuntimeError("string doesn't end in newline: %s" % string)
 
+# I don't know how GIT_DIR and GIT_WORK_TREE and GIT_OBJECT_DIRECTORY
+# and all the rest could affect us here, so I'll just discard them all
+# for now.
+def safe_environ():
+    env = os.environ.copy()
+    for k in env.keys():
+        if k.startswith('GIT_'):
+            del env[k]
+
+class GitError(Error):
+    """Base exception for errors in the cvsgit.git module"""
+    pass
+
+class GitCommandError(GitError):
+    """Failure to run an external "git" command
+
+    The 'command' attribute will be an array representing the
+    command that failed and 'returncode' will contain the exit
+    code of the command.  The 'stderr' member may contain the
+    error output from the command, but may also be None."""
+
+    def __init__(self, command, returncode, stderr=None):
+        self.command = command
+        self.returncode = returncode
+        self.stderr = stderr
+        msg = "'%s' exited with code %d" % \
+            (' '.join(command), returncode)
+        if stderr:
+            stderr = '\n  '.join(stripnl(stderr).split('\n'))
+            msg += '\n\nError output of %s command:\n  %s' % \
+                (command[0], stderr)
+        super(GitCommandError, self).__init__(msg)
+
 class Git(object):
-    """Represents a Git repository."""
+    """Git repository and optional work tree.
 
-    def __init__(self, directory=None, bare=None):
-        """If 'directory' is None, the repository path will be
-        determined by the GIT_DIR environment variable or derived from
-        the current working directory."""
+    The Git repository may or may not already exist until the init()
+    method is called, after which the repository will definitely
+    exist, if the call returns successfully.
+    """
 
-        if directory:
-            if os.path.exists(directory):
-                directory = os.path.abspath(directory)
-            if not bare:
-                if directory.endswith('.git'):
-                    bare = True
-                else:
-                    directory = os.path.join(directory, '.git')
+    def __init__(self, directory=None):
+        """Construct a Git repository object.
+        """
+        if directory == None:
+            self._directory = os.getcwd()
         else:
-            bare = None
+            self._directory = directory
 
-        self._is_bare_repository = bare
-        self._git_dir = directory
-        self._work_tree = None
+    def get_directory(self):
+        """Return the repository top-level path.
+
+        This may be the metadata directory or the top-level of the
+        work tree depending on whether the repository is bare or not.
+
+        This method may be called before the repository has been
+        initialized and will always return the same result.
+        """
+        return self._directory
+
+    directory = property(get_directory)
+
+    def is_bare(self):
+        """Return True iff the repository exists and is bare.
+
+        This method may be called before the repository has been
+        initialized, but may return a different result.
+        """
+        return self.config_get('core.bare') == 'true'
 
     def get_git_dir(self):
-        """Return the repository path.  When called for the first
-        time, this method calls 'git rev-parse' to find the repository
-        based on the GIT_DIR environment variable and current working
-        directory.  If 'git rev-parse' fails then sys.exit() will be
-        called with a non-zero return code.  If you want to catch this
-        error then you must intercept the SystemExit exception.  The
-        result is cached internally."""
+        """Return the path to the metadata directory.
 
-        if self._git_dir is None:
-            git = Popen(['git', 'rev-parse', '--git-dir'], stdout=PIPE)
-            stdout = git.communicate()[0]
-            if git.returncode != 0:
-                sys.exit(git.returncode)
-            self._git_dir = stripnl(stdout)
-        return self._git_dir
-
-    def get_work_tree(self):
-        """Return the path to the working tree or False if the
-        repository is bare and neither the GIT_WORK_TREE environment
-        variable nor 'core.worktree' is set in the repository config.
-        sys.exit() may be called if the repository path is invalid and
-        you must handle the SystemExit exception if you wish to catch
-        this error.  The result is cached internally."""
-
-        if self._work_tree is None:
-            if os.environ.has_key('GIT_WORK_TREE'):
-                self._work_tree = os.environ['GIT_WORK_TREE']
-            else:
-                self._work_tree = self.config_get('core.worktree')
-                if self._work_tree is None:
-                    if self.is_bare_repository():
-                        self._work_tree = False
-                    else:
-                        self._work_tree = os.path.dirname(self.git_dir)
-        return self._work_tree
+        This method may be called before the repository has been
+        initialized, but may return a different result.
+        """
+        if self.is_bare():
+            return self.directory
+        else:
+            return os.path.join(self.directory, '.git')
 
     git_dir = property(get_git_dir)
-    work_tree = property(get_work_tree)
 
-    def is_bare_repository(self):
-        """Call 'git rev-parse' to see if the repository is bare or
-        not.  If 'git rev-parse' returns a non-zero exit code, then
-        sys.exit() will be called with the same exit code.  If you
-        wish to catch this error you must intercept the SystemExit
-        exception. The result is cached internally."""
+    def get_git_work_tree(self):
+        """Return the path to the working tree.
 
-        if self._is_bare_repository is None:
-            git = Popen(['git', 'rev-parse', '--is-bare-repository'],
-                        stdout=PIPE)
-            stdout = git.communicate()[0]
-            if git.returncode != 0:
-                sys.exit(git.returncode)
-            elif stripnl(stdout) == 'true':
-                self._is_bare_repository = True
-            else:
-                self._is_bare_repository = False
-        return self._is_bare_repository
+        If the repository is bare, None is returned since it has no
+        associated work tree.
 
-    def init(self, quiet=False):
-        """Initialize or reinitialize the repository."""
-
-        if self._is_bare_repository:
-            args = ['--bare']
+        This method may be called before the repository has been
+        initialized, but may return a different result.
+        """
+        if self.is_bare():
+            return None
         else:
-            args = []
+            return self.directory
 
+    git_work_tree = property(get_git_work_tree)
+
+    def _popen(self, command, **kwargs):
+        if not kwargs.has_key('env'):
+            kwargs['env'] = safe_environ()
+        if not kwargs.has_key('cwd'):
+            kwargs['cwd'] = self.directory
+        return Popen(command, **kwargs)
+
+    def init(self, bare=False, quiet=False):
+        """Initialize or reinitialize the repository.
+        """
+        args = []
+        if bare:
+            args.append('--bare')
         if quiet:
-            args.append('-q')
-
-        env = os.environ.copy()
-        if env.has_key('GIT_DIR'):
-            del env['GIT_DIR']
-        if env.has_key('GIT_WORK_TREE'):
-            del env['GIT_WORK_TREE']
+            args.append('--quiet')
 
         directory_created = False
         try:
-            if self._git_dir:
-                if self._is_bare_repository:
-                    directory = self._git_dir
-                else:
-                    directory = os.path.dirname(self._git_dir)
-                if not os.path.isdir(directory):
-                    os.mkdir(directory)
-                    directory_created = True
-            else:
-                directory = os.getcwd()
+            if not os.path.isdir(self.directory):
+                os.mkdir(self.directory)
+                directory_created = True
 
-            check_call(['git', 'init'] + args, env=env, cwd=directory)
+            command = ['git', 'init'] + args
+            pipe = self._popen(command, stderr=PIPE)
+            dummy, stderr = pipe.communicate()
+            if pipe.returncode != 0:
+                raise GitCommandError(command, pipe.returncode, stderr)
         except:
             if directory_created:
-                shutil.rmtree(directory)
+                shutil.rmtree(self.directory)
             raise
 
     def destroy(self):
-        if self.is_bare_repository():
-            directory = self.git_dir
-        else:
-            directory = self.work_tree
-        if os.path.exists(directory):
-            shutil.rmtree(directory)
-
-    def _git_env(self, work_tree=True):
-        env = os.environ.copy()
-        env['GIT_DIR'] = self.git_dir
-        if self.is_bare_repository() or not work_tree:
-            if env.has_key('GIT_WORK_TREE'):
-                del env['GIT_WORK_TREE']
-        else:
-            env['GIT_WORK_TREE'] = self.work_tree
-        return env
-
-    def _git_call(self, args):
-        check_call(['git'] + args, env=self._git_env())
+        """Recursively remove the repository directory.
+        """
+        if os.path.exists(self.directory):
+            shutil.rmtree(self.directory)
 
     def checkout(self, *args):
-        self._git_call(['checkout'] + list(args))
+        """Call 'git checkout' with given arguments.
+        """
+        command = ['git', 'checkout'] + list(args)
+        pipe = self._popen(command, stderr=PIPE)
+        dummy, stderr = pipe.communicate()
+        if pipe.returncode != 0:
+            raise GitCommandError(command, pipe.returncode, stderr)
 
     def config_get(self, varname, default=None):
-        pipe = Popen(['git', 'config', '--get', varname],
-                     stdout=PIPE, env=self._git_env(False))
+        """Retrieve the value of a config variable.
+
+        This method may be called before the repository exists.  In
+        that case it will always return the default value.
+        """
+        if not os.path.isdir(self.directory):
+            return default
+        command = ['git', 'config', '--get', varname]
+        pipe = self._popen(command, stdout=PIPE, stderr=PIPE)
         stdout, stderr = pipe.communicate()
         if pipe.returncode != 0:
             return default
@@ -170,7 +182,11 @@ class Git(object):
             return stripnl(stdout)
 
     def config_set(self, varname, value):
-        self._git_call(['config', varname, value])
+        command = ['git', 'config', varname, value]
+        pipe = self._popen(command, stderr=PIPE)
+        dummy, stderr = pipe.communicate()
+        if pipe.returncode != 0:
+            raise GitCommandError(command, pipe.returncode, stderr)
 
     def import_changesets(self, changesets, params={},
                           onprogress=None, total=None, count=None):
@@ -184,10 +200,10 @@ class Git(object):
                 return self.count > 0
 
         marksfile = os.path.join(self.git_dir, 'cvsgit.marks')
-        pipe = Popen(['git', 'fast-import',
-                      '--export-marks=' + marksfile,
-                      '--quiet'], stdin=PIPE, env=self._git_env(),
-                      preexec_fn=lambda: signal(SIGINT, SIG_IGN))
+        command = ['git', 'fast-import', '--quiet']
+        command.append('--export-marks=' + marksfile)
+        pipe = self._popen(command, stdin=PIPE, preexec_fn=lambda:
+                               signal(SIGINT, SIG_IGN))
 
         sigint_flag = SignalIndicator()
 	old_sigaction = signal(SIGINT, sigint_flag)

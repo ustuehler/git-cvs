@@ -100,7 +100,7 @@ class clone(Cmd):
             cvs.export_changesets(git, params, onprogress=lambda count, total:
                 progress(_('Importing changesets'), count, total),
                 count=self.options.count)
-            if not git.is_bare_repository():
+            if not git.is_bare():
                 git.checkout()
         except:
             if not self.options.incremental:
