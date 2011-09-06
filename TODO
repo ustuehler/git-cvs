@@ -5,3 +5,16 @@
 * Install 'git-cvs' in Git's --exec-path (optional?).
 * http://andialbrecht.wordpress.com/2009/03/17/creating-a-man-page-with-distutils-and-optparse/
 * Handle branches and tags.
+
+* Feature: Cloning from a particular date. (git-cvs clone -d now /cvs/src)
+
+OPENBSD CONVERSION ISSUES
+=========================
+
+* (no known issues at the moment)
+
+MISSING TESTS
+=============
+
+* expand $Mdocdate$ macro on commit like this: $Mdocdate: February 6 2009 $,
+  for example in src/etc/MAKEDEV.man or src/bin/ps/ps.1
