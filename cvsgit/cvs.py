@@ -295,7 +295,7 @@ class CVS(object):
         return data
 
     def expand_keywords(self, line, change):
-        return re.sub('\$([^$]+)\$',
+        return re.sub('\$([^$:]+)[^$]*\$',
             lambda match: self.expand_keyword_match(match, change),
             line)
 
@@ -308,6 +308,11 @@ class CVS(object):
                  change.revision,
                  time.strftime('%Y/%m/%d %H:%M:%S', timestamp),
                  change.author, change.state)).encode('ascii')
+        elif match.group(1) == 'Mdocdate':
+            timestamp = time.gmtime(change.timestamp)
+            mdocdate = time.strftime('%B %e %Y', timestamp)
+            mdocdate = mdocdate.replace('  ', ' ') # for %e
+            return ('$Mdocdate: %s $' % mdocdate)
         else:
             return match.group(0)
 
