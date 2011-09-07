@@ -199,7 +199,10 @@ class Git(object):
             def isset(self):
                 return self.count > 0
 
+        # absolulte file name since cwd is changed in _popen
         marksfile = os.path.join(self.git_dir, 'cvsgit.marks')
+        marksfile = os.path.abspath(marksfile)
+
         command = ['git', 'fast-import', '--quiet']
         command.append('--export-marks=' + marksfile)
         pipe = self._popen(command, stdin=PIPE, preexec_fn=lambda:
