@@ -105,10 +105,10 @@ class ChangeSet(object):
                     integrated into the target VCS""")
 
     def blob(self, change):
-        return self.provider.blob(change)
+        return self.provider.blob(change, self)
 
     def get_timestamp(self):
-        # At first, this method returned start_time, but it make more
+        # At first, this method returned start_time, but it makes more
         # sense to return end_time, which is when the last RCS change
         # happend that affected this changeset.  This should make it
         # more likely that a "cvs checkout -D <timestamp>" yields the

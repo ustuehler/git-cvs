@@ -8,14 +8,10 @@
 #    vendor branch and never modified.  The 'head' keyword has the
 #    value "1.1" in that case.
 #
-# 2. Sometimes cvs expands the Id keyword to "1.1.1.1" for the
-#    initial revision and sometimes to "1.1".  This seems to be
-#    not only due to the order of revisions in the RCS file or
-#    because the file has been modified on a branch somewhere in
-#    its history.  There doesn't seem to be a simple rule.  Many
-#    deltas for revision 1.2 however indicate that the original
-#    file, when it was checked out, may have had Id expanded to
-#    "1.1.1.1" before it was committed as 1.2.
+# 2. When checking out files on trunk via date that were imported
+#    in a vendor branch, cvs expands the Id keyword to "1.1.1.1"
+#    if the date matches exactly, and to "1.1" if the date is one
+#    second or more after the exact date of the import.
 
 import os.path
 import sys

@@ -259,7 +259,7 @@ class CVS(object):
             changeset.provider = self
             yield(changeset)
 
-    def blob(self, change):
+    def blob(self, change, changeset):
         """Return the raw binary content of a file at the specified
         revision."""
 
@@ -272,6 +272,15 @@ class CVS(object):
         if not os.path.isfile(rcsfile):
             raise RuntimeError, _('no RCS file found for %s') % filename
 
+        # cvs has the odd behavior that it favors revision 1.1 over
+        # 1.1.1.1 if it searches for a revision by date and the date
+        # is after that of the initial revision even by one second.
+        if change.revision == '1.1.1.1' and \
+                change.timestamp < changeset.timestamp:
+            revision = '1.1'
+        else:
+            revision = change.revision
+
         #
         # We use co(1) instead of cvs(1) to fetch the full text of a
         # particular revision since cvs(1) needs an existing working
@@ -282,7 +291,7 @@ class CVS(object):
         # "tag=XYZ" option in CVSROOT/options.  We will do that here
         # but leave the rest of the keywords to be expanded by co(1).
         #
-        argv = ['co', '-q', '-p' + change.revision, rcsfile]
+        argv = ['co', '-q', '-p' + revision, rcsfile]
         pipe = Popen(argv, stdout=PIPE)
         if change.mode == 'b':
             return pipe.communicate()[0]
