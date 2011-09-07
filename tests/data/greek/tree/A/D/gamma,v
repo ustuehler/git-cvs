@@ -1,0 +1,39 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  GREEK_RELEASE:1.1.1.1 GREEK_VENDOR:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2011.09.07.22.41.51;  author uwe;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2011.09.07.22.41.51;  author uwe;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@This is the file 'A/D/gamma'.
+@
+
+
+1.1.1.1
+log
+@Import greek tree
+@
+text
+@@
