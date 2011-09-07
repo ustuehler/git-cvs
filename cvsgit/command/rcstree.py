@@ -6,12 +6,12 @@ from cvsgit.i18n import _
 
 class rcstree(Cmd):
     __doc__ = _(
-    """Draw the revision tree of an RCS file.
+    """Dump all changes on the HEAD branch of an RCS file.
 
     Usage: %prog <rcsfile>
 
-    Displays the revisions of an RCS file as a tree for debugging
-    purposes.
+    Displays the changes on the HEAD branch of an RCS file for
+    debugging purposes.
     """)
 
     def initialize_options(self):
@@ -27,8 +27,14 @@ class rcstree(Cmd):
 
     def run(self):
         rcsfile = RCSFile(self.rcsfile)
-        for revision in rcsfile._revisions():
-            rcsfile._print_revision(revision)
+        print 'Head: %s' % rcsfile.head
+        print 'Branch: %s' % rcsfile.branch
+        print 'Revision trail:',
+        for revision in rcsfile.revisions():
+            print revision,
+        print ''
+        for change in rcsfile.changes():
+            rcsfile._print_revision(change.revision)
 
 if __name__ == '__main__':
     rcstree()
