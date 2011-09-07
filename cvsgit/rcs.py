@@ -1,12 +1,21 @@
 """RCS interface module for CVSGit."""
 
 # Some observations about RCS + CVS, although I don't really know
-# the RCS format...
+# that much about the RCS format or the CVS usage of it...
 #
 # 1. The 'branch' keyword is normally absent (or empty?), but has
 #    the value "1.1.1" for files that have been imported into the
 #    vendor branch and never modified.  The 'head' keyword has the
 #    value "1.1" in that case.
+#
+# 2. Sometimes cvs expands the Id keyword to "1.1.1.1" for the
+#    initial revision and sometimes to "1.1".  This seems to be
+#    not only due to the order of revisions in the RCS file or
+#    because the file has been modified on a branch somewhere in
+#    its history.  There doesn't seem to be a simple rule.  Many
+#    deltas for revision 1.2 however indicate that the original
+#    file, when it was checked out, may have had Id expanded to
+#    "1.1.1.1" before it was committed as 1.2.
 
 import os.path
 import sys
@@ -57,6 +66,14 @@ class RCSFile(rcsparse.Sink):
         """
         revision = self.head
         while revision != None:
+            # See the comment at the top of this file.  This may not always
+            # result in the same Id keyword expansion that cvs does for the
+            # initial revision of an imported file, but it seems to be what
+            # Id expanded to in the checked out file that resulted in 1.2.
+            branches = self.revs[revision][REV_BRANCHES]
+            if revision == '1.1' and '1.1.1.1' in branches:
+                revision = '1.1.1.1'
+
             yield(revision)
             revision = self.revs[revision][REV_NEXT]
 
@@ -79,18 +96,23 @@ class RCSFile(rcsparse.Sink):
                     continue
                 else:
                     filestatus = FILE_DELETED
-            elif revision == '1.1.1.1' or revision == '1.1':
-                if revision == '1.1' and rev[REV_BRANCHES] == ['1.1.1.1']:
-                    self.log[revision] = self.log['1.1.1.1']
+            elif rev[REV_NEXT] == None:
                 filestatus = FILE_ADDED
             else:
                 # XXX: Resurrections of dead revisions aren't flagged
                 # as FILE_ADDED.
                 filestatus = FILE_MODIFIED
 
+            # The log message for an initial import is actually in
+            # the initial vendor branch revision.
+            if revision == '1.1' and '1.1.1.1' in rev[REV_BRANCHES]:
+                log = self.log['1.1.1.1']
+            else:
+                log = self.log[revision]
+
             yield(Change(timestamp=rev[REV_TIMESTAMP],
                          author=rev[REV_AUTHOR],
-                         log=self.log[revision],
+                         log=log,
                          filestatus=filestatus,
                          filename=self.filename,
                          revision=revision,
