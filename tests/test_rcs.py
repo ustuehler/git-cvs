@@ -19,5 +19,5 @@ class Test(unittest.TestCase):
         only contains revisions back to 1.4, but no earlier revisions.
         """
         f = RCSFile(join(dirname(__file__), 'data', 'pkcs.c,v'))
-        for c in f.changes(warn=False): pass
+        for c in f.changes(): pass
         self.assertEqual('1.4', c.revision)
