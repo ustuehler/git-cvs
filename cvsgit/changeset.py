@@ -43,7 +43,8 @@ class ChangeSet(object):
 
     One or more Change objects can be integrated into a ChangeSet
     like so:
-    >>> c1 = Change(1303768248, "jack", "Initial commit", FILE_ADDED,
+
+    >>> c1 = Change(1303768245, "jack", "Initial commit", FILE_ADDED,
     ... "todo.txt", "1.1", "state???", "mode???")
     >>> c2 = Change(1303768249, "jack", "Initial commit", FILE_ADDED,
     ... "README", "1.1", "state???", "mode???")
@@ -52,16 +53,23 @@ class ChangeSet(object):
     True
     >>> cs.log
     'Initial commit'
-    >>> cs.timestamp
-    1303768249
-    >>> cs.timestamp == cs.end_time
-    True
     >>> cs.start_time < cs.end_time
     True
 
-    Note that the timestamp returned is that of the last change in
-    the set, because that is most likely the time when the CVS commit
-    was actually completed."""
+    The following is a little odd, but currently wanted behaviour in
+    order to make it easier to emulate a peculiarity of cvs.  The
+    timestamp is always one second ahead of end_time:
+
+    >>> cs.timestamp > cs.end_time
+    True
+    >>> cs.timestamp
+    1303768250
+
+    The timestamp returned for the changeset is based on the timestamp
+    of the last change in the set because that is most likely the time
+    when the commit actually completed and "cvs -D <timestamp>" can be
+    used to create an equivalent working copy from CVS.
+    """
 
     def __init__(self, change, id=None, mark=None, provider=None):
         """'id' is an arbitrary value to distinguish this changeset.
