@@ -12,12 +12,7 @@ from subprocess import Popen, PIPE
 from cvsgit.changeset import FILE_DELETED
 from cvsgit.i18n import _
 from cvsgit.error import Error
-
-def stripnl(string):
-    if string.endswith('\n'):
-        return string[0:-1]
-    else:
-        raise RuntimeError("string doesn't end in newline: %s" % string)
+from cvsgit.utils import stripnl
 
 # I don't know how GIT_DIR and GIT_WORK_TREE and GIT_OBJECT_DIRECTORY
 # and all the rest could affect us here, so I'll just discard them all

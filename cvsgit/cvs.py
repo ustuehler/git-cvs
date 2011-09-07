@@ -10,8 +10,27 @@ from cvsgit.changeset import ChangeSetGenerator
 from cvsgit.rcs import RCSFile
 from cvsgit.i18n import _
 
+def split_cvs_source(dirname):
+    """Split <dirname> into CVSROOT and module paths.
+    """
+    cvsroot = dirname
+    module = ''
+    while True:
+        parent = os.path.dirname(cvsroot)
+        if cvsroot == parent:
+            raise TypeError, _('not a CVS repository path (%s): %s') \
+                % (_('no CVSROOT within nor above'), dirname)
+        if os.path.isdir(os.path.join(cvsroot, 'CVSROOT')):
+            return (cvsroot, module,)
+        if module == '':
+            module = os.path.basename(cvsroot)
+        else:
+            module = os.path.join(os.path.basename(cvsroot), module)
+        cvsroot = parent
+
 class CVS(object):
-    "Represents a CVS repository."
+    """Represents a CVS repository.
+    """
 
     def __init__(self, metadb):
         self.metadb = metadb
@@ -40,25 +59,8 @@ class CVS(object):
 
         # Split 'dirname' into self.root and self.module and also
         # set self.prefix to the full absolute module path.
-        cvsroot = dirname
-        module = ''
-        while True:
-            parent = os.path.dirname(cvsroot)
-            if cvsroot == parent:
-                raise TypeError, _('not a CVS repository path (%s): %s') \
-                    % (_('no CVSROOT within nor above'), dirname)
-            if os.path.isdir(os.path.join(cvsroot, 'CVSROOT')):
-                break
-            if module == '':
-                module = os.path.basename(cvsroot)
-            else:
-                module = os.path.join(os.path.basename(cvsroot), module)
-            cvsroot = parent
-
-        self.root = cvsroot
-        self.module = module
-
-        if module == '':
+        self.root, self.module = split_cvs_source(dirname)
+        if self.module == '':
             self.prefix = self.root
         else:
             self.prefix = os.path.join(self.root, self.module)
