@@ -113,7 +113,12 @@ class ChangeSet(object):
         # happend that affected this changeset.  This should make it
         # more likely that a "cvs checkout -D <timestamp>" yields the
         # expected result when <timestamp> is that of the changeset.
-        return self.end_time
+
+        # FIXME: end_time + 1 is a lie
+        # It is however an easy workaround to make the initial
+        # revisions be 1.1 instead of 1.1.1.1 (consistently, in both
+        # "cvs co -D <date>" and in the cloned Git repository.)
+        return self.end_time + 1
 
     def get_author(self):
         return self.changes[0].author
