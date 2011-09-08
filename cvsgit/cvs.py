@@ -9,6 +9,7 @@ from subprocess import Popen, PIPE
 from cvsgit.changeset import ChangeSetGenerator
 from cvsgit.rcs import RCSFile
 from cvsgit.i18n import _
+from cvsgit.term import NoProgress
 
 def split_cvs_source(dirname):
     """Split <dirname> into CVSROOT and module paths.
@@ -95,9 +96,19 @@ class CVS(object):
         return self.statcache.has_key(path) and \
                 self.statcache[path] == identity
 
-    def changed_rcs_filenames(self):
+    def changed_rcs_filenames(self, progress=None):
         """Return the list of RCS filenames which need to be scanned for
-        new changes to import."""
+        new changes to import.
+        """
+        if not progress:
+            progress = NoProgress()
+
+        with progress:
+            return self._changed_rcs_filenames(progress=progress)
+
+    def _changed_rcs_filenames(self, progress=None):
+        progress(_('Collecting RCS files'))
+        count = 0
 
         # Helper function to raise the OSError reported by os.walk().
         def raise_error(e): raise e
@@ -127,6 +138,9 @@ class CVS(object):
                 # Ignore all non-RCS files.
                 if not filename.endswith(',v'):
                     continue
+
+                count += 1
+                progress(_('Collecting RCS files'), count)
 
                 #
                 # Perform the zombie check:
@@ -178,21 +192,25 @@ class CVS(object):
             _("invalid path: %s (%s)") % (trunkfile, \
             _('exists in Attic and parent directory'))
 
-    def pull_changes(self, onprogress=None):
+    def pull_changes(self, progress=None):
         """Pull new revisions from the CVS repository and add them to
         the meta database."""
 
-        filenames = self.changed_rcs_filenames()
-        if onprogress:
-            total = len(filenames)
-            count = 0
+        if not progress:
+            progress = NoProgress()
+
+        filenames = self.changed_rcs_filenames(progress=progress)
+
+        with progress:
+            self._pull_changes(filenames, progress=progress)
+
+    def _pull_changes(self, filenames, progress=None):
+        count = 0
+        total = len(filenames)
+        progress(_('Parsing RCS files'), count, total)
 
         for rcs_filename in filenames:
           try:
-            if onprogress:
-                onprogress(count, total)
-                count += 1
-
             # For the working copy path it does not matter if the RCS
             # file is in the 'Attic' directory or not, so strip it.
             filename = re.sub('(Attic/)?([^/]+),v$', '\\2', rcs_filename)
@@ -213,15 +231,17 @@ class CVS(object):
             # (which isn't bad but costs time).
             self.metadb.update_statcache({rcs_filename:identity})
             self.metadb.commit()
+
+            count += 1
+            progress(_('Parsing RCS files'), count, total)
+          except KeyboardInterrupt:
+            raise
           except:
             # XXX: Print the file name where this error happened,
             # regardless of whether the error is actually printed,
             # just as a quick & dirty debugging aid.
             print "(Error while processing %s)" % rcs_filename
             raise
-
-        if onprogress:
-            onprogress(total, total)
 
     def generate_changesets(self, onprogress=None):
         """Convert changes stored in the meta database into sets of

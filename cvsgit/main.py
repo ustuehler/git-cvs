@@ -91,16 +91,20 @@ class Conduit(object):
 
         progress = Progress(enabled=not quiet and not verbose)
 
-        progress(_('Counting files'), 0, 1) # XXX
-        self.cvs.pull_changes(onprogress=lambda count, total:
-            progress(_('Parsing RCS files'), count, total))
+        self.cvs.pull_changes(progress=progress)
 
-        self.cvs.generate_changesets(onprogress=lambda count, total:
-            progress(_('Calculating changesets'), count, total))
+        # TODO: use progress directly in generate_changesets()
+        with progress:
+            progress(_('Calculating changesets'))
+            self.cvs.generate_changesets(onprogress=lambda count, total:
+                progress(_('Calculating changesets'), count, total))
 
-        self.cvs.export_changesets(self.git, params, count=count,
-            onprogress=lambda count, total:
-                progress(_('Importing changesets'), count, total))
+        # TODO: use progress directly in export_changesets()
+        with progress:
+            progress(_('Importing changesets'))
+            self.cvs.export_changesets(self.git, params, count=count,
+                onprogress=lambda count, total:
+                    progress(_('Importing changesets'), count, total))
 
     def pull(self, count=None, quiet=True, verbose=False):
         self.fetch(count=count, quiet=quiet, verbose=verbose)
