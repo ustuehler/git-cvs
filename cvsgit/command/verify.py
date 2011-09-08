@@ -5,13 +5,12 @@ import subprocess
 from subprocess import PIPE
 import sys
 
-from cvsgit.cmd import Cmd
 from cvsgit.cvs import split_cvs_source
-from cvsgit.git import Git
 from cvsgit.i18n import _
+from cvsgit.main import Command, Conduit
 from cvsgit.utils import Tempdir, stripnl
 
-class verify(Cmd):
+class verify(Command):
     __doc__ = _(
     """Verify the Git work tree against CVS.
 
@@ -23,17 +22,17 @@ class verify(Cmd):
 
     def initialize_options(self):
         self.commit = 'HEAD'
+        self.add_option('--quiet', action='store_true', help=\
+            _("Only report error and warning messages."))
 
     def finalize_options(self):
         if len(self.args) > 0:
             self.usage_error(_('too many arguments'))
 
     def run(self):
-        self.git = git = Git()
-
-        source = git.config_get('cvs.source')
-        if source == None:
-            self.fatal(_("'cvs.source' is unset; not a git-cvs repository?"))
+        conduit = Conduit()
+        source = conduit.source
+        self.git = git = conduit.git
 
         returncode = 0
         with Tempdir() as tempdir:
@@ -41,7 +40,8 @@ class verify(Cmd):
             cvsroot, module = split_cvs_source(source)
             command = ['cvs', '-Q', '-d', cvsroot, 'checkout',
                        '-P', '-D', date, '-d', tempdir, module]
-            print "'%s'" % "' '".join(command)
+            if not self.options.quiet:
+                print "'%s'" % "' '".join(command)
             subprocess.check_call(command)
             command = ['diff', '-r', tempdir, git.git_work_tree]
             pipe = subprocess.Popen(command, stdout=PIPE, stderr=PIPE)
@@ -51,7 +51,8 @@ class verify(Cmd):
                     continue
                 if re.match('^Only in .+: CVS$', line):
                     continue
-                sys.stdout.write(line + '\n')
+                if not self.options.quiet:
+                    sys.stdout.write(line + '\n')
                 returncode = 1
         return returncode
 
