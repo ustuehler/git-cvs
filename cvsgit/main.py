@@ -21,10 +21,13 @@ class ConduitError(Error):
 
 class NoSourceError(ConduitError):
     """Raised when no CVS source has been configured
+
+    This error may occur if you run git-cvs commands in a directory
+    that has not been initialized with "git-cvs init".
     """
     def __init__(self):
         super(NoSourceError, self).__init__(
-            _("missing 'cvs.source' in Git config"))
+            _("'cvs.source' is unset; not a git-cvs repository?"))
 
 class Conduit(object):
 
