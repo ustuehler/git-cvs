@@ -18,9 +18,11 @@ class Progress(object):
         self.update_suppressed = False
 
         if sys.stdout.isatty():
+            self.update_interval = 1
             self.update = self.update_tty
             self.finish = self.finish_tty
         else:
+            self.update_interval = 30
             self.update = self.update_dumb
             self.finish = self.finish_dumb
 
@@ -36,7 +38,7 @@ class Progress(object):
         if not self.enabled:
             return
         if message != self.last_message or \
-                time.time() - self.last_progress > 1:
+                time.time() - self.last_progress > self.update_interval:
             self.last_progress = time.time()
             self.update(message, count, total)
             self.update_suppressed = False
