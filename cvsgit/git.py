@@ -154,7 +154,25 @@ class Git(object):
     def checkout(self, *args):
         """Call 'git checkout' with given arguments.
         """
-        command = ['git', 'checkout'] + list(args)
+        self.check_command('checkout', *args)
+
+    def rebase(self, *args):
+        """Call 'git rebase' with given arguments.
+        """
+        self.check_command('rebase', *args)
+
+    def pull(self, *args):
+        """Call 'git pull' with given arguments.
+        """
+        self.check_command('pull', *args)
+
+    def check_command(self, command, *args):
+        """Run "git" subcommand with given arguments.
+
+        Raises a GitCommandError if the subcommand does not return a
+        zero exit code.
+        """
+        command = ['git', command] + list(args)
         pipe = self._popen(command, stderr=PIPE)
         dummy, stderr = pipe.communicate()
         if pipe.returncode != 0:
@@ -177,11 +195,9 @@ class Git(object):
             return stripnl(stdout)
 
     def config_set(self, varname, value):
-        command = ['git', 'config', varname, value]
-        pipe = self._popen(command, stderr=PIPE)
-        dummy, stderr = pipe.communicate()
-        if pipe.returncode != 0:
-            raise GitCommandError(command, pipe.returncode, stderr)
+        """Set the value of a config variable.
+        """
+        self.check_command('config', varname, value)
 
     def import_changesets(self, changesets, params={},
                           onprogress=None, total=None, count=None):

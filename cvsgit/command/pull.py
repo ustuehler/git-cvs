@@ -1,17 +1,16 @@
-"""Command to fetch unfetched revisions from the tracked CVS
-repository."""
+"""Command to pull changes from CVS into the current branch."""
 
 from cvsgit.main import Command, Conduit
 from cvsgit.i18n import _
 
-class fetch(Command):
+class pull(Command):
     __doc__ = _(
-    """Fetch unfetched revisions from CVS.
+    """Update the CVS tracking branch and the current HEAD
 
     Usage: %prog [options]
 
-    Fetches unfetched changes from the CVS repository we are tracking,
-    merges them into related changesets and imports them into Git.
+    Does what the "fetch" command does and runs "git pull" afterwards
+    to update the current branch.
     """)
 
     def initialize_options(self):
@@ -28,9 +27,9 @@ class fetch(Command):
 
     def run(self):
         conduit = Conduit()
-        conduit.fetch(count=self.options.count,
-                      quiet=self.options.quiet,
-                      verbose=self.options.verbose)
+        conduit.pull(count=self.options.count,
+                     quiet=self.options.quiet,
+                     verbose=self.options.verbose)
 
 if __name__ == '__main__':
-    fetch()
+    pull()

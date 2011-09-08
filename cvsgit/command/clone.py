@@ -24,7 +24,7 @@ class clone(Command):
         self.directory = None
         self.add_option('--bare', action='store_true', help=\
             _("Create a bare Git repository without work tree."))
-        self.add_option('--count', metavar='COUNT', help=\
+        self.add_option('--count', type='int', metavar='COUNT', help=\
             _("Stop importing after COUNT new commits."))
         self.add_option('--domain', metavar='DOMAIN', help=\
             _("Set the e-mail domain to use for unknown authors."))
@@ -51,9 +51,6 @@ class clone(Command):
         else:
             self.usage_error(_('too many arguments'))
 
-        if self.options.count:
-            self.options.count = int(self.options.count)
-
     def run(self):
         if os.path.exists(self.directory) and not self.options.incremental:
             self.fatal(_("destination path '%s' already exists") % \
@@ -65,10 +62,14 @@ class clone(Command):
                      domain=self.options.domain,
                      quiet=self.options.quiet)
         try:
-            conduit.fetch(quiet=self.options.quiet,
+            conduit.fetch(count=self.options.count,
+                          quiet=self.options.quiet,
                           verbose=self.options.verbose)
             if not self.options.bare:
-                conduit.git.checkout()
+                conduit.git.checkout('-b', 'master', conduit.branch)
+                conduit.git.config_set('branch.master.remote', '.')
+                conduit.git.config_set('branch.master.merge', conduit.branch)
+                conduit.git.config_set('branch.master.rebase', 'true')
         except:
             if not self.options.incremental:
                 shutil.rmtree(self.directory)

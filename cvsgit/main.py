@@ -33,6 +33,7 @@ class Conduit(object):
 
     def __init__(self, directory=None):
         self.git = Git(directory)
+        self.branch = 'refs/cvs/HEAD'
         self._cvs = None
         self._config = {}
 
@@ -86,7 +87,7 @@ class Conduit(object):
         params = {}
         params['domain'] = self.domain
         params['verbose'] = verbose
-        #params['branch'] = 'refs/remotes/git-cvs'
+        params['branch'] = self.branch
 
         progress = Progress(enabled=not quiet and not verbose)
 
@@ -100,3 +101,7 @@ class Conduit(object):
         self.cvs.export_changesets(self.git, params, count=count,
             onprogress=lambda count, total:
                 progress(_('Importing changesets'), count, total))
+
+    def pull(self, count=None, quiet=True, verbose=False):
+        self.fetch(count=count, quiet=quiet, verbose=verbose)
+        self.git.pull()
