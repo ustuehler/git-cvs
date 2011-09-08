@@ -1,10 +1,10 @@
 """Command to draw the revision tree of an RCS file."""
 
-from cvsgit.cmd import Cmd
+from cvsgit.main import Command
 from cvsgit.rcs import RCSFile
 from cvsgit.i18n import _
 
-class rcsdump(Cmd):
+class rcsdump(Command):
     __doc__ = _(
     """Dump all changes on the HEAD branch of an RCS file.
 

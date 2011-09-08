@@ -1,4 +1,4 @@
-"""Sub-command handling logic for CVSGit."""
+"""Sub-command logic for git-cvs."""
 
 import os
 import string
@@ -8,7 +8,8 @@ from optparse import OptionParser
 from cvsgit.i18n import _
 
 class Cmd(object):
-    """Abstract base class for commands."""
+    """Abstract base class for conduit commands.
+    """
 
     def __init__(self):
         # Parse the __doc__ string of this command class. This string
@@ -53,7 +54,8 @@ class Cmd(object):
 
     def eval(self, *args):
         try:
-            self.main([self.__class__.__name__] + list(args))
+            prog = self.__class__.__name__
+            self.main([prog] + list(args))
         except SystemExit, e:
             if e.code is None or e.code == 0:
                 return 0

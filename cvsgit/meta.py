@@ -8,36 +8,21 @@ from cvsgit.changeset import Change, ChangeSet
 from cvsgit.i18n import _
 
 class MetaDb(object):
-    """Database containing metadata about a pair of CVS and Git
-    repositories.  The actual metadata is distributed at least across
-    an SQLite database and Git's config file, both in GIT_DIR."""
+    """Database of CVS revisions (changes) and combined changesets.
 
-    # As of now the database contains only revisions from the CVS
-    # repository that are pending to be grouped into changesets.
+    The database contains revisions from the CVS repository that are
+    pending or already grouped into changesets and a mark indicating
+    whether a changeset was already processed.  For Git, the mark is
+    the SHA1 commit hash.  Unprocessed changesets have the mark None.
+    """
 
-    def __init__(self, git):
-        self.git = git
-        self._source = None
+    def __init__(self, filename):
+        self.filename = filename
         self._dbh = None
-
-    def get_source(self):
-        if self._source is None:
-            self._source = self.git.config_get('cvs.source')
-            if self._source is None:
-                raise RuntimeError, \
-                    _("missing 'cvs.source' in Git config")
-        return self._source
-
-    def set_source(self, source):
-        self.git.config_set('cvs.source', source)
-        self._source = source
-
-    source = property(get_source, set_source)
 
     def get_dbh(self):
         if self._dbh is None:
-            filename = os.path.join(self.git.git_dir, 'cvsgit.db')
-            dbh = sqlite3.connect(filename)
+            dbh = sqlite3.connect(self.filename)
 
             # Create the table that contains changes pulled from CVS.
             #

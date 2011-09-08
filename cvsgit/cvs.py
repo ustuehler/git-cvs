@@ -32,7 +32,7 @@ class CVS(object):
     """Represents a CVS repository.
     """
 
-    def __init__(self, metadb):
+    def __init__(self, dirname, metadb):
         self.metadb = metadb
 
         # 'dirname' is a local filesystem path pointing at the root of
@@ -47,7 +47,6 @@ class CVS(object):
         # module path are available for reading in the instance
         # attributes 'root' and 'module', respectively.
 
-        dirname = self.metadb.source
         if not os.path.isdir(dirname):
             raise TypeError, _('not a CVS repository path (%s): %s') \
                 % (_('not even a directory'), dirname)

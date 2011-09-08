@@ -5,13 +5,10 @@ import os.path
 import sys
 import time
 
-from cvsgit.cmd import Cmd
-from cvsgit.cvs import CVS
-from cvsgit.git import Git
-from cvsgit.meta import MetaDb
+from cvsgit.main import Command, Conduit
 from cvsgit.i18n import _
 
-class init(Cmd):
+class init(Command):
     __doc__ = _(
     """Initialize a Git repository to track a CVS repository.
 
@@ -34,6 +31,8 @@ class init(Cmd):
             _("Set the 'cvs.domain' configuration option to the "
               "e-mail domain to use as a default value for unknown "
               "authors."))
+        self.add_option('--quiet', action='store_true', help=\
+            _("Only print error and warning messages."))
 
     def finalize_options(self):
         if len(self.args) < 1:
@@ -48,12 +47,11 @@ class init(Cmd):
             self.usage_error(_('too many arguments'))
 
     def run(self):
-        git = Git(self.directory, bare=self.options.bare)
-        git.init()
-        git.config_set('cvs.source', self.repository)
-
-        if self.options.domain:
-            git.config_set('cvs.domain', self.options.domain)
+        conduit = Conduit(self.directory)
+        conduit.init(self.repository,
+                     domain=self.options.domain,
+                     bare=self.options.bare,
+                     quiet=self.options.quiet)
 
 if __name__ == '__main__':
     init()

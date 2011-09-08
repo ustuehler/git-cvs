@@ -1,17 +1,17 @@
 """Command to fetch unfetched revisions from the tracked CVS
 repository."""
 
-from cvsgit.app import GitCVS, Command
+from cvsgit.main import Command, Conduit
 from cvsgit.i18n import _
 
 class fetch(Command):
     __doc__ = _(
-    """Fetch unfetched revisions from the CVS repository.
+    """Fetch unfetched revisions from CVS.
 
     Usage: %prog [options]
 
-    Fetches unfetched revisions from the CVS repository we are
-    tracking.
+    Fetches unfetched changes from the CVS repository we are tracking,
+    merges them into related changesets and imports them into Git.
     """)
 
     def initialize_options(self):
@@ -22,8 +22,8 @@ class fetch(Command):
             self.usage_error(_('too many arguments'))
 
     def run(self):
-        gitcvs = GitCVS()
-        gitcvs.fetch()
+        conduit = Conduit()
+        conduit.fetch()
 
 if __name__ == '__main__':
     fetch()
