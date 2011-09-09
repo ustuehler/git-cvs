@@ -14,7 +14,7 @@ class pull(Command):
     """)
 
     def initialize_options(self):
-        self.add_option('--count', type='int', metavar='COUNT', help=\
+        self.add_option('--limit', type='int', metavar='COUNT', help=\
             _("Stop importing after COUNT new commits."))
         self.add_option('--quiet', action='store_true', help=\
             _("Only report error and warning messages."))
@@ -27,7 +27,7 @@ class pull(Command):
 
     def run(self):
         conduit = Conduit()
-        conduit.pull(count=self.options.count,
+        conduit.pull(limit=self.options.limit,
                      quiet=self.options.quiet,
                      verbose=self.options.verbose)
 

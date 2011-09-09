@@ -93,7 +93,7 @@ class Conduit(object):
         if domain:
             self.domain = domain
 
-    def fetch(self, count=None, quiet=True, verbose=False,
+    def fetch(self, limit=None, quiet=True, verbose=False,
               fast_import_dump=False):
         """Fetch new changesets into the CVS tracking branch.
 
@@ -112,14 +112,13 @@ class Conduit(object):
 
         self.git.import_changesets(self.cvs.changesets(), self.branch,
                                    domain=self.domain,
-                                   # TODO: cmdline option --count -> --limit
-                                   limit=count,
+                                   limit=limit,
                                    # FIXME: honor fast_import_dump option
                                    #dump=fast_import_dump,
                                    verbose=verbose,
                                    progress=progress,
                                    total=self.cvs.count_changesets())
 
-    def pull(self, count=None, quiet=True, verbose=False):
-        self.fetch(count=count, quiet=quiet, verbose=verbose)
+    def pull(self, limit=None, quiet=True, verbose=False):
+        self.fetch(limit=limit, quiet=quiet, verbose=verbose)
         self.git.pull()

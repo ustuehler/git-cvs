@@ -15,7 +15,7 @@ class fetch(Command):
     """)
 
     def initialize_options(self):
-        self.add_option('--count', type='int', metavar='COUNT', help=\
+        self.add_option('--limit', type='int', metavar='COUNT', help=\
             _("Stop importing after COUNT new commits."))
         self.add_option('--quiet', action='store_true', help=\
             _("Only report error and warning messages."))
@@ -28,7 +28,7 @@ class fetch(Command):
 
     def run(self):
         conduit = Conduit()
-        conduit.fetch(count=self.options.count,
+        conduit.fetch(limit=self.options.limit,
                       quiet=self.options.quiet,
                       verbose=self.options.verbose)
 
