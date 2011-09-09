@@ -34,6 +34,11 @@ class Change(object):
         self.state = state
         self.mode = mode
 
+    def __str__(self):
+        return '<%s %s, %s, %s %s %s %s>' % \
+            (type(self).__name__, self.timestamp, self.author,
+             self.filestatus, self.filename, self.revision, self.state)
+
 class ChangeSet(object):
     """A set of Change objects that represent a CVS commit.
 
@@ -155,6 +160,14 @@ class ChangeSet(object):
 
         self.changes.append(change)
         return True
+
+    def __str__(self):
+        if len(self.changes) == 1:
+            changes = '1 change'
+        else:
+            changes = '%d changes' % len(self.changes)
+        return '<%s %s, %s, %s>' % \
+            (type(self).__name__, self.timestamp, self.author, changes)
 
 class ChangeSetGenerator(object):
     """Group a series of individual file changes into changesets that
