@@ -112,11 +112,12 @@ class Conduit(object):
             quiet = True
             verbose = False
 
-        progress = Progress(enabled=not quiet and not verbose)
+        if quiet or verbose:
+            progress = None
+        else:
+            progress = Progress()
 
-        self.cvs.pull_changes(progress)
-        self.cvs.generate_changesets(progress)
-
+        self.cvs.fetch(progress=progress)
         self.git.import_changesets(self.cvs.changesets(), self.branch,
                                    domain=self.domain,
                                    limit=limit,

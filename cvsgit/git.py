@@ -13,6 +13,7 @@ from cvsgit.changeset import FILE_DELETED
 from cvsgit.i18n import _
 from cvsgit.error import Error
 from cvsgit.utils import stripnl
+from cvsgit.term import NoProgress
 
 # I don't know how GIT_DIR and GIT_WORK_TREE and GIT_OBJECT_DIRECTORY
 # and all the rest could affect us here, so I'll just discard them all
@@ -222,8 +223,10 @@ class Git(object):
     def import_changesets(self, changesets, branch, domain=None,
                           limit=None, dump=False, verbose=False,
                           progress=None, total=None):
-        """Loop over changesets and import them"""
-
+        """Loop over changesets and import them.
+        """
+        if progress == None:
+            progress = NoProgress()
         with progress:
             self._import_changesets(changesets, branch, domain,
                                     limit, dump, verbose, progress,

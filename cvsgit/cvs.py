@@ -192,19 +192,17 @@ class CVS(object):
             _("invalid path: %s (%s)") % (trunkfile, \
             _('exists in Attic and parent directory'))
 
-    def pull_changes(self, progress=None):
-        """Pull new revisions from the CVS repository and add them to
-        the meta database."""
-
+    def fetch_changes(self, progress=None):
+        """Fetch new revisions from the CVS repository.
+        """
         if progress == None:
             progress = NoProgress()
 
         filenames = self.changed_rcs_filenames(progress=progress)
-
         with progress:
-            self._pull_changes(filenames, progress)
+            self._fetch_changes(filenames, progress)
 
-    def _pull_changes(self, filenames, progress):
+    def _fetch_changes(self, filenames, progress):
         count = 0
         total = len(filenames)
         progress(_('Parsing RCS files'), count, total)
@@ -265,11 +263,15 @@ class CVS(object):
                 for cs in csg.finalize():
                     self.metadb.add_changeset(cs)
 
-    def changesets(self):
-        """Yield changesets reconstructed earlier from individual file
-        changes and stored in the meta database by the
-        generate_changesets() method."""
+    def fetch(self, progress=None):
+        """Fetch new revisions and generate changesets.
+        """
+        self.fetch_changes(progress)
+        self.generate_changesets(progress)
 
+    def changesets(self):
+        """Yield new changesets fetched earlier.
+        """
         for changeset in self.metadb.changesets_by_start_time():
             changeset.provider = self
             yield(changeset)
