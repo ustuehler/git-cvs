@@ -2,10 +2,8 @@
 'git-cvs'."""
 
 import os.path
-import sys
-import time
 
-import cvsgit.cmd
+from cvsgit.cmd import Cmd
 from cvsgit.error import Error
 from cvsgit.git import Git
 from cvsgit.cvs import CVS
@@ -13,7 +11,9 @@ from cvsgit.meta import MetaDb
 from cvsgit.i18n import _
 from cvsgit.term import Progress
 
-Command = cvsgit.cmd.Cmd
+class Command(Cmd):
+    """Base class for conduit commands
+    """
 
 class ConduitError(Error):
     """Base exception for errors in the cvsgit.main module
@@ -30,6 +30,8 @@ class NoSourceError(ConduitError):
             _("'cvs.source' is unset; not a git-cvs repository?"))
 
 class Conduit(object):
+    """CVS-to-Git conduit logic
+    """
 
     def __init__(self, directory=None):
         self.git = Git(directory)
@@ -38,6 +40,8 @@ class Conduit(object):
         self._config = {}
 
     def config_get(self, varname):
+        """Get a Git variable from the 'cvs' section
+        """
         if self._config.has_key(varname):
             return self._config[varname]
         else:
@@ -46,16 +50,22 @@ class Conduit(object):
             return value
 
     def config_set(self, varname, value):
+        """Set a Git variable in the 'cvs' section
+        """
         self.git.config_set('cvs.' + varname, value)
         self._config[varname] = value
 
     def get_source(self):
+        """Get the CVS repository source path
+        """
         source = self.config_get('source')
         if source is None:
             raise NoSourceError
         return source
 
     def set_source(self, directory):
+        """Set the CVS repository source path
+        """
         self.config_set('source', directory)
 
     source = property(get_source, set_source)
