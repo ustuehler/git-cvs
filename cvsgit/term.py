@@ -29,8 +29,10 @@ class Progress(object):
         pass
 
     def __exit__(self, exception_type, value, traceback):
-        if not exception_type is KeyboardInterrupt:
-            self.finish()
+        self.last_progress = 0
+        if self.update_suppressed:
+            self.update(self.last_message, self.last_count, self.last_total)
+            self.update_suppressed = False
         return False
 
     def __call__(self, message, count=None, total=None):
@@ -60,9 +62,6 @@ class Progress(object):
         sys.stdout.flush()
 
     def finish_tty(self):
-        if self.update_suppressed:
-            self.update_tty(self.last_message, self.last_count, self.last_total)
-            self.update_suppressed = False
         sys.stdout.write('\n')
 
     def update_dumb(self, message, count, total):
@@ -79,9 +78,7 @@ class Progress(object):
         sys.stdout.flush()
 
     def finish_dumb(self):
-        if self.update_suppressed:
-            self.update_dumb(self.last_message, self.last_count, self.last_total)
-            self.update_suppressed = False
+        pass
 
 class NoProgress(object):
     """Behaves like Progress but does nothing.

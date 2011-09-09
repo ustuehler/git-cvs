@@ -234,7 +234,9 @@ class Git(object):
 
     def _import_changesets(self, changesets, branch, domain, limit,
                            dump, verbose, progress, total):
-        progress(_('Importing changesets'))
+        message = _('Importing changesets')
+        def do_progress(count, total):
+            progress(message, len(changesets_seen), total)
 
         class SignalIndicator():
             def __init__(self):
@@ -268,11 +270,9 @@ class Git(object):
                 if limit != None and len(changesets_seen) >= limit:
                     break
 
-                progress(_('Importing changesets'),
-                         len(changesets_seen), total)
-
                 changesets_seen.append(changeset)
                 fi.add_changeset(changeset)
+                do_progress(len(changesets_seen), total)
 
                 if sigint_flag.isset():
                     raise KeyboardInterrupt()
