@@ -73,9 +73,6 @@ class clone(Command):
 
             if not self.options.bare and not self.options.fast_import_dump:
                 conduit.git.checkout('-b', 'master', conduit.branch)
-                conduit.git.config_set('branch.master.remote', '.')
-                conduit.git.config_set('branch.master.merge', conduit.branch)
-                conduit.git.config_set('branch.master.rebase', 'true')
         except:
             if not self.options.partial:
                 shutil.rmtree(self.directory)

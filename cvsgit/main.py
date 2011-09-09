@@ -89,7 +89,14 @@ class Conduit(object):
 
     def init(self, repository, domain=None, bare=False, quiet=True):
         self.git.init(bare=bare, quiet=quiet)
+
+        if self.git.config_get('branch.master.remote') == None:
+            self.git.config_set('branch.master.remote', '.')
+            self.git.config_set('branch.master.merge', self.branch)
+            self.git.config_set('branch.master.rebase', 'true')
+
         self.source = repository
+
         if domain:
             self.domain = domain
 

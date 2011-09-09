@@ -166,17 +166,35 @@ class Git(object):
         """
         self.check_command('pull', *args)
 
-    def check_command(self, command, *args):
+    def rev_parse(self, *args):
+        """Return the output of 'git rev-parse <*args>'
+        """
+        return self.check_command('rev-parse', *args, stdout=PIPE)
+
+    def check_command(self, command, *args, **kwargs):
         """Run "git" subcommand with given arguments.
 
         Raises a GitCommandError if the subcommand does not return a
         zero exit code.
+
+        The stdout keyword argument can take any value that
+        subprocess.Popen would accept.  If it is subprocess.PIPE, then
+        the output of the command is returned as a string.
         """
+        stdout = None
+        for kw in kwargs.keys():
+            if kw == 'stdout':
+                stdout = kwargs[kw]
+            else:
+                raise ArgumentError, 'Invalid keyword: %s' % kw
+
         command = ['git', command] + list(args)
-        pipe = self._popen(command, stderr=PIPE)
-        dummy, stderr = pipe.communicate()
+        pipe = self._popen(command, stdout=stdout, stderr=PIPE)
+        stdout, stderr = pipe.communicate()
         if pipe.returncode != 0:
             raise GitCommandError(command, pipe.returncode, stderr)
+        if stdout == PIPE:
+            return stdout
 
     def config_get(self, varname, default=None):
         """Retrieve the value of a config variable.
@@ -189,10 +207,12 @@ class Git(object):
         command = ['git', 'config', '--get', varname]
         pipe = self._popen(command, stdout=PIPE, stderr=PIPE)
         stdout, stderr = pipe.communicate()
-        if pipe.returncode != 0:
+        if pipe.returncode == 0:
+            return stripnl(stdout)
+        elif pipe.returncode == 1:
             return default
         else:
-            return stripnl(stdout)
+            raise GitCommandError(command, pipe.returncode, stderr)
 
     def config_set(self, varname, value):
         """Set the value of a config variable.
