@@ -28,11 +28,15 @@ class clone(Command):
             _("Stop importing after COUNT new commits."))
         self.add_option('--domain', metavar='DOMAIN', help=\
             _("Set the e-mail domain to use for unknown authors."))
-        self.add_option('--incremental', action='store_true', help=\
+        self.add_option('--partial', action='store_true', help=\
             _("Keep the incomplete Git repository if this command "
               "is interrupted by the user or an unexpected error "
               "and continue from the last checkpoint if the Git "
               "repository already exists."))
+        self.add_option('--fast-import-dump', action='store_true', help=\
+            _("Write all changesets to stdout in git-fast-import(1) "
+              "format but do not actually import them.  This option "
+              "is mostly useful for debugging."))
         self.add_option('--no-progress', action='store_true', help=\
             _("Don't display the progress meter."))
         self.add_option('--quiet', action='store_true', help=\
@@ -52,7 +56,7 @@ class clone(Command):
             self.usage_error(_('too many arguments'))
 
     def run(self):
-        if os.path.exists(self.directory) and not self.options.incremental:
+        if os.path.exists(self.directory) and not self.options.partial:
             self.fatal(_("destination path '%s' already exists") % \
                        self.directory)
 
@@ -64,14 +68,16 @@ class clone(Command):
         try:
             conduit.fetch(count=self.options.count,
                           quiet=self.options.quiet,
-                          verbose=self.options.verbose)
-            if not self.options.bare:
+                          verbose=self.options.verbose,
+                          fast_import_dump=self.options.fast_import_dump)
+
+            if not self.options.bare and not self.options.fast_import_dump:
                 conduit.git.checkout('-b', 'master', conduit.branch)
                 conduit.git.config_set('branch.master.remote', '.')
                 conduit.git.config_set('branch.master.merge', conduit.branch)
                 conduit.git.config_set('branch.master.rebase', 'true')
         except:
-            if not self.options.incremental:
+            if not self.options.partial:
                 shutil.rmtree(self.directory)
             raise
 
