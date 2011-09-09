@@ -249,19 +249,18 @@ class CVS(object):
         if progress == None:
             progress = NoProgress()
 
-        progress(_('Calculating changesets'))
         with progress:
             count = 0
-            total = self.metadb.count_changes()
-            progress(_('Calculating changesets'), count, total)
             csg = ChangeSetGenerator()
+            total = self.metadb.count_changes()
+            progress(_('Processing changes'), 0, total)
             for change in self.metadb.changes_by_timestamp():
                 count += 1
-                progress(_('Calculating changesets'), count, total)
+                progress(_('Processing changes'), count, total)
                 for cs in csg.integrate(change):
                     self.metadb.add_changeset(cs)
-                for cs in csg.finalize():
-                    self.metadb.add_changeset(cs)
+            for cs in csg.finalize():
+                self.metadb.add_changeset(cs)
 
     def fetch(self, progress=None):
         """Fetch new revisions and generate changesets.
