@@ -9,8 +9,7 @@ class Progress(object):
     """Display progress information.
     """
 
-    def __init__(self, enabled=True):
-        self.enabled = enabled
+    def __init__(self):
         self.last_progress = 0
         self.last_message = ''
         self.last_count = None
@@ -35,8 +34,6 @@ class Progress(object):
         return False
 
     def __call__(self, message, count=None, total=None):
-        if not self.enabled:
-            return
         if message != self.last_message or \
                 time.time() - self.last_progress > self.update_interval:
             self.last_progress = time.time()
@@ -86,11 +83,8 @@ class Progress(object):
             self.update_suppressed = False
 
 class NoProgress(object):
-    """Does nothing.
+    """Behaves like Progress but does nothing.
     """
-
-    def __init__(self):
-        self.enabled = False
 
     def __enter__(self):
         pass
