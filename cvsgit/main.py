@@ -91,13 +91,8 @@ class Conduit(object):
 
         progress = Progress(enabled=not quiet and not verbose)
 
-        self.cvs.pull_changes(progress=progress)
-
-        # TODO: use progress directly in generate_changesets()
-        with progress:
-            progress(_('Calculating changesets'))
-            self.cvs.generate_changesets(onprogress=lambda count, total:
-                progress(_('Calculating changesets'), count, total))
+        self.cvs.pull_changes(progress)
+        self.cvs.generate_changesets(progress)
 
         # TODO: use progress directly in export_changesets()
         with progress:

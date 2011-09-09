@@ -243,33 +243,27 @@ class CVS(object):
             print "(Error while processing %s)" % rcs_filename
             raise
 
-    def generate_changesets(self, onprogress=None):
+    def generate_changesets(self, progress=None):
         """Convert changes stored in the meta database into sets of
         related changes and store the resulting changesets in the meta
-        database as well.  The individual changes referenced in a
-        changeset will be deleted from the meta database."""
+        database as well.
+        """
+        if progress == None:
+            progress = NoProgress()
 
-        if onprogress:
-            onprogress(0, 1)
-            total = self.metadb.count_changes()
+        progress(_('Calculating changesets'))
+        with progress:
             count = 0
-            if total > 0:
-                onprogress(count, total)
-
-        csg = ChangeSetGenerator()
-        for change in self.metadb.changes_by_timestamp():
-            if onprogress:
-                onprogress(count, total)
+            total = self.metadb.count_changes()
+            progress(_('Calculating changesets'), count, total)
+            csg = ChangeSetGenerator()
+            for change in self.metadb.changes_by_timestamp():
                 count += 1
-
-            for cs in csg.integrate(change):
-                self.metadb.add_changeset(cs)
-
-        for cs in csg.finalize():
-            self.metadb.add_changeset(cs)
-
-        if onprogress:
-            onprogress(total, total)
+                progress(_('Calculating changesets'), count, total)
+                for cs in csg.integrate(change):
+                    self.metadb.add_changeset(cs)
+                for cs in csg.finalize():
+                    self.metadb.add_changeset(cs)
 
     def changesets(self):
         """Yield changesets reconstructed earlier from individual file
