@@ -76,6 +76,7 @@ class Progress(object):
         else:
             sys.stdout.write('%s: %3.0f%% (%d/%d)\n' % \
                 (message, count * 100.0 / total, count, total))
+        sys.stdout.flush()
 
     def finish_dumb(self):
         if self.update_suppressed:
