@@ -196,15 +196,15 @@ class CVS(object):
         """Pull new revisions from the CVS repository and add them to
         the meta database."""
 
-        if not progress:
+        if progress == None:
             progress = NoProgress()
 
         filenames = self.changed_rcs_filenames(progress=progress)
 
         with progress:
-            self._pull_changes(filenames, progress=progress)
+            self._pull_changes(filenames, progress)
 
-    def _pull_changes(self, filenames, progress=None):
+    def _pull_changes(self, filenames, progress):
         count = 0
         total = len(filenames)
         progress(_('Parsing RCS files'), count, total)
@@ -347,15 +347,5 @@ class CVS(object):
         assert(changeset.mark != None)
         self.metadb.mark_changeset(changeset)
 
-    def export_changesets(self, receiver, params={}, onprogress=None,
-                          count=None):
-        if onprogress:
-            onprogress(0, 1)
-            total = self.metadb.count_changesets()
-
-        receiver.import_changesets(self.changesets(), params=params,
-                                   onprogress=onprogress, total=total,
-                                   count=count)
-
-        if onprogress:
-            onprogress(total, total)
+    def count_changesets(self):
+        return self.metadb.count_changesets()

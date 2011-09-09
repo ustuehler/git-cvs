@@ -93,23 +93,32 @@ class Conduit(object):
         if domain:
             self.domain = domain
 
-    def fetch(self, count=None, quiet=True, verbose=False):
-        params = {}
-        params['domain'] = self.domain
-        params['verbose'] = verbose
-        params['branch'] = self.branch
+    def fetch(self, count=None, quiet=True, verbose=False,
+              fast_import_dump=False):
+        """Fetch new changesets into the CVS tracking branch.
+
+        If 'fast_import_dump' is true, then git-fast-import(1) data is
+        written to stdout but not actually imported.  The 'quiet' and
+        and 'verbose' options are ignored in this case.
+        """
+        if fast_import_dump:
+            quiet = True
+            verbose = False
 
         progress = Progress(enabled=not quiet and not verbose)
 
         self.cvs.pull_changes(progress)
         self.cvs.generate_changesets(progress)
 
-        # TODO: use progress directly in export_changesets()
-        with progress:
-            progress(_('Importing changesets'))
-            self.cvs.export_changesets(self.git, params, count=count,
-                onprogress=lambda count, total:
-                    progress(_('Importing changesets'), count, total))
+        self.git.import_changesets(self.cvs.changesets(), self.branch,
+                                   domain=self.domain,
+                                   # TODO: cmdline option --count -> --limit
+                                   limit=count,
+                                   # FIXME: honor fast_import_dump option
+                                   #dump=fast_import_dump,
+                                   verbose=verbose,
+                                   progress=progress,
+                                   total=self.cvs.count_changesets())
 
     def pull(self, count=None, quiet=True, verbose=False):
         self.fetch(count=count, quiet=quiet, verbose=verbose)

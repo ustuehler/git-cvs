@@ -199,8 +199,19 @@ class Git(object):
         """
         self.check_command('config', varname, value)
 
-    def import_changesets(self, changesets, params={},
-                          onprogress=None, total=None, count=None):
+    def import_changesets(self, changesets, branch, domain=None,
+                          limit=None, dump=False, verbose=False,
+                          progress=None, total=None):
+        """Loop over changesets and import them"""
+
+        with progress:
+            self._import_changesets(changesets, branch, domain,
+                                    limit, dump, verbose, progress,
+                                    total)
+
+    def _import_changesets(self, changesets, branch, domain, limit,
+                           dump, verbose, progress, total):
+        progress(_('Importing changesets'))
 
         class SignalIndicator():
             def __init__(self):
@@ -222,23 +233,20 @@ class Git(object):
         sigint_flag = SignalIndicator()
 	old_sigaction = signal(SIGINT, sigint_flag)
 
-        if count != None and total != None and total > count:
-            total = count
+        # TODO: check if this is indeed what we want
+        if limit != None and total != None and total > limit:
+            total = limit
 
-        fi = GitFastImport(pipe, **params)
+        fi = GitFastImport(pipe, branch, domain=domain, verbose=verbose,
+                           dump=dump)
         changesets_seen = []
         try:
             for changeset in changesets:
-                if count != None:
-                    if count > 0:
-                        count -= 1
-                    else:
-                        if onprogress and total and not params.get('verbose'):
-                            onprogress(total, total)
-                        break
+                if limit != None and len(changesets_seen) >= limit:
+                    break
 
-                if onprogress and total and not params.get('verbose'):
-                    onprogress(len(changesets_seen), total)
+                progress(_('Importing changesets'),
+                         len(changesets_seen), total)
 
                 changesets_seen.append(changeset)
                 fi.add_changeset(changeset)
@@ -275,11 +283,15 @@ class Git(object):
                 changeset.set_mark(sha1)
 
 class GitFastImport(object):
-    def __init__(self, pipe, branch='master', domain=None, verbose=False):
+    def __init__(self, pipe, branch, domain=None, verbose=False, dump=False):
         self.pipe = pipe
         self.branch = branch
         self.domain = domain
-        self.verbose = verbose
+        self.dump = dump
+        if dump:
+            self.verbose = False
+        else:
+            self.verbose = verbose
         self.last_changeset = None
 
     def add_changeset(self, changeset):
