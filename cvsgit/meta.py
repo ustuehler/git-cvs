@@ -100,20 +100,16 @@ class MetaDb(object):
 
         Note that multiple updates to the database may be grouped into
         a larger transaction for performance, but the caller can use
-        commit() to ensure that the changes get flushed to disk."""
-
-        sql = 'INSERT OR IGNORE INTO change ' \
-              '(timestamp, author, log, filestatus, filename, ' \
-              'revision, state, mode) VALUES (?,?,?,?,?,?,?,?)'
-        values = (change.timestamp,
-                  change.author,
-                  change.log,
-                  change.filestatus,
-                  change.filename,
-                  change.revision,
-                  change.state,
-                  change.mode,)
-        self.dbh.execute(sql, values)
+        commit() to ensure that the changes get flushed to disk.
+        """
+        self.dbh.execute("""
+            INSERT OR IGNORE INTO change
+                (timestamp, author, log, filestatus, filename,
+                revision, state, mode)
+            VALUES (?,?,?,?,?,?,?,?)""",
+            (change.timestamp, change.author, change.log,
+             change.filestatus, change.filename, change.revision,
+             change.state, change.mode,))
 
     def add_changeset(self, changeset):
         """Record the attributes of 'changeset' and mark the
@@ -145,32 +141,36 @@ class MetaDb(object):
             raise
 
     def mark_changeset(self, changeset):
-        """Mark 'changeset' as having been integrated."""
-
+        """Mark 'changeset' as having been integrated.
+        """
         assert(changeset.id != None)
         sql = 'UPDATE changeset SET mark=? WHERE id=?'
         self.dbh.execute(sql, (changeset.mark, changeset.id,))
         self.dbh.commit()
 
     def commit(self):
-        """Commit the pending database transaction, if any."""
-
+        """Commit the pending database transaction, if any.
+        """
         self.dbh.commit()
 
     def count_changes(self):
-        "Return the number of free changes (not bound in a changeset)."
-
-        sql = 'SELECT COUNT(*) FROM change WHERE changeset_id IS NULL'
-        return self.dbh.execute(sql).fetchone()[0]
+        """Return the number of free changes (not bound in a changeset).
+        """
+        return self.dbh.execute("""
+            SELECT COUNT(*)
+            FROM change
+            WHERE changeset_id IS NULL""").fetchone()[0]
 
     def changes_by_timestamp(self):
         """Yield a list of free changes recorded in the database and
-        not bound to a changeset, ordered by their timestamp."""
-
-        sql = 'SELECT timestamp, author, log, filestatus, filename, ' \
-              'revision, state, mode FROM change WHERE changeset_id IS ' \
-              'NULL ORDER BY timestamp'
-        for row in self.dbh.execute(sql):
+        not bound to a changeset, ordered by their timestamp.
+        """
+        for row in self.dbh.execute("""
+            SELECT timestamp, author, log, filestatus, filename,
+                   revision, state, mode
+            FROM change
+            WHERE changeset_id IS NULL
+            ORDER BY timestamp"""):
             yield(Change(timestamp=row[0],
                          author=row[1],
                          log=row[2],
@@ -181,22 +181,21 @@ class MetaDb(object):
                          mode=row[7]))
 
     def count_changesets(self):
-        "Return the number of unmarked changesets (not imported)."
-
+        """Return the number of unmarked changesets (not imported).
+        """
         sql = 'SELECT COUNT(*) FROM changeset WHERE mark IS NULL'
         return self.dbh.execute(sql).fetchone()[0]
 
     def _select_changesets(self, where):
-
         where = where % {'changeset':'cs'}
-        sql = """SELECT cs.id, cs.start_time, cs.end_time,
-                        c.timestamp, c.author, c.log,
-                        c.filestatus, c.filename,
-                        c.revision, c.state, c.mode
-                 FROM changeset cs
-                 INNER JOIN change c ON c.changeset_id = cs.id
-                 WHERE %s
-                 ORDER BY cs.start_time, cs.id""" % where
+        sql = """
+            SELECT cs.id, cs.start_time, cs.end_time, c.timestamp,
+                   c.author, c.log, c.filestatus, c.filename,
+                   c.revision, c.state, c.mode
+            FROM changeset cs
+            INNER JOIN change c ON c.changeset_id = cs.id
+            WHERE %s
+            ORDER BY cs.start_time, cs.id""" % where
 
         changeset = None
         for row in self.dbh.execute(sql):
@@ -225,15 +224,15 @@ class MetaDb(object):
 
     def head_changeset(self):
         """Return the "head" changeset, the one with the highest value
-        of 'id' ('mark' is ignored) or None if there is no changeset."""
-
+        of 'id' ('mark' is ignored) or None if there is no changeset.
+        """
         where = '%(changeset)s.id IS MAX(%(changeset)s.id)'
         for cs in self._select_changesets(where):
             return cs
 
     def changesets_by_start_time(self):
         """Yield a list of all unmarked changesets currently recorded
-        in the database, ordered by their start time."""
-
+        in the database, ordered by their start time.
+        """
 	where = '%(changeset)s.mark IS NULL'
         return self._select_changesets(where)
