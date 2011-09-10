@@ -25,6 +25,12 @@ class verify(Command):
         self.commit = 'HEAD'
         self.add_option('--history', action='store_true', help=\
             _("Walk backwards through the entire history."))
+        self.add_option('--forward', action='store_true', help=\
+            _("Modifies the --history option to walk forward."))
+        self.add_option('--skip', action='store_true', help=\
+            _("Skip the first verification step and move HEAD "
+              "backward instead, the opposite direction with "
+              "--forward)."))
         self.add_option('--quiet', action='store_true', help=\
             _("Only report error and warning messages."))
 
@@ -40,16 +46,28 @@ class verify(Command):
             self.tempdir = tempdir
 
             while True:
-                returncode = self._run()
-                if returncode != 0:
-                    return returncode
-                elif not self.options.history:
-                    return 0
+                if self.options.skip:
+                    self.options.skip = False
+                else:
+                    returncode = self._run()
+                    if returncode != 0:
+                        return returncode
+                    elif not self.options.history:
+                        return 0
 
-                try:
-                    self.git.checkout('-q', 'HEAD~1')
-                except GitCommandError:
-                    return 0
+                if self.options.forward:
+                    wc_head = self.git.rev_parse('HEAD')
+                    cvs_head = self.git.rev_parse(conduit.branch)
+                    if wc_head == cvs_head:
+                        return 0
+                    subprocess.check_call(['/bin/sh', '-c',
+                       'git checkout `git rev-list %s..%s|tail -1`' % \
+                       (wc_head, cvs_head)])
+                else:
+                    try:
+                        self.git.checkout('-q', 'HEAD~1')
+                    except GitCommandError:
+                        return 0
 
     def _run(self):
         returncode = 0
