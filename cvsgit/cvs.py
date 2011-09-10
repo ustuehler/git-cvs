@@ -331,7 +331,13 @@ class CVS(object):
         else:
             revision = change.revision
 
-        blob = RCSFile(rcsfile).blob(revision)
+        if not self.statcache:
+            self.statcache = self.metadb.load_statcache()
+        if self.statcache.has_key(filename):
+            size_hint = self.statcache[filename][1]
+        else:
+            size_hint = None
+        blob = RCSFile(rcsfile).blob(revision, size_hint)
         if change.mode == 'b':
             return blob
         else:
