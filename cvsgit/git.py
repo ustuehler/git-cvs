@@ -346,7 +346,7 @@ class GitFastImport(object):
         if changeset.id != 1:
             # FIXME: this is a hack; find out if the branch exists
             if self.last_changeset is None:
-                self.write('from refs/heads/%s^0\n' % self.branch)
+                self.write('from %s^0\n' % self.branch)
             else:
                 self.write('from :%s\n' % self.last_changeset.id)
         self.last_changeset = changeset
