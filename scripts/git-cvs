@@ -3,6 +3,7 @@
 
 from glob import glob
 import os
+import re
 import sys
 
 from cvsgit.cmd import Cmd
@@ -56,7 +57,7 @@ class CLI(Cmd):
         return modules.keys()
 
     def get_command_class(self, command):
-        klass_name = command
+        klass_name = re.sub('[^A-Za-z_]', '_', command)
         module_name = '%s.%s' % ('cvsgit.command', command)
         try:
             __import__(module_name)
