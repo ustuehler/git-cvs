@@ -221,7 +221,7 @@ class Git(object):
         self.check_command('config', varname, value)
 
     def import_changesets(self, changesets, branch, domain=None,
-                          limit=None, dump=False, verbose=False,
+                          limit=None, verbose=False,
                           progress=None, total=None):
         """Loop over changesets and import them.
         """
@@ -229,11 +229,11 @@ class Git(object):
             progress = NoProgress()
         with progress:
             self._import_changesets(changesets, branch, domain,
-                                    limit, dump, verbose, progress,
+                                    limit, verbose, progress,
                                     total)
 
     def _import_changesets(self, changesets, branch, domain, limit,
-                           dump, verbose, progress, total):
+                           verbose, progress, total):
         message = _('Importing changesets')
         def do_progress(count, total):
             progress(message, len(changesets_seen), total)
@@ -271,8 +271,7 @@ class Git(object):
         if limit != None and total != None and total > limit:
             total = limit
 
-        fi = GitFastImport(pipe, branch, domain=domain, verbose=verbose,
-                           dump=dump)
+        fi = GitFastImport(pipe, branch, domain=domain, verbose=verbose)
         changesets_seen = []
         try:
             for changeset in changesets:
@@ -318,15 +317,11 @@ class Git(object):
                 changeset.set_mark(sha1)
 
 class GitFastImport(object):
-    def __init__(self, pipe, branch, domain=None, verbose=False, dump=False):
+    def __init__(self, pipe, branch, domain=None, verbose=False):
         self.pipe = pipe
         self.branch = branch
         self.domain = domain
-        self.dump = dump
-        if dump:
-            self.verbose = False
-        else:
-            self.verbose = verbose
+        self.verbose = verbose
         self.last_changeset = None
 
     def add_changeset(self, changeset):

@@ -33,10 +33,6 @@ class clone(Command):
               "is interrupted by the user or an unexpected error "
               "and continue from the last checkpoint if the Git "
               "repository already exists."))
-        self.add_option('--fast-import-dump', action='store_true', help=\
-            _("Write all changesets to stdout in git-fast-import(1) "
-              "format but do not actually import them.  This option "
-              "is mostly useful for debugging."))
         self.add_option('--quiet', action='store_true', help=\
             _("Only report error and warning messages."))
         self.add_option('--verbose', action='store_true', help=\
@@ -66,10 +62,9 @@ class clone(Command):
         try:
             conduit.fetch(limit=self.options.limit,
                           quiet=self.options.quiet,
-                          verbose=self.options.verbose,
-                          fast_import_dump=self.options.fast_import_dump)
+                          verbose=self.options.verbose)
 
-            if not self.options.bare and not self.options.fast_import_dump:
+            if not self.options.bare:
                 conduit.git.checkout('-b', 'master', conduit.branch)
         except:
             if not self.options.partial:
