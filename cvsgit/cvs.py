@@ -345,17 +345,17 @@ class CVS(object):
     def expand_keyword_match(self, match, change, rcsfile):
         if self.localid and match.group(1) == self.localid:
             timestamp = time.gmtime(change.timestamp)
-            return ('$%s: %s,v %s %s %s %s $' % \
-                (self.localid,
-                 os.path.basename(change.filename),
+            return ('$%s: %s %s %s %s %s $' % \
+                (self.localid, os.path.basename(rcsfile),
                  change.revision,
                  time.strftime('%Y/%m/%d %H:%M:%S', timestamp),
                  change.author, change.state)).encode('ascii')
         elif match.group(1) == 'Header':
-            header = match.group(0)
-            # str(rcsfile) because rcsfile is a unicode string
-            return str(self._rcs_headerfix_re.sub(
-                    ' %s ' % str(rcsfile), header))
+            timestamp = time.gmtime(change.timestamp)
+            return ('$Header: %s %s %s %s %s $' % \
+                (rcsfile, change.revision,
+                 time.strftime('%Y/%m/%d %H:%M:%S', timestamp),
+                 change.author, change.state)).encode('ascii')
         elif match.group(1) == 'Mdocdate':
             # This is for OpenBSD.
             timestamp = time.gmtime(change.timestamp)
