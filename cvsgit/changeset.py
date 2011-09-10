@@ -163,11 +163,12 @@ class ChangeSet(object):
 
     def __str__(self):
         if len(self.changes) == 1:
-            changes = '1 change'
+            changes = '1 file'
         else:
-            changes = '%d changes' % len(self.changes)
-        return '<%s %s, %s, %s>' % \
-            (type(self).__name__, self.timestamp, self.author, changes)
+            changes = '%d files' % len(self.changes)
+        return '<%s %s, %s, %s, %s>' % \
+            (type(self).__name__, self.timestamp, self.author, changes,
+             self.mark)
 
 class ChangeSetGenerator(object):
     """Group a series of individual file changes into changesets that
