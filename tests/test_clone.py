@@ -64,3 +64,16 @@ class Test(unittest.TestCase):
             self.assertNotEqual(head1, Git().rev_parse('HEAD'))
             self.assertEquals(0, pull().eval('--quiet', '--limit=3'))
             self.assertEqual(head1, Git().rev_parse('HEAD'))
+
+    def test_git_clone_from_cvs_clone(self):
+        """Cloning a new Git repo from a bare CVS tracking repo.
+        """
+        head1 = None
+        with Tempdir(cwd=True) as tempdir:
+            source = join(dirname(__file__), 'data', 'zombie')
+            self.assertEquals(0, clone().eval('--quiet', source, 'test.git'))
+            Git().check_command('clone', '--quiet', 'test.git')
+            self.assertEquals(Git('test.git').rev_parse('HEAD'),
+                              Git('test').rev_parse('HEAD'))
+            self.assertEquals('refs/heads/master',
+                              Git('test').symbolic_ref('HEAD'))
