@@ -191,11 +191,11 @@ class Git(object):
 
         command = ['git', command] + list(args)
         pipe = self._popen(command, stdout=stdout, stderr=PIPE)
-        stdout, stderr = pipe.communicate()
+        out, err = pipe.communicate()
         if pipe.returncode != 0:
-            raise GitCommandError(command, pipe.returncode, stderr)
+            raise GitCommandError(command, pipe.returncode, err)
         if stdout == PIPE:
-            return stdout
+            return stripnl(out)
 
     def config_get(self, varname, default=None):
         """Retrieve the value of a config variable.
