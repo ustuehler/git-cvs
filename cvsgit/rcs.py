@@ -22,6 +22,9 @@ import sys
 from cvsgit.changeset import Change, FILE_ADDED, FILE_MODIFIED, \
     FILE_DELETED
 
+from cvsgit.error import Error
+from cvsgit.i18n import _
+
 # Our 'rcsparse' module is actually a simple copy of the RCS parser
 # code from cvs2svn.
 #from cvsgit import rcsparse
@@ -32,6 +35,38 @@ REV_STATE = 3
 REV_BRANCHES = 4
 REV_NEXT = 5
 REV_MODE = 6
+
+class RCSError(Error):
+    """Base class for exceptions from the cvsgit.rcs module
+    """
+
+class ParseError(RCSError):
+    """Raised when an RCS file couldn't be parsed correctly
+    """
+
+    def __init__(self, message, rcsfile):
+        """This exception provides additional information.
+
+        'rcsfile' is an RCSFile object.
+        """
+        super(ParseError, self).__init__(message)
+        self.rcsfile = rcsfile
+
+class CheckoutError(ParseError):
+    """Raised when the file content of a particular revision couldn't
+    be retrieved from an RCS file
+    """
+
+    def __init__(self, rcsfile, revision):
+        """This exception provides additional information.
+
+        'rcsfile' is an RCSFile object.
+        'revision' is the revision that couldn't be retrieved.
+        """
+        super(CheckoutError, self).__init__(
+            _("Couldn't retrieve file content for revision %s of %s") % \
+                (revision, rcsfile.filename), rcsfile)
+        self.revision = revision
 
 class RCSFile(object):
     "Represents a single RCS file."
@@ -118,7 +153,10 @@ class RCSFile(object):
     def blob(self, revision):
         """Returns the revision's file content.
         """
-        return self.rcsfile.checkout(revision)
+        try:
+            return self.rcsfile.checkout(revision)
+        except RuntimeError:
+            raise CheckoutError(self, revision)
 
     # XXX only for debugging; remove later
     def _print_revision(self, revision):

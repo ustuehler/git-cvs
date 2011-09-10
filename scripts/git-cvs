@@ -9,6 +9,7 @@ import sys
 
 from cvsgit.cmd import Cmd
 from cvsgit.i18n import _
+from cvsgit.rcs import RCSError
 import cvsgit.command
 
 class CLI(Cmd):
@@ -32,9 +33,15 @@ class CLI(Cmd):
 
     def run(self):
         if len(self.args) > 0:
-            self.run_command(self.args)
+            self.run_command_with_exception_handling(self.args)
         else:
             self.print_available_commands()
+
+    def run_command_with_exception_handling(self, argv):
+        try:
+            self.run_command(self.args)
+        except RCSError as e:
+            self.fatal(str(e))
 
     def run_command(self, argv):
         command = argv[0]
