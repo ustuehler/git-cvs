@@ -161,6 +161,7 @@ class MetaDb(object):
         assert(changeset.id != None)
         sql = 'UPDATE changeset SET mark=? WHERE id=?'
         self.dbh.execute(sql, (changeset.mark, changeset.id,))
+        self.dbh.commit()
 
     def begin_transaction(self):
         """Starts a new transaction (disables autocommit).
