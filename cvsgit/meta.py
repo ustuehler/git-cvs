@@ -95,8 +95,8 @@ class MetaDb(object):
 
     def load_statcache(self):
         """Load the complete stat() cache and return it as a dictionary
-        of the form {path:(mtime, size)}."""
-
+        of the form {path:(mtime, size)}.
+        """
         sql = 'SELECT path, mtime, size FROM statcache'
         statcache = {}
         for row in self.dbh.execute(sql):
@@ -105,8 +105,8 @@ class MetaDb(object):
 
     def update_statcache(self, statcache):
         """'statcache' is a dictionary of {path:(mtime, size)} to insert
-        into or update in the meta database's stat() cache."""
-
+        into or update in the meta database's stat() cache.
+        """
         sql = 'INSERT OR REPLACE INTO statcache ' \
               '(path, mtime, size) VALUES (?,?,?)'
         for path in statcache.keys():

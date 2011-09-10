@@ -272,7 +272,6 @@ class Git(object):
         command.append('--export-marks=' + marksfile)
         pipe = self._popen(command, stdin=PIPE, preexec_fn=ignore_signals)
 
-        # TODO: check if this is indeed what we want
         if limit != None and total != None and total > limit:
             total = limit
 
