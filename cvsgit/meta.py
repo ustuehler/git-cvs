@@ -24,6 +24,20 @@ class MetaDb(object):
         if self._dbh is None:
             dbh = sqlite3.connect(self.filename)
 
+            # http://web.utk.edu/~jplyon/sqlite/SQLite_optimization_FAQ.html
+            dbh.execute("PRAGMA synchronous=OFF")
+            dbh.execute("PRAGMA count_changes=OFF")
+            #dbh.execute("PRAGMA cache_size=4000")
+
+            # This should also help, but causes the behaviour of the
+            # ROLLBACK command to become undefined.
+            dbh.execute("PRAGMA journal_mode=OFF")
+
+            # This helps for the temporary table which we create when
+            # iterating over changes for changeset generation, but
+            # bloats the process image a lot.
+            dbh.execute("PRAGMA temp_store=MEMORY")
+
             # Create the table that contains changes pulled from CVS.
             #
             # 'changeset_id' is NULL until a change is associated with
@@ -43,6 +57,9 @@ class MetaDb(object):
             sql = 'CREATE INDEX IF NOT EXISTS change__changeset_id ' \
                   'ON change (changeset_id)'
             dbh.execute(sql)
+            dbh.execute("""
+                CREATE INDEX IF NOT EXISTS change__timestamp
+                ON change (timestamp)""")
 
             # Create the table that defines the attributes of complete
             # changesets.  'id' will be referenced by one or more rows
@@ -61,11 +78,15 @@ class MetaDb(object):
             # Create the table that stores stat() information for all
             # paths in the CVS repository.  This allows the CVS change
             # scanner to skip unmodified RCS files and directories.
-            sql = 'CREATE TABLE IF NOT EXISTS statcache (' \
-                  'path VARCHAR PRIMARY KEY, ' \
-                  'mtime INTEGER NOT NULL, ' \
-                  'size INTEGER NOT NULL)'
-            dbh.execute(sql)
+            dbh.execute("""
+                CREATE TABLE IF NOT EXISTS statcache (
+                    path VARCHAR PRIMARY KEY,
+                    mtime INTEGER NOT NULL,
+                    size INTEGER NOT NULL)""")
+            # With this index, I haven't observed any speed gain.
+            #dbh.execute("""
+            #    CREATE INDEX IF NOT EXISTS statcache_index
+            #    ON statcache (path, mtime, size)""")
 
             self._dbh = dbh
         return self._dbh
@@ -115,29 +136,23 @@ class MetaDb(object):
         """Record the attributes of 'changeset' and mark the
         referenced changes as belonging to this changeset.
 
-        Associating changes with a changeset is guaranteed to be
-        atomic.  The update will be performed in a transaction which
-        is rolled back if the process is somehow interrupted."""
-
-        # Begin a fresh transaction.
-        self.dbh.commit()
+        Associating changes with a changeset can be considered an
+        atomic operation from the caller's perspective.
+        """
+        id = self.dbh.execute("""
+            INSERT INTO changeset (start_time, end_time) VALUES (?,?)
+            """, (changeset.start_time, changeset.end_time,)).lastrowid
         try:
-            sql = 'INSERT INTO changeset (start_time, end_time) ' \
-                  'VALUES (?,?)'
-            values = (changeset.start_time,
-                      changeset.end_time,)
-            id = self.dbh.execute(sql, values).lastrowid
-
-            sql = 'UPDATE change SET changeset_id=%s '\
-                  'WHERE filename=? AND revision=?' % id
-            self.dbh.executemany(sql,
-                map(lambda c: (c.filename, c.revision),
-                    changeset.changes))
-
-            # Commit this transaction.
-            self.dbh.commit()
+            self.dbh.executemany("""
+                UPDATE change SET changeset_id=%d
+                WHERE filename=? AND revision=?
+                """ % id, map(lambda c: (c.filename, c.revision),
+                              changeset.changes))
         except:
-            self.dbh.rollback()
+            self.dbh.execute("""
+                UPDATE change SET changeset_id=NULL
+                WHERE changeset_id=%dfilename=? AND revision=?
+                """ % id)
             raise
 
     def mark_changeset(self, changeset):
@@ -146,12 +161,21 @@ class MetaDb(object):
         assert(changeset.id != None)
         sql = 'UPDATE changeset SET mark=? WHERE id=?'
         self.dbh.execute(sql, (changeset.mark, changeset.id,))
-        self.dbh.commit()
+
+    def begin_transaction(self):
+        """Starts a new transaction (disables autocommit).
+        """
+        self.dbh.execute('BEGIN TRANSACTION')
 
     def commit(self):
-        """Commit the pending database transaction, if any.
+        """Commits the current transaction.
         """
         self.dbh.commit()
+
+    def end_transaction(self):
+        """Ends a new transaction (enables autocommit).
+        """
+        self.dbh.execute('END TRANSACTION')
 
     def count_changes(self):
         """Return the number of free changes (not bound in a changeset).
@@ -161,16 +185,54 @@ class MetaDb(object):
             FROM change
             WHERE changeset_id IS NULL""").fetchone()[0]
 
-    def changes_by_timestamp(self):
-        """Yield a list of free changes recorded in the database and
-        not bound to a changeset, ordered by their timestamp.
+    def changes_by_timestamp(self, processed=None, reentrant=True):
+        """Yields a list of changes recorded in the database.
+
+        The 'processed' keyword determines wheather changes which are
+        already included in a changeset are to be included or not.  If
+        the value is neuter True nor False, all changes are included.
         """
+        if processed == True:
+            where = 'changeset_id IS NOT NULL'
+        elif processed == False:
+            where = 'changeset_id IS NULL'
+        else:
+            where = '1'
+
+        def mkchange(row):
+            return Change(timestamp=row[0], author=row[1], log=row[2],
+                          filestatus=row[3], filename=row[4],
+                          revision=row[5], state=row[6], mode=row[7])
+
+        if not reentrant:
+            for row in self.dbh.execute("""
+                SELECT timestamp, author, log, filestatus, filename,
+                       revision, state, mode
+                FROM change
+                WHERE %s
+                ORDER BY timestamp""" % where):
+                yield(mkchange(row))
+            return
+
         self.dbh.execute("""
             CREATE TEMPORARY TABLE free_change AS
             SELECT timestamp, author, log, filestatus, filename,
                    revision, state, mode
             FROM change
-            WHERE changeset_id IS NULL""")
+            LIMIT 0""")
+        self.dbh.execute("""
+            CREATE INDEX free_change__timestamp
+            ON free_change (timestamp)""")
+        self.dbh.execute("""
+            CREATE INDEX free_change__filename__revision
+            ON free_change (filename, revision)""")
+        self.dbh.execute("""
+            INSERT INTO free_change
+            SELECT timestamp, author, log, filestatus, filename,
+                   revision, state, mode
+            FROM change
+            WHERE %s""" % where)
+
         try:
             while True:
                 rows = self.dbh.execute("""
@@ -182,10 +244,7 @@ class MetaDb(object):
                 if len(rows) == 0:
                     break
                 for row in rows:
-                    change = Change(timestamp=row[0], author=row[1],
-                                    log=row[2], filestatus=row[3],
-                                    filename=row[4], revision=row[5],
-                                    state=row[6], mode=row[7])
+                    change = mkchange(row)
                     yield(change)
                     self.dbh.execute("""
                         DELETE FROM free_change

@@ -205,39 +205,61 @@ class CVS(object):
         total = len(filenames)
         progress(_('Parsing RCS files'), count, total)
 
-        for rcs_filename in filenames:
-          try:
-            # For the working copy path it does not matter if the RCS
-            # file is in the 'Attic' directory or not, so strip it.
-            filename = re.sub('(Attic/)?([^/]+),v$', '\\2', rcs_filename)
+        # We will commit changes to the database every few seconds to
+        # avoid having to scan all RCS files again in case the process
+        # is interrupted or an error occurs (a rescan isn't really bad
+        # but costs time.)
+        commit_time = 0
+        commit_interval = 10
+        self.metadb.begin_transaction()
+        for rcsfile in filenames:
+            try:
+                self._fetch_changes_from_rcsfile(rcsfile)
 
-            rcs_abspath = os.path.join(self.prefix, rcs_filename)
-            st = os.stat(rcs_abspath)
-            identity = (st.st_mtime, st.st_size,)
-            rcsfile = RCSFile(rcs_abspath)
+                if time.time() - commit_time >= commit_interval:
+                    try:
+                        self.metadb.end_transaction()
+                    except:
+                        pass
+                    self.metadb.begin_transaction()
+                    commit_time = time.time()
 
-            for change in rcsfile.changes():
-                # Record the file's actual working copy path, which
-                # RCS alone cannot know about.
-                change.filename = filename
-                self.metadb.add_change(change)
+                count += 1
+                progress(_('Parsing RCS files'), count, total)
+            except KeyboardInterrupt:
+                # Re-raise the exception silently.  An impatient user
+                # may interrupt the process and that should by handled
+                # gracefully.
+                raise
+            except:
+                # Print the file name where this error happened,
+                # regardless of whether the error is actually printed,
+                # just as a quick & dirty debugging aid.
+                # TODO: raise a FetchChangesError
+                print "(Error while processing %s)" % rcsfile
+                raise
+            finally:
+                try:
+                    self.metadb.end_transaction()
+                except:
+                    pass
 
-            # Flush changes to disk after each RCS file; otherwise,
-            # interruption would cause us to scan RCS files again
-            # (which isn't bad but costs time).
-            self.metadb.update_statcache({rcs_filename:identity})
-            self.metadb.commit()
+    def _fetch_changes_from_rcsfile(self, rcsfile):
+        # For the working copy path it does not matter if the RCS
+        # file is in the 'Attic' directory or not, so strip it.
+        filename = re.sub('(Attic/)?([^/]+),v$', '\\2', rcsfile)
 
-            count += 1
-            progress(_('Parsing RCS files'), count, total)
-          except KeyboardInterrupt:
-            raise
-          except:
-            # XXX: Print the file name where this error happened,
-            # regardless of whether the error is actually printed,
-            # just as a quick & dirty debugging aid.
-            print "(Error while processing %s)" % rcs_filename
-            raise
+        abspath = os.path.join(self.prefix, rcsfile)
+        st = os.stat(abspath)
+        identity = (st.st_mtime, st.st_size,)
+
+        for change in RCSFile(abspath).changes():
+            # Record the file's actual working copy path, which
+            # RCS alone cannot know about.
+            change.filename = filename
+            self.metadb.add_change(change)
+
+        self.metadb.update_statcache({rcsfile:identity})
 
     def generate_changesets(self, progress=None):
         """Convert changes stored in the meta database into sets of
@@ -252,7 +274,7 @@ class CVS(object):
             csg = ChangeSetGenerator()
             total = self.metadb.count_changes()
             progress(_('Processing changes'), 0, total)
-            for change in self.metadb.changes_by_timestamp():
+            for change in self.changes(processed=False, reentrant=True):
                 count += 1
                 progress(_('Processing changes'), count, total)
                 for cs in csg.integrate(change):
@@ -261,22 +283,33 @@ class CVS(object):
                 self.metadb.add_changeset(cs)
 
     def fetch(self, progress=None):
-        """Fetch new revisions and generate changesets.
+        """Fetch new revisions and compute changesets.
         """
         self.fetch_changes(progress)
         self.generate_changesets(progress)
 
     def changesets(self):
-        """Yield new changesets fetched earlier.
+        """Yield new changesets computed earlier.
         """
         for changeset in self.metadb.changesets_by_start_time():
             changeset.provider = self
             yield(changeset)
 
+    def changes(self, processed=None, reentrant=True):
+        """Yields changes fetched earlier.
+
+        The 'processed' keyword can be set to a boolean value to
+        select whether changes which are already included in a
+        previously computed changeset are to be considered.  If the
+        value is None, then all changes are considered.
+        """
+        return self.metadb.changes_by_timestamp(processed=processed,
+                                                reentrant=reentrant)
+
     def blob(self, change, changeset):
         """Return the raw binary content of a file at the specified
-        revision."""
-
+        revision.
+        """
         filename = change.filename + ',v'
         rcsfile = os.path.join(self.prefix, filename)
         if not os.path.isfile(rcsfile):
