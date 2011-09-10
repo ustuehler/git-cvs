@@ -364,14 +364,14 @@ class CVS(object):
                 (rcsfile, revision,
                  time.strftime('%Y/%m/%d %H:%M:%S', timestamp),
                  change.author, change.state)).encode('ascii')
+        elif match.group(1) == 'Revision':
+            return ('$Revision: %s $' % revision).encode('ascii')
         elif match.group(1) == 'Mdocdate':
             # This is for OpenBSD.
             timestamp = time.gmtime(change.timestamp)
             mdocdate = time.strftime('%B %e %Y', timestamp)
             mdocdate = mdocdate.replace('  ', ' ') # for %e
             return ('$Mdocdate: %s $' % mdocdate)
-        elif match.group(1) == 'Revision':
-            return ('$Revision: %s $' % revision)
         else:
             return match.group(0)
 
