@@ -26,17 +26,19 @@ class Progress(object):
             self.finish = self.finish_dumb
 
     def __enter__(self):
-        pass
+        self.last_progress = time.time()
 
     def __exit__(self, exception_type, value, traceback):
         self.last_progress = 0
         if self.update_suppressed:
             self.update(self.last_message, self.last_count, self.last_total)
             self.update_suppressed = False
+        self.finish()
+        self.last_message = None
         return False
 
     def __call__(self, message, count=None, total=None):
-        if message != self.last_message or \
+        if (self.last_message and message != self.last_message) or \
                 time.time() - self.last_progress > self.update_interval:
             self.last_progress = time.time()
             self.update(message, count, total)

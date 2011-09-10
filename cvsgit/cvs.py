@@ -107,14 +107,12 @@ class CVS(object):
             return self._changed_rcs_filenames(progress=progress)
 
     def _changed_rcs_filenames(self, progress=None):
-        progress(_('Collecting RCS files'))
-        count = 0
-
         # Helper function to raise the OSError reported by os.walk().
         def raise_error(e): raise e
 
         self.statcache = self.metadb.load_statcache()
         result = []
+        count = 0
 
         for dirpath, dirnames, filenames in \
                 os.walk(self.prefix, onerror=raise_error):
