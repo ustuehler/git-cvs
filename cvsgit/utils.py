@@ -62,12 +62,22 @@ class Environ(object):
 def stripnl(string):
     """Strip the final newline from <string>.
 
-    It is an error if <string> does not end with a newline character.
+    It is an error if <string> does not end with a newline character,
+    except for the empty string, which is okay.
 
-    >>> stripnl('hello\\n')
-    'hello'
+    >>> stripnl('')
+    ''
+    >>> stripnl('he\\nllo\\n')
+    'he\\nllo'
+    >>> try:
+    ...   stripnl('hello')
+    ... except RuntimeError as e:
+    ...   e.message
+    "string doesn't end in newline: hello"
     """
-    if string.endswith('\n'):
+    if string == '':
+        return string
+    elif string.endswith('\n'):
         return string[0:-1]
     else:
         raise RuntimeError("string doesn't end in newline: %s" % string)
