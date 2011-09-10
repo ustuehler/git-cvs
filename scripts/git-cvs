@@ -4,6 +4,7 @@
 from glob import glob
 import os
 import re
+import string
 import sys
 
 from cvsgit.cmd import Cmd
@@ -65,7 +66,12 @@ class CLI(Cmd):
         except ImportError:
             return None
         try:
-            klass = getattr(module, klass_name)
+            try:
+                klass = getattr(module, klass_name)
+            except AttributeError:
+                alt_name = string.join(map(lambda s: s.title(),
+                                           klass_name.split('_')), '')
+                klass = getattr(module, alt_name)
         except AttributeError:
             raise RuntimeError(
                 _("invalid command '%s' (no class '%s' in module '%s')") \
