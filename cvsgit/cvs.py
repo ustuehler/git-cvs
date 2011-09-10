@@ -370,6 +370,8 @@ class CVS(object):
             mdocdate = time.strftime('%B %e %Y', timestamp)
             mdocdate = mdocdate.replace('  ', ' ') # for %e
             return ('$Mdocdate: %s $' % mdocdate)
+        elif match.group(1) == 'Revision':
+            return ('$Revision: %s $' % revision)
         else:
             return match.group(0)
 
