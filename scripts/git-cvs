@@ -45,7 +45,7 @@ class CLI(Cmd):
 
     def print_available_commands(self):
         print _("Available commands:")
-        for command in self.get_command_names():
+        for command in sorted(self.get_command_names()):
             print "  " + command
 
     def get_command_names(self):
