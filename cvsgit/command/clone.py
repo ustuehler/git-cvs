@@ -37,8 +37,6 @@ class clone(Command):
             _("Write all changesets to stdout in git-fast-import(1) "
               "format but do not actually import them.  This option "
               "is mostly useful for debugging."))
-        self.add_option('--no-progress', action='store_true', help=\
-            _("Don't display the progress meter."))
         self.add_option('--quiet', action='store_true', help=\
             _("Only report error and warning messages."))
         self.add_option('--verbose', action='store_true', help=\
