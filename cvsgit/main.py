@@ -15,6 +15,14 @@ class Command(Cmd):
     """Base class for conduit commands
     """
 
+    def add_quiet_option(self):
+        self.add_option('--quiet', action='store_true', help=\
+            _("Only report error and warning messages."))
+
+    def add_verbose_option(self):
+        self.add_option('--verbose', action='store_true', help=\
+            _("Display each changeset as it is imported."))
+
 class ConduitError(Error):
     """Base exception for errors in the cvsgit.main module
     """

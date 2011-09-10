@@ -33,10 +33,8 @@ class clone(Command):
               "is interrupted by the user or an unexpected error "
               "and continue from the last checkpoint if the Git "
               "repository already exists."))
-        self.add_option('--quiet', action='store_true', help=\
-            _("Only report error and warning messages."))
-        self.add_option('--verbose', action='store_true', help=\
-            _("Display each changeset as it is imported."))
+        self.add_quiet_option()
+        self.add_verbose_option()
 
     def finalize_options(self):
         if len(self.args) < 1:
