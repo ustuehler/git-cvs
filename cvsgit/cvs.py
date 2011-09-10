@@ -335,25 +335,27 @@ class CVS(object):
         if change.mode == 'b':
             return blob
         else:
-            return self.expand_keywords(blob, change, rcsfile)
+            return self.expand_keywords(blob, change, rcsfile, revision)
 
-    def expand_keywords(self, line, change, rcsfile):
+    def expand_keywords(self, line, change, rcsfile, revision):
         return self._rcs_keyword_re.sub(
-            lambda match: self.expand_keyword_match(match, change, rcsfile),
+            lambda match:
+                self.expand_keyword_match(match, change, rcsfile, revision),
             line)
 
-    def expand_keyword_match(self, match, change, rcsfile):
-        if self.localid and match.group(1) == self.localid:
+    def expand_keyword_match(self, match, change, rcsfile, revision):
+        if match.group(1) == 'Id' or \
+                (self.localid and match.group(1) == self.localid):
             timestamp = time.gmtime(change.timestamp)
             return ('$%s: %s %s %s %s %s $' % \
-                (self.localid, os.path.basename(rcsfile),
-                 change.revision,
+                (match.group(1), os.path.basename(rcsfile),
+                 revision,
                  time.strftime('%Y/%m/%d %H:%M:%S', timestamp),
                  change.author, change.state)).encode('ascii')
         elif match.group(1) == 'Header':
             timestamp = time.gmtime(change.timestamp)
             return ('$Header: %s %s %s %s %s $' % \
-                (rcsfile, change.revision,
+                (rcsfile, revision,
                  time.strftime('%Y/%m/%d %H:%M:%S', timestamp),
                  change.author, change.state)).encode('ascii')
         elif match.group(1) == 'Mdocdate':
