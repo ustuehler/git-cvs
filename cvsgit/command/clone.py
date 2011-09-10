@@ -65,7 +65,6 @@ class clone(Command):
             git = conduit.git
             if git.symbolic_ref('HEAD') == 'refs/heads/master':
                 if self.options.bare:
-                    print conduit.branch
                     git.symbolic_ref('HEAD', conduit.branch)
                 else:
                     git.check_command('reset', '-q', '--hard', conduit.branch)
