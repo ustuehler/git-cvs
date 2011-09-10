@@ -37,7 +37,7 @@ REV_MODE = 6
 # compared to co(1).  If we check out revisions with his parser we
 # risk blowing up the whole process, so we resort to a slow checkout
 # using an external process for large files. :-/
-FAST_CHECKOUT_SIZE_LIMIT = 1048576
+FAST_CHECKOUT_SIZE_LIMIT = 800000
 
 class RCSError(Error):
     """Base class for exceptions from the cvsgit.rcs module
