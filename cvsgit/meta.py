@@ -165,20 +165,34 @@ class MetaDb(object):
         """Yield a list of free changes recorded in the database and
         not bound to a changeset, ordered by their timestamp.
         """
-        for row in self.dbh.execute("""
+        self.dbh.execute("""
+            CREATE TEMPORARY TABLE free_change AS
             SELECT timestamp, author, log, filestatus, filename,
                    revision, state, mode
             FROM change
-            WHERE changeset_id IS NULL
-            ORDER BY timestamp"""):
-            yield(Change(timestamp=row[0],
-                         author=row[1],
-                         log=row[2],
-                         filestatus=row[3],
-                         filename=row[4],
-                         revision=row[5],
-                         state=row[6],
-                         mode=row[7]))
+            WHERE changeset_id IS NULL""")
+        try:
+            while True:
+                rows = self.dbh.execute("""
+                    SELECT timestamp, author, log, filestatus, filename,
+                           revision, state, mode
+                    FROM free_change
+                    ORDER BY timestamp
+                    LIMIT 1000""").fetchall()
+                if len(rows) == 0:
+                    break
+                for row in rows:
+                    change = Change(timestamp=row[0], author=row[1],
+                                    log=row[2], filestatus=row[3],
+                                    filename=row[4], revision=row[5],
+                                    state=row[6], mode=row[7])
+                    yield(change)
+                    self.dbh.execute("""
+                        DELETE FROM free_change
+                        WHERE filename = ? AND revision = ?""",
+                        (change.filename, change.revision,))
+        finally:
+            self.dbh.execute('DROP TABLE IF EXISTS free_change')
 
     def count_changesets(self):
         """Return the number of unmarked changesets (not imported).
