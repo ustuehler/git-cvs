@@ -24,7 +24,8 @@ class CLI(Cmd):
     repository."""
 
     def initialize_options(self):
-        pass
+        self.add_option('--profile', action='store_true', help=\
+            _("Enable profiling output for this command."))
 
     def finalize_options(self):
         pass
@@ -41,7 +42,22 @@ class CLI(Cmd):
         if klass is None:
             self.usage_error(_('invalid command: %s') % command)
         else:
-            klass().main(argv)
+            if self.options.profile:
+                import cProfile
+                import pstats
+                import tempfile
+                with tempfile.NamedTemporaryFile() as tmp:
+                    filename = tmp.name
+                    cProfile.runctx('klass().main(argv)', globals(),
+                                    {'klass':klass, 'argv':argv},
+                                    filename)
+                    stats = pstats.Stats(filename)
+                    stats.sort_stats('cumulative')
+                    stats.print_stats(10)
+                    stats.sort_stats('time')
+                    stats.print_stats(10)
+            else:
+                klass().main(argv)
 
     def print_available_commands(self):
         print _("Available commands:")
