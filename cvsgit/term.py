@@ -50,7 +50,8 @@ class Progress(object):
         self.last_total = total
 
     def update_tty(self, message, count, total):
-        sys.stdout.write('\r' + (' ' * len(self.last_message)) + '\r')
+        if self.last_message:
+            sys.stdout.write('\r' + (' ' * len(self.last_message)) + '\r')
         if count == None:
             sys.stdout.write('%s...' % message)
         elif total == None:
