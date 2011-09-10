@@ -6,7 +6,7 @@ import types
 import shutil
 import sys
 
-from signal import signal, SIGINT, SIG_IGN
+from signal import signal, SIGHUP, SIGINT, SIGTERM, SIG_IGN
 from subprocess import Popen, PIPE
 
 from cvsgit.changeset import FILE_DELETED
@@ -240,11 +240,24 @@ class Git(object):
 
         class SignalIndicator():
             def __init__(self):
-                self.count = 0
+                self.signal = {}
             def __call__(self, signalnum, frame):
-                self.count += 1
-            def isset(self):
-                return self.count > 0
+                self.signal[signalnum] = True
+            def isset(self, signalnum=None):
+                if signalnum:
+                    return self.signal.has_key(signalnum)
+                else:
+                    return len(self.signal) > 0
+
+        sigaction = SignalIndicator()
+        signalset = (SIGHUP,SIGINT,SIGTERM,)
+        old_sigaction = {}
+        for signalnum in signalset:
+            old_sigaction[signalnum] = signal(signalnum, sigaction)
+
+        def ignore_signals():
+            for signalnum in signalset:
+                signal(signalnum, SIG_IGN)
 
         # absolulte file name since cwd is changed in _popen
         marksfile = os.path.join(self.git_dir, 'cvsgit.marks')
@@ -252,11 +265,7 @@ class Git(object):
 
         command = ['git', 'fast-import', '--quiet']
         command.append('--export-marks=' + marksfile)
-        pipe = self._popen(command, stdin=PIPE, preexec_fn=lambda:
-                               signal(SIGINT, SIG_IGN))
-
-        sigint_flag = SignalIndicator()
-	old_sigaction = signal(SIGINT, sigint_flag)
+        pipe = self._popen(command, stdin=PIPE, preexec_fn=ignore_signals)
 
         # TODO: check if this is indeed what we want
         if limit != None and total != None and total > limit:
@@ -274,14 +283,17 @@ class Git(object):
                 fi.add_changeset(changeset)
                 do_progress(len(changesets_seen), total)
 
-                if sigint_flag.isset():
+                if sigaction.isset(SIGINT):
                     raise KeyboardInterrupt()
+                elif sigaction.isset():
+                    break
         finally:
             try:
                 fi.close()
             finally:
                 self.mark_changesets(changesets_seen)
-                signal(SIGINT, old_sigaction)
+                for signalnum in signalset:
+                    signal(signalnum, old_sigaction[signalnum])
 
         if fi.returncode != 0:
             raise RuntimeError, _('git fast-import failed')
@@ -350,8 +362,9 @@ class GitFastImport(object):
             if c.filestatus == FILE_DELETED:
                 self.write('D %s\n' % c.filename)
             else:
+                blob = changeset.blob(c)
                 self.write('M 644 inline %s\n' % c.filename)
-                self.data(changeset.blob(c))
+                self.data(blob)
 
     def close(self):
         try:
