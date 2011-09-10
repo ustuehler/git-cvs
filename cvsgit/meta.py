@@ -36,7 +36,7 @@ class MetaDb(object):
             # This helps for the temporary table which we create when
             # iterating over changes for changeset generation, but
             # bloats the process image a lot.
-            dbh.execute("PRAGMA temp_store=MEMORY")
+            #dbh.execute("PRAGMA temp_store=MEMORY")
 
             # Create the table that contains changes pulled from CVS.
             #
