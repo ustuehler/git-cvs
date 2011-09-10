@@ -6,10 +6,13 @@ import os
 import re
 import string
 import sys
+import textwrap
+import traceback
 
 from cvsgit.cmd import Cmd
 from cvsgit.i18n import _
-from cvsgit.rcs import RCSError
+from cvsgit.error import Error
+from cvsgit.utils import stripnl
 import cvsgit.command
 
 class CLI(Cmd):
@@ -27,6 +30,9 @@ class CLI(Cmd):
     def initialize_options(self):
         self.add_option('--profile', action='store_true', help=\
             _("Enable profiling output for this command."))
+        self.add_option('--detailed-errors', action='store_true', help=\
+            _("Display full stack traces on error and display the "
+              "documentation for exceptions, if available."))
 
     def finalize_options(self):
         pass
@@ -40,8 +46,23 @@ class CLI(Cmd):
     def run_command_with_exception_handling(self, argv):
         try:
             self.run_command(self.args)
-        except RCSError as e:
-            self.fatal(str(e))
+        except Error as e:
+            if self.options.detailed_errors:
+                self.error(str(e) + ' (details follow)')
+
+                (exc_type, exc_value, exc_traceback) = sys.exc_info()
+                print 'Traceback (most recent call last):'
+                traceback.print_tb(exc_traceback)
+
+                if type(e).__doc__:
+                    print '-'*72
+                    print type(e).__name__ + ':',
+                    print textwrap.dedent(type(e).__doc__.rstrip())
+                    print '-'*72
+            else:
+                self.error(str(e) + ' (--detailed-errors for more information)')
+
+            exit(1)
 
     def run_command(self, argv):
         command = argv[0]

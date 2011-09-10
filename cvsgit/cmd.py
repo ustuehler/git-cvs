@@ -75,6 +75,9 @@ class Cmd(object):
     def usage_error(self, msg):
         self.option_parser.error(msg)
 
+    def error(self, msg):
+        sys.stderr.write(_('%s: error: %s\n') % (self.option_parser.prog, msg))
+
     def fatal(self, msg):
         sys.stderr.write(_('%s: fatal: %s\n') % (self.option_parser.prog, msg))
         sys.exit(1)
