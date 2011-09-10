@@ -28,11 +28,6 @@ class clone(Command):
             _("Stop importing after COUNT new commits."))
         self.add_option('--domain', metavar='DOMAIN', help=\
             _("Set the e-mail domain to use for unknown authors."))
-        self.add_option('--partial', action='store_true', help=\
-            _("Keep the incomplete Git repository if this command "
-              "is interrupted by the user or an unexpected error "
-              "and continue from the last checkpoint if the Git "
-              "repository already exists."))
         self.add_quiet_option()
         self.add_verbose_option()
 
@@ -48,7 +43,7 @@ class clone(Command):
             self.usage_error(_('too many arguments'))
 
     def run(self):
-        if os.path.exists(self.directory) and not self.options.partial:
+        if os.path.exists(self.directory):
             self.fatal(_("destination path '%s' already exists") % \
                        self.directory)
 
@@ -63,14 +58,14 @@ class clone(Command):
                           verbose=self.options.verbose)
 
             git = conduit.git
-            if git.symbolic_ref('HEAD') == 'refs/heads/master':
+            head_branch = git.symbolic_ref('HEAD')
+            if head_branch == 'refs/heads/master':
                 if self.options.bare:
-                    git.symbolic_ref('HEAD', conduit.branch)
+                    git.check_command('branch', '-f', 'master', conduit.branch)
                 else:
                     git.check_command('reset', '-q', '--hard', conduit.branch)
         except:
-            if not self.options.partial:
-                shutil.rmtree(self.directory)
+            shutil.rmtree(self.directory)
             raise
 
 if __name__ == '__main__':

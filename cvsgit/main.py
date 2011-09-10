@@ -127,4 +127,12 @@ class Conduit(object):
 
     def pull(self, limit=None, quiet=True, verbose=False):
         self.fetch(limit=limit, quiet=quiet, verbose=verbose)
-        self.git.pull()
+
+        args = []
+        if quiet:
+            args.append('--quiet')
+
+        # XXX: --quiet is not enough if branch.<branch>.rebase is true
+        #self.git.pull(*args)
+        import subprocess
+        self.git.check_command('pull', *args, stdout=subprocess.PIPE)

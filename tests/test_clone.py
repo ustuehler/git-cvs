@@ -43,21 +43,24 @@ class Test(unittest.TestCase):
             #self.assertEquals(0, verify().eval())
 
     def test_clone_partial_alternative(self):
-        """Calling "clone --partial" several times is the same as
-        "clone --partial" followed by "fetch".
+        """Calling "pull --limit" several times is basically the same
+        as cloning everything (given that it's done enough times or
+        that limit is high enough.)
         """
         head1 = None
         with Tempdir(cwd=True) as tempdir:
-            source = join(dirname(__file__), 'data', 'greek', 'tree')
-            self.assertEquals(0, init().eval('--quiet', source))
-            self.assertEquals(0, clone().eval('--quiet', '--partial', source, '.'))
+            source = join(dirname(__file__), 'data', 'zombie')
+            self.assertEquals(0, clone().eval('--quiet', source))
+            os.chdir('zombie')
             head1 = Git().rev_parse('HEAD')
 
         head2 = None
         with Tempdir(cwd=True) as tempdir:
-            source = join(dirname(__file__), 'data', 'greek', 'tree')
+            source = join(dirname(__file__), 'data', 'zombie')
             self.assertEquals(0, init().eval('--quiet', source))
-            self.assertEquals(0, pull().eval())
-            head2 = Git().rev_parse('HEAD')
-
-        self.assertEqual(head1, head2)
+            self.assertEquals(0, pull().eval('--quiet', '--limit=1'))
+            self.assertNotEqual(head1, Git().rev_parse('HEAD'))
+            self.assertEquals(0, pull().eval('--quiet', '--limit=2'))
+            self.assertNotEqual(head1, Git().rev_parse('HEAD'))
+            self.assertEquals(0, pull().eval('--quiet', '--limit=3'))
+            self.assertEqual(head1, Git().rev_parse('HEAD'))
