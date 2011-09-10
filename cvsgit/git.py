@@ -390,7 +390,8 @@ class GitFastImport(object):
 
     def data(self, data):
         "'data' must be a raw binary string of the str() type."
-        assert(type(data) == types.StringType)
+        assert type(data) == types.StringType, \
+            "data type is %s" % type(data)
         self.write('data %d\n' % len(data))
         self.write(data)
         self.write('\n')

@@ -313,16 +313,16 @@ class CVS(object):
         line = pipe.stdout.readline()
         data = ''
         while line:
-            data += self.expand_keywords(line, change)
+            data += self.expand_keywords(line, change, rcsfile)
             line = pipe.stdout.readline()
         return data
 
-    def expand_keywords(self, line, change):
+    def expand_keywords(self, line, change, rcsfile):
         return re.sub('\$([^$:]+)[^$]*\$',
-            lambda match: self.expand_keyword_match(match, change),
+            lambda match: self.expand_keyword_match(match, change, rcsfile),
             line)
 
-    def expand_keyword_match(self, match, change):
+    def expand_keyword_match(self, match, change, rcsfile):
         if self.localid and match.group(1) == self.localid:
             timestamp = time.gmtime(change.timestamp)
             return ('$%s: %s,v %s %s %s %s $' % \
@@ -331,7 +331,12 @@ class CVS(object):
                  change.revision,
                  time.strftime('%Y/%m/%d %H:%M:%S', timestamp),
                  change.author, change.state)).encode('ascii')
+        elif match.group(1) == 'Header':
+            header = match.group(0)
+            # str(rcsfile) because rcsfile is a unicode string
+            return str(re.sub(' ([^ ]+,v) ', ' %s ' % str(rcsfile), header))
         elif match.group(1) == 'Mdocdate':
+            # This is for OpenBSD.
             timestamp = time.gmtime(change.timestamp)
             mdocdate = time.strftime('%B %e %Y', timestamp)
             mdocdate = mdocdate.replace('  ', ' ') # for %e
