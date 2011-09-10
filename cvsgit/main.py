@@ -43,7 +43,7 @@ class Conduit(object):
 
     def __init__(self, directory=None):
         self.git = Git(directory)
-        self.branch = 'refs/cvs/HEAD'
+        self.branch = 'refs/heads/cvs/HEAD'
         self._cvs = None
         self._config = {}
 

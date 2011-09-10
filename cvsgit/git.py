@@ -338,7 +338,7 @@ class GitFastImport(object):
                 teaser = teaser[:68] + '...'
             print '\t%s' % teaser.encode('ascii', 'replace')
 
-        self.write('commit refs/heads/%s\n' % self.branch)
+        self.write('commit %s\n' % self.branch)
         self.write('mark :%s\n' % changeset.id)
         self.write('committer %s <%s> %s\n' % (name, email, when))
         self.data(changeset.log.encode('utf-8'))
