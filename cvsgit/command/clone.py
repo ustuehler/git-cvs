@@ -62,8 +62,10 @@ class clone(Command):
                           quiet=self.options.quiet,
                           verbose=self.options.verbose)
 
-            if not self.options.bare:
-                conduit.git.checkout('-b', 'master', conduit.branch)
+            git = conduit.git
+            if not self.options.bare and \
+                    git.symbolic_ref('HEAD') == 'refs/heads/master':
+                git.check_command('reset', '--hard', conduit.branch)
         except:
             if not self.options.partial:
                 shutil.rmtree(self.directory)
