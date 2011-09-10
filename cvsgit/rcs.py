@@ -1,5 +1,8 @@
 """RCS interface module for CVSGit."""
 
+from __future__ import absolute_import
+import rcsparse
+
 # Some observations about RCS + CVS, although I don't really know
 # that much about the RCS format or the CVS usage of it...
 #
@@ -21,16 +24,16 @@ from cvsgit.changeset import Change, FILE_ADDED, FILE_MODIFIED, \
 
 # Our 'rcsparse' module is actually a simple copy of the RCS parser
 # code from cvs2svn.
-from cvsgit import rcsparse
+#from cvsgit import rcsparse
 
-REV_TIMESTAMP = 0
-REV_AUTHOR = 1
-REV_STATE = 2
-REV_BRANCHES = 3
-REV_NEXT = 4
-REV_MODE = 5
+REV_TIMESTAMP = 1
+REV_AUTHOR = 2
+REV_STATE = 3
+REV_BRANCHES = 4
+REV_NEXT = 5
+REV_MODE = 6
 
-class RCSFile(rcsparse.Sink):
+class RCSFile(object):
     "Represents a single RCS file."
 
     def __init__(self, filename, encoding='iso8859-1'):
@@ -39,23 +42,12 @@ class RCSFile(rcsparse.Sink):
         """
         self.filename = filename
         self.encoding = encoding
-        self.parse()
+        self.rcsfile = rcsparse.rcsfile(filename)
 
-    def parse(self):
-        """Parse the RCS file to set the 'head', 'branch', 'revs' and
-        'log' attributes.
-        """
-        f = file(os.path.join(self.filename), 'r')
-        try:
-            self.head = None
-            self.branch = None
-            self.revs = {}
-            self.log = {}
-            self.mode = ''              # XXX
-
-            rcsparse.parse(f, self)
-        finally:
-            f.close()
+    head = property(lambda self: self.rcsfile.head)
+    branch = property(lambda self: self.rcsfile.branch)
+    mode = property(lambda self: self.rcsfile.mode)
+    revs = property(lambda self: self.rcsfile.revs)
 
     def revisions(self):
         """Yield all revision numbers from current HEAD backwards.
@@ -102,9 +94,17 @@ class RCSFile(rcsparse.Sink):
             # The log message for an initial import is actually in
             # the initial vendor branch revision.
             if revision == '1.1' and '1.1.1.1' in rev[REV_BRANCHES]:
-                log = self.log['1.1.1.1']
+                log = self.rcsfile.getlog('1.1.1.1')
             else:
-                log = self.log[revision]
+                log = self.rcsfile.getlog(revision)
+
+            # XXX: is this right?
+            log = unicode(log, self.encoding)
+
+            if rev[REV_MODE] == None:
+                mode = ''
+            else:
+                mode = rev[REV_MODE]
 
             yield(Change(timestamp=rev[REV_TIMESTAMP],
                          author=rev[REV_AUTHOR],
@@ -113,7 +113,12 @@ class RCSFile(rcsparse.Sink):
                          filename=self.filename,
                          revision=revision,
                          state=rev[REV_STATE],
-                         mode=rev[REV_MODE]))
+                         mode=mode))
+
+    def blob(self, revision):
+        """Returns the revision's file content.
+        """
+        return self.rcsfile.checkout(revision)
 
     # XXX only for debugging; remove later
     def _print_revision(self, revision):
@@ -124,23 +129,4 @@ class RCSFile(rcsparse.Sink):
         print '  branches:', rev[REV_BRANCHES]
         print '  next:', rev[REV_NEXT]
         print '  state:', rev[REV_STATE]
-        print '  log:', self.log[revision].splitlines()[0]
-
-    # rcsparse.Sink methods:
-
-    def set_head_revision(self, revision):
-        self.head = revision
-
-    def set_principal_branch(self, branch_name):
-        self.branch = branch_name
-
-    def set_expansion(self, mode):
-        self.mode = mode
-
-    def define_revision(self, revision, timestamp, author, state,
-                        branches, next):
-        self.revs[revision] = (timestamp, author, state, branches, next,
-                               self.mode) # XXX
-
-    def set_revision_info(self, revision, log, text):
-        self.log[revision] = unicode(log, self.encoding)
+        print '  log:', self.rcsfile.getlog(revision).splitlines()[0]

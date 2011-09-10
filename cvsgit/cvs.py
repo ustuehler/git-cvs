@@ -69,6 +69,9 @@ class CVS(object):
         self.parse_options()
 
         self.statcache = {}
+        self._rcs_keyword_re = re.compile('\$([^$:\r\n]+)[^$\r\n]*\$')
+        self._rcs_headerfix_re = re.compile(' ([^ ]+,v) ')
+        self._rcs_strip_attic_re = re.compile('(Attic/)?([^/]+),v$')
 
     def parse_options(self):
         """Extract relevant information from the CVSROOT/options file,
@@ -247,7 +250,7 @@ class CVS(object):
     def _fetch_changes_from_rcsfile(self, rcsfile):
         # For the working copy path it does not matter if the RCS
         # file is in the 'Attic' directory or not, so strip it.
-        filename = re.sub('(Attic/)?([^/]+),v$', '\\2', rcsfile)
+        filename = self._rcs_strip_attic_re.sub('\\2', rcsfile)
 
         abspath = os.path.join(self.prefix, rcsfile)
         st = os.stat(abspath)
@@ -328,30 +331,14 @@ class CVS(object):
         else:
             revision = change.revision
 
-        #
-        # We use co(1) instead of cvs(1) to fetch the full text of a
-        # particular revision since cvs(1) needs an existing working
-        # copy (then we could use "cvs up -p -r <rev>").  The problem
-        # with co(1) is that it does not expand RCS keywords in the
-        # same way as cvs(1) would do.  In particular, co(1) will not
-        # expand the "local ID" keyword that can be set through the
-        # "tag=XYZ" option in CVSROOT/options.  We will do that here
-        # but leave the rest of the keywords to be expanded by co(1).
-        #
-        argv = ['co', '-q', '-p' + revision, rcsfile]
-        pipe = Popen(argv, stdout=PIPE)
+        blob = RCSFile(rcsfile).blob(revision)
         if change.mode == 'b':
-            return pipe.communicate()[0]
-
-        line = pipe.stdout.readline()
-        data = ''
-        while line:
-            data += self.expand_keywords(line, change, rcsfile)
-            line = pipe.stdout.readline()
-        return data
+            return blob
+        else:
+            return self.expand_keywords(blob, change, rcsfile)
 
     def expand_keywords(self, line, change, rcsfile):
-        return re.sub('\$([^$:]+)[^$]*\$',
+        return self._rcs_keyword_re.sub(
             lambda match: self.expand_keyword_match(match, change, rcsfile),
             line)
 
@@ -367,7 +354,8 @@ class CVS(object):
         elif match.group(1) == 'Header':
             header = match.group(0)
             # str(rcsfile) because rcsfile is a unicode string
-            return str(re.sub(' ([^ ]+,v) ', ' %s ' % str(rcsfile), header))
+            return str(self._rcs_headerfix_re.sub(
+                    ' %s ' % str(rcsfile), header))
         elif match.group(1) == 'Mdocdate':
             # This is for OpenBSD.
             timestamp = time.gmtime(change.timestamp)
