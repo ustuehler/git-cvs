@@ -1,6 +1,9 @@
 import unittest
-from cvsgit.rcs import RCSFile
+
 from os.path import dirname, join
+
+from cvsgit.rcs import RCSFile
+from cvsgit.cvs import CVS # XXX: should not be needed here
 
 class Test(unittest.TestCase):
 
@@ -32,3 +35,14 @@ class Test(unittest.TestCase):
         """
         f = RCSFile(join(dirname(__file__), 'data', 'nsd', 'LICENSE,v'))
         self.assertEqual(['1.1.1.1', '1.1.1.2'], list(f.revisions()))
+
+    def test_keyword_substitution_edge_cases(self):
+        """Test edge cases where RCS keyword expansion might fail.
+        """
+        f = RCSFile(join(dirname(__file__), 'data', 'dot.commonutils,v'))
+        c = f.change('1.1')
+        # FIXME: RCS should do keyword substitution, not CVS!
+        cvs = CVS(join(dirname(__file__), 'data', 'greek'), None)
+        blob = cvs.expand_keywords(f.blob('1.1'), c, 'dot.commonutils,v', '1.1')
+        s = '$Id: dot.commonutils,v 1.1 1995/10/18 08:37:54 deraadt Exp $'
+        self.assertEqual(1651, blob.find(s))

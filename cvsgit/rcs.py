@@ -115,47 +115,56 @@ class RCSFile(object):
         from most recent to oldest.
         """
         for revision in self.revisions():
-            rev = self.revs[revision]
+            change = self.change(revision)
+            if change != None:
+                yield(change)
 
-            if rev[REV_STATE] == 'dead':
-                if revision == '1.1':
-                    # This file was initially added on a branch and so
-                    # the initial trunk revision was marked 'dead'. We
-                    # do not count this as a change since it wasn't
-                    # added and hasn't existed before.
-                    continue
-                else:
-                    filestatus = FILE_DELETED
-            elif rev[REV_NEXT] == None:
-                filestatus = FILE_ADDED
+    def change(self, revision):
+        """Return a single Change object for <revision>.
+
+        If the revision is 1.1 and has state 'dead' then the file was
+        added on a branch and None is returned.
+        """
+        rev = self.revs[revision]
+        if rev[REV_STATE] == 'dead':
+            if revision == '1.1':
+                # This file was initially added on a branch and so
+                # the initial trunk revision was marked 'dead'. We
+                # do not count this as a change since it wasn't
+                # added and hasn't existed before.
+                return None
             else:
-                # XXX: Resurrections of dead revisions aren't flagged
-                # as FILE_ADDED.
-                filestatus = FILE_MODIFIED
+                filestatus = FILE_DELETED
+        elif rev[REV_NEXT] == None:
+            filestatus = FILE_ADDED
+        else:
+            # XXX: Resurrections of dead revisions aren't flagged
+            # as FILE_ADDED.
+            filestatus = FILE_MODIFIED
 
-            # The log message for an initial import is actually in
-            # the initial vendor branch revision.
-            if revision == '1.1' and '1.1.1.1' in rev[REV_BRANCHES]:
-                log = self.rcsfile.getlog('1.1.1.1')
-            else:
-                log = self.rcsfile.getlog(revision)
+        # The log message for an initial import is actually in
+        # the initial vendor branch revision.
+        if revision == '1.1' and '1.1.1.1' in rev[REV_BRANCHES]:
+            log = self.rcsfile.getlog('1.1.1.1')
+        else:
+            log = self.rcsfile.getlog(revision)
 
-            # XXX: is this right?
-            log = unicode(log, self.encoding)
+        # XXX: is this right?
+        log = unicode(log, self.encoding)
 
-            if rev[REV_MODE] == None:
-                mode = ''
-            else:
-                mode = rev[REV_MODE]
+        if rev[REV_MODE] == None:
+            mode = ''
+        else:
+            mode = rev[REV_MODE]
 
-            yield(Change(timestamp=rev[REV_TIMESTAMP],
-                         author=rev[REV_AUTHOR],
-                         log=log,
-                         filestatus=filestatus,
-                         filename=self.filename,
-                         revision=revision,
-                         state=rev[REV_STATE],
-                         mode=mode))
+        return Change(timestamp=rev[REV_TIMESTAMP],
+                      author=rev[REV_AUTHOR],
+                      log=log,
+                      filestatus=filestatus,
+                      filename=self.filename,
+                      revision=revision,
+                      state=rev[REV_STATE],
+                      mode=mode)
 
     def blob(self, revision, size_hint=None):
         """Returns the revision's file content.

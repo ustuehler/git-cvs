@@ -69,7 +69,7 @@ class CVS(object):
         self.parse_options()
 
         self.statcache = {}
-        self._rcs_keyword_re = re.compile('\$([^$:\r\n]+)[^$\r\n]*\$')
+        self._rcs_keyword_re = re.compile('\$([A-Z][A-Za-z]+)(:[^$]+)?\$')
         self._rcs_headerfix_re = re.compile(' ([^ ]+,v) ')
         self._rcs_strip_attic_re = re.compile('(Attic/)?([^/]+),v$')
 
@@ -343,11 +343,11 @@ class CVS(object):
         else:
             return self.expand_keywords(blob, change, rcsfile, revision)
 
-    def expand_keywords(self, line, change, rcsfile, revision):
+    def expand_keywords(self, blob, change, rcsfile, revision):
         return self._rcs_keyword_re.sub(
             lambda match:
                 self.expand_keyword_match(match, change, rcsfile, revision),
-            line)
+            blob)
 
     def expand_keyword_match(self, match, change, rcsfile, revision):
         if match.group(1) == 'Id' or \
