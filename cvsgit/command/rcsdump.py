@@ -1,5 +1,7 @@
 """Command to draw the revision tree of an RCS file."""
 
+import os
+
 from cvsgit.main import Command
 from cvsgit.rcs import RCSFile
 from cvsgit.i18n import _
@@ -8,14 +10,15 @@ class Rcsdump(Command):
     __doc__ = _(
     """Dump all changes on the HEAD branch of an RCS file.
 
-    Usage: %prog <rcsfile>
+    Usage: %prog [options] <rcsfile>
 
     Displays the changes on the HEAD branch of an RCS file for
     debugging purposes.
     """)
 
     def initialize_options(self):
-        self.rcsfile = None
+        self.add_option('--checkout', metavar='REVISION', help=\
+            _("Dump the content of the specified REVISION."))
 
     def finalize_options(self):
         if len(self.args) < 1:
@@ -27,6 +30,10 @@ class Rcsdump(Command):
 
     def run(self):
         rcsfile = RCSFile(self.rcsfile)
+
+        if self.options.checkout:
+            return self.checkout(rcsfile, self.options.checkout)
+
         print 'Head: %s' % rcsfile.head
         print 'Branch: %s' % rcsfile.branch
         print 'Revision trail:',
@@ -35,3 +42,7 @@ class Rcsdump(Command):
         print ''
         for change in rcsfile.changes():
             rcsfile._print_revision(change.revision)
+
+    def checkout(self, rcsfile, revision):
+        size = os.stat(self.rcsfile).st_size
+        print rcsfile.blob(revision, size_hint=size)
