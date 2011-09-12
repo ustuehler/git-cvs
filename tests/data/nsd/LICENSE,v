@@ -1,0 +1,98 @@
+head	1.1;
+branch 1.1.1;
+access;
+symbols
+	NLNETLABS:1.1.1
+	NSD_3_2_4:1.1.1.1
+	NSD_3_2_5:1.1.1.1
+	NSD_3_2_6:1.1.1.1
+	NSD_3_2_8:1.1.1.2
+	OPENBSD_4_7:1.1.1.1.0.2
+	OPENBSD_4_7_BASE:1.1.1.1
+	OPENBSD_4_8:1.1.1.1.0.4
+	OPENBSD_4_8_BASE:1.1.1.1
+	OPENBSD_4_9:1.1.1.1.0.6
+	OPENBSD_4_9_BASE:1.1.1.1
+	OPENBSD_5_0:1.1.1.2.0.2
+	OPENBSD_5_0_BASE:1.1.1.2;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2010.01.15.19.24.51;	author jakob;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2010.01.15.19.24.51;	author jakob;	state Exp;
+branches;
+next	1.1.1.2;
+
+1.1.1.2
+date	2011.05.21.18.17.22;	author jakob;	state Exp;
+branches;
+next	;
+
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Copyright (c) 2001-2006, NLnet Labs. All rights reserved.
+
+This software is open source.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+
+Neither the name of the NLNET LABS nor the names of its contributors may
+be used to endorse or promote products derived from this software without
+specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+@
+
+
+1.1.1.1
+log
+@NSD v3.2.4
+@
+text
+@@
+
+
+1.1.1.2
+log
+@NSD v3.2.8
+@
+text
+@d1 1
+a1 1
+Copyright (c) 2001-2011, NLnet Labs. All rights reserved.
+@
