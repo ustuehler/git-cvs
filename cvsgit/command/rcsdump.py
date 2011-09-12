@@ -4,7 +4,7 @@ from cvsgit.main import Command
 from cvsgit.rcs import RCSFile
 from cvsgit.i18n import _
 
-class rcsdump(Command):
+class Rcsdump(Command):
     __doc__ = _(
     """Dump all changes on the HEAD branch of an RCS file.
 
@@ -35,6 +35,3 @@ class rcsdump(Command):
         print ''
         for change in rcsfile.changes():
             rcsfile._print_revision(change.revision)
-
-if __name__ == '__main__':
-    rcsdump()

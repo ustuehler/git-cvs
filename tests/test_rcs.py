@@ -21,3 +21,14 @@ class Test(unittest.TestCase):
         f = RCSFile(join(dirname(__file__), 'data', 'pkcs.c,v'))
         for c in f.changes(): pass
         self.assertEqual('1.4', c.revision)
+
+    def test_multiple_vendor_imports_and_no_revisions_on_trunk(self):
+        """Respect the 'branch' field in the RCS header.
+
+        This file was imported twice into the vendor branch but never
+        modified in the HEAD branch.
+
+        The RCS file is from OpenBSD CVS (src/usr.sbin/nsd/LICENSE).
+        """
+        f = RCSFile(join(dirname(__file__), 'data', 'nsd', 'LICENSE,v'))
+        self.assertEqual(['1.1.1.1', '1.1.1.2'], list(f.revisions()))

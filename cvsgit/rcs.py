@@ -90,19 +90,19 @@ class RCSFile(object):
     def revisions(self):
         """Yield all revision numbers from current HEAD backwards.
         """
+        if self.branch:
+            branchprefix = self.branch + '.'
+        else:
+            branchprefix = None
+
         revision = self.head
         while revision != None:
-            # See the comment at the top of this file.  This may not always
-            # result in the same Id keyword expansion that cvs does for the
-            # initial revision of an imported file, but it seems to be what
-            # Id expanded to in the checked out file that resulted in 1.2.
-            branches = self.revs[revision][REV_BRANCHES]
-            if revision == '1.1' and '1.1.1.1' in branches:
-                revision = '1.1.1.1'
-                # REV_NEXT will be 1.1.1.2, but this really is the end
-                # of the history on HEAD.
-                yield(revision)
-                break
+            if branchprefix:
+                for brevision in self.revs[revision][REV_BRANCHES]:
+                    if brevision.startswith(branchprefix):
+                        branchprefix = None
+                        revision = brevision
+                        break
 
             yield(revision)
             revision = self.revs[revision][REV_NEXT]
