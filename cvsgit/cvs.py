@@ -69,7 +69,7 @@ class CVS(object):
         self.parse_options()
 
         self.statcache = {}
-        self._rcs_keyword_re = re.compile('\$([A-Z][A-Za-z]+)(:[^$]+)?\$')
+        self._rcs_keyword_re = re.compile('\$([A-Z][A-Za-z]+)(:[^$\r\n]+)?\$')
         self._rcs_headerfix_re = re.compile(' ([^ ]+,v) ')
         self._rcs_strip_attic_re = re.compile('(Attic/)?([^/]+),v$')
 

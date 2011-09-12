@@ -46,3 +46,10 @@ class Test(unittest.TestCase):
         blob = cvs.expand_keywords(f.blob('1.1'), c, 'dot.commonutils,v', '1.1')
         s = '$Id: dot.commonutils,v 1.1 1995/10/18 08:37:54 deraadt Exp $'
         self.assertEqual(1651, blob.find(s))
+
+        f = RCSFile(join(dirname(__file__), 'data', 'res_query.c,v'))
+        c = f.change('1.1')
+        cvs = CVS(join(dirname(__file__), 'data', 'greek'), None)
+        blob = cvs.expand_keywords(f.blob('1.1'), c, 'res_query.c,v', '1.1')
+        s = '$Id: res_query.c,v 1.1 1993/06/01 09:42:14 vixie Exp vixie "'
+        self.assertEqual(3091, blob.find(s))
