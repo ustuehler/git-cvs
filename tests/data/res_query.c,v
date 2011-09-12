@@ -1,0 +1,1326 @@
+head	1.26;
+access;
+symbols
+	OPENBSD_2_0:1.7.0.2
+	OPENBSD_2_0_BASE:1.7
+	OPENBSD_2_1:1.9.0.2
+	OPENBSD_2_1_BASE:1.9
+	OPENBSD_2_2:1.10.0.2
+	OPENBSD_2_2_BASE:1.10
+	OPENBSD_2_3:1.11.0.2
+	OPENBSD_2_3_BASE:1.11
+	OPENBSD_2_4:1.12.0.2
+	OPENBSD_2_4_BASE:1.12
+	OPENBSD_2_5:1.12.0.4
+	OPENBSD_2_5_BASE:1.12
+	OPENBSD_2_6:1.13.0.2
+	OPENBSD_2_6_BASE:1.13
+	OPENBSD_2_7:1.13.0.4
+	OPENBSD_2_7_BASE:1.13
+	OPENBSD_2_8:1.13.0.6
+	OPENBSD_2_8_BASE:1.13
+	OPENBSD_2_9:1.13.0.8
+	OPENBSD_2_9_BASE:1.13
+	OPENBSD_3_0:1.16.0.2
+	OPENBSD_3_0_BASE:1.16
+	OPENBSD_3_1:1.17.0.2
+	OPENBSD_3_1_BASE:1.17
+	OPENBSD_3_2:1.19.0.2
+	OPENBSD_3_2_BASE:1.19
+	OPENBSD_3_3:1.20.0.2
+	OPENBSD_3_3_BASE:1.20
+	OPENBSD_3_4:1.21.0.2
+	OPENBSD_3_4_BASE:1.21
+	OPENBSD_3_5:1.21.0.4
+	OPENBSD_3_5_BASE:1.21
+	OPENBSD_3_6:1.21.0.6
+	OPENBSD_3_6_BASE:1.21
+	OPENBSD_3_7:1.21.0.8
+	OPENBSD_3_7_BASE:1.21
+	OPENBSD_3_8:1.24.0.2
+	OPENBSD_3_8_BASE:1.24
+	OPENBSD_3_9:1.24.0.4
+	OPENBSD_3_9_BASE:1.24
+	OPENBSD_4_0:1.24.0.6
+	OPENBSD_4_0_BASE:1.24
+	OPENBSD_4_1:1.24.0.8
+	OPENBSD_4_1_BASE:1.24
+	OPENBSD_4_2:1.25.0.2
+	OPENBSD_4_2_BASE:1.25
+	OPENBSD_4_3:1.25.0.4
+	OPENBSD_4_3_BASE:1.25
+	OPENBSD_4_4:1.25.0.6
+	OPENBSD_4_4_BASE:1.25
+	OPENBSD_4_5:1.25.0.8
+	OPENBSD_4_5_BASE:1.25
+	OPENBSD_4_6:1.25.0.12
+	OPENBSD_4_6_BASE:1.25
+	OPENBSD_4_7:1.25.0.10
+	OPENBSD_4_7_BASE:1.25
+	OPENBSD_4_8:1.26.0.2
+	OPENBSD_4_8_BASE:1.26
+	OPENBSD_4_9:1.26.0.4
+	OPENBSD_4_9_BASE:1.26
+	OPENBSD_5_0:1.26.0.6
+	OPENBSD_5_0_BASE:1.26
+	netbsd_1_1:1.1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.26
+date	2010.06.29.21.08.54;	author deraadt;	state Exp;
+branches;
+next	1.25;
+
+1.25
+date	2007.05.16.04.14.23;	author ray;	state Exp;
+branches;
+next	1.24;
+
+1.24
+date	2005.08.06.20.30.04;	author espie;	state Exp;
+branches;
+next	1.23;
+
+1.23
+date	2005.03.30.02.58.28;	author tedu;	state Exp;
+branches;
+next	1.22;
+
+1.22
+date	2005.03.25.13.24.12;	author otto;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	2003.06.02.20.18.36;	author millert;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	2003.01.28.04.58.00;	author marc;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	2002.06.27.09.55.49;	author itojun;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	2002.05.24.21.22.37;	author deraadt;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	2002.02.16.21.27.23;	author millert;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	2001.07.31.22.02.18;	author jakob;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	2001.06.27.00.58.55;	author lebel;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	2001.06.11.10.06.01;	author itojun;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	99.09.27.23.58.26;	author alex;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	98.08.31.18.15.29;	author deraadt;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	98.03.16.05.07.02;	author millert;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	97.07.09.01.08.53;	author millert;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	97.04.06.07.55.04;	author deraadt;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	97.03.13.19.07.40;	author downsj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	96.08.27.03.32.54;	author deraadt;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	96.08.24.09.32.20;	author deraadt;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	96.08.19.17.45.21;	author deraadt;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	96.08.19.08.29.48;	author tholo;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	96.08.18.19.07.27;	author deraadt;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	96.02.19.19.53.28;	author dm;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.10.18.08.42.04;	author deraadt;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	95.10.18.08.42.04;	author deraadt;	state Exp;
+branches;
+next	;
+
+
+
+desc
+@@
+
+
+1.26
+log
+@use a union to align the dns answer buffer until gcc4 is fixed
+@
+text
+@/*	$OpenBSD: res_query.c,v 1.25 2007/05/16 04:14:23 ray Exp $	*/
+
+/*
+ * ++Copyright++ 1988, 1993
+ * -
+ * Copyright (c) 1988, 1993
+ *    The Regents of the University of California.  All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * -
+ * Portions Copyright (c) 1993 by Digital Equipment Corporation.
+ * 
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies, and that
+ * the name of Digital Equipment Corporation not be used in advertising or
+ * publicity pertaining to distribution of the document or software without
+ * specific, written prior permission.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS" AND DIGITAL EQUIPMENT CORP. DISCLAIMS ALL
+ * WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS.   IN NO EVENT SHALL DIGITAL EQUIPMENT
+ * CORPORATION BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+ * DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
+ * PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
+ * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+ * SOFTWARE.
+ * -
+ * --Copyright--
+ */
+
+#include <sys/types.h>
+#include <sys/param.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+
+#include <stdio.h>
+#include <netdb.h>
+#include <resolv.h>
+#include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "thread_private.h"
+
+#if PACKETSZ > 1024
+#define MAXPACKET	PACKETSZ
+#else
+#define MAXPACKET	1024
+#endif
+
+const char *hostalias(const char *);
+int h_errno;
+extern int res_opt(int, u_char *, int, int);
+
+/*
+ * Formulate a normal query, send, and await answer.
+ * Returned answer is placed in supplied buffer "answer".
+ * Perform preliminary check of answer, returning success only
+ * if no error is indicated and the answer count is nonzero.
+ * Return the size of the response on success, -1 on error.
+ * Error number is left in h_errno.
+ *
+ * Caller must parse answer and determine whether it answers the question.
+ */
+int
+res_query(const char *name,
+    int class,		/* domain name */
+    int type,		/* class and type of query */
+    u_char *answer,	/* buffer to put answer */
+    int anslen)		/* size of answer buffer */
+{
+	struct __res_state *_resp = _THREAD_PRIVATE(_res, _res, &_res);
+	union {
+		HEADER hdr;
+		u_char buf[MAXPACKET];
+	} buf;
+	HEADER *hp = (HEADER *) answer;
+	int n;
+
+	hp->rcode = NOERROR;	/* default */
+
+	if (_res_init(0) == -1) {
+		h_errno = NETDB_INTERNAL;
+		return (-1);
+	}
+#ifdef DEBUG
+	if (_resp->options & RES_DEBUG)
+		printf(";; res_query(%s, %d, %d)\n", name, class, type);
+#endif
+
+	n = res_mkquery(QUERY, name, class, type, NULL, 0, NULL,
+			buf.buf, sizeof(buf.buf));
+	if (n > 0 && ((_resp->options & RES_USE_EDNS0) ||
+	    (_resp->options & RES_USE_DNSSEC))) {
+		n = res_opt(n, buf.buf, sizeof(buf.buf), anslen);
+	}
+
+	if (n <= 0) {
+#ifdef DEBUG
+		if (_resp->options & RES_DEBUG)
+			printf(";; res_query: mkquery failed\n");
+#endif
+		h_errno = NO_RECOVERY;
+		return (n);
+	}
+	n = res_send(buf.buf, n, answer, anslen);
+	if (n < 0) {
+#ifdef DEBUG
+		if (_resp->options & RES_DEBUG)
+			printf(";; res_query: send error\n");
+#endif
+		h_errno = TRY_AGAIN;
+		return (n);
+	}
+
+	if (hp->rcode != NOERROR || ntohs(hp->ancount) == 0) {
+#ifdef DEBUG
+		if (_resp->options & RES_DEBUG)
+			printf(";; rcode = %u, ancount=%u\n", hp->rcode,
+			    ntohs(hp->ancount));
+#endif
+		switch (hp->rcode) {
+		case NXDOMAIN:
+			h_errno = HOST_NOT_FOUND;
+			break;
+		case SERVFAIL:
+			h_errno = TRY_AGAIN;
+			break;
+		case NOERROR:
+			h_errno = NO_DATA;
+			break;
+		case FORMERR:
+		case NOTIMP:
+		case REFUSED:
+		default:
+			h_errno = NO_RECOVERY;
+			break;
+		}
+		return (-1);
+	}
+	return (n);
+}
+
+/*
+ * Formulate a normal query, send, and retrieve answer in supplied buffer.
+ * Return the size of the response on success, -1 on error.
+ * If enabled, implement search rules until answer or unrecoverable failure
+ * is detected.  Error code, if any, is left in h_errno.
+ */
+int
+res_search(const char *name,
+    int class,		/* domain name */
+    int type,		/* class and type of query */
+    u_char *answer,	/* buffer to put answer */
+    int anslen)		/* size of answer */
+{
+	const char *cp, * const *domain;
+	struct __res_state *_resp = _THREAD_PRIVATE(_res, _res, &_res);
+	HEADER *hp = (HEADER *) answer;
+	u_int dots;
+	int trailing_dot, ret, saved_herrno;
+	int got_nodata = 0, got_servfail = 0, tried_as_is = 0;
+
+	if (_res_init(0) == -1) {
+		h_errno = NETDB_INTERNAL;
+		return (-1);
+	}
+	errno = 0;
+	h_errno = HOST_NOT_FOUND;	/* default, if we never query */
+	dots = 0;
+	for (cp = name; *cp; cp++)
+		dots += (*cp == '.');
+	trailing_dot = 0;
+	if (cp > name && *--cp == '.')
+		trailing_dot++;
+
+	/*
+	 * if there aren't any dots, it could be a user-level alias
+	 */
+	if (!dots && (cp = __hostalias(name)) != NULL)
+		return (res_query(cp, class, type, answer, anslen));
+
+	/*
+	 * If there are dots in the name already, let's just give it a try
+	 * 'as is'.  The threshold can be set with the "ndots" option.
+	 */
+	saved_herrno = -1;
+	if (dots >= _resp->ndots) {
+		ret = res_querydomain(name, NULL, class, type, answer, anslen);
+		if (ret > 0)
+			return (ret);
+		saved_herrno = h_errno;
+		tried_as_is++;
+	}
+
+	/*
+	 * We do at least one level of search if
+	 *	- there is no dot and RES_DEFNAME is set, or
+	 *	- there is at least one dot, there is no trailing dot,
+	 *	  and RES_DNSRCH is set.
+	 */
+	if ((!dots && (_resp->options & RES_DEFNAMES)) ||
+	    (dots && !trailing_dot && (_resp->options & RES_DNSRCH))) {
+		int done = 0;
+
+		for (domain = (const char * const *)_resp->dnsrch;
+		     *domain && !done;
+		     domain++) {
+
+			ret = res_querydomain(name, *domain, class, type,
+					      answer, anslen);
+			if (ret > 0)
+				return (ret);
+
+			/*
+			 * If no server present, give up.
+			 * If name isn't found in this domain,
+			 * keep trying higher domains in the search list
+			 * (if that's enabled).
+			 * On a NO_DATA error, keep trying, otherwise
+			 * a wildcard entry of another type could keep us
+			 * from finding this entry higher in the domain.
+			 * If we get some other error (negative answer or
+			 * server failure), then stop searching up,
+			 * but try the input name below in case it's
+			 * fully-qualified.
+			 */
+			if (errno == ECONNREFUSED) {
+				h_errno = TRY_AGAIN;
+				return (-1);
+			}
+
+			switch (h_errno) {
+			case NO_DATA:
+				got_nodata++;
+				/* FALLTHROUGH */
+			case HOST_NOT_FOUND:
+				/* keep trying */
+				break;
+			case TRY_AGAIN:
+				if (hp->rcode == SERVFAIL) {
+					/* try next search element, if any */
+					got_servfail++;
+					break;
+				}
+				/* FALLTHROUGH */
+			default:
+				/* anything else implies that we're done */
+				done++;
+			}
+
+			/* if we got here for some reason other than DNSRCH,
+			 * we only wanted one iteration of the loop, so stop.
+			 */
+			if (!(_resp->options & RES_DNSRCH))
+				done++;
+		}
+	}
+
+	/* if we have not already tried the name "as is", do that now.
+	 * note that we do this regardless of how many dots were in the
+	 * name or whether it ends with a dot.
+	 */
+	if (!tried_as_is) {
+		ret = res_querydomain(name, NULL, class, type, answer, anslen);
+		if (ret > 0)
+			return (ret);
+	}
+
+	/* if we got here, we didn't satisfy the search.
+	 * if we did an initial full query, return that query's h_errno
+	 * (note that we wouldn't be here if that query had succeeded).
+	 * else if we ever got a nodata, send that back as the reason.
+	 * else send back meaningless h_errno, that being the one from
+	 * the last DNSRCH we did.
+	 */
+	if (saved_herrno != -1)
+		h_errno = saved_herrno;
+	else if (got_nodata)
+		h_errno = NO_DATA;
+	else if (got_servfail)
+		h_errno = TRY_AGAIN;
+	return (-1);
+}
+
+/*
+ * Perform a call on res_query on the concatenation of name and domain,
+ * removing a trailing dot from name if domain is NULL.
+ */
+int
+res_querydomain(const char *name,
+    const char *domain,
+    int class,		/* class and type of query */
+    int type,
+    u_char *answer,	/* buffer to put answer */
+    int anslen)		/* size of answer */
+{
+#ifdef DEBUG
+	struct __res_state *_resp = _THREAD_PRIVATE(_res, _res, &_res);
+#endif
+	char nbuf[MAXDNAME*2+1+1];
+	const char *longname = nbuf;
+	int n;
+
+	if (_res_init(0) == -1) {
+		h_errno = NETDB_INTERNAL;
+		return (-1);
+	}
+#ifdef DEBUG
+	if (_resp->options & RES_DEBUG)
+		printf(";; res_querydomain(%s, %s, %d, %d)\n",
+		       name, domain?domain:"<Nil>", class, type);
+#endif
+	if (domain == NULL) {
+		/*
+		 * Check for trailing '.';
+		 * copy without '.' if present.
+		 */
+		n = strlen(name) - 1;
+		if (n != (0 - 1) && name[n] == '.' && n < sizeof(nbuf) - 1) {
+			bcopy(name, nbuf, n);
+			nbuf[n] = '\0';
+		} else
+			longname = name;
+	} else
+		snprintf(nbuf, sizeof nbuf, "%.*s.%.*s",
+		    MAXDNAME, name, MAXDNAME, domain);
+
+	return (res_query(longname, class, type, answer, anslen));
+}
+
+const char *
+hostalias(const char *name)
+{
+	struct __res_state *_resp = _THREAD_PRIVATE(_res, _res, &_res);
+	char *cp1, *cp2;
+	FILE *fp;
+	char *file;
+	char buf[BUFSIZ];
+	static char abuf[MAXDNAME];
+	size_t len;
+
+	if (_resp->options & RES_NOALIASES)
+		return (NULL);
+	file = getenv("HOSTALIASES");
+	if (issetugid() != 0 || file == NULL || (fp = fopen(file, "r")) == NULL)
+		return (NULL);
+	setbuf(fp, NULL);
+	while ((cp1 = fgetln(fp, &len)) != NULL) {
+		if (cp1[len-1] == '\n')
+			len--;
+		if (len >= sizeof(buf) || len == 0)
+			continue;
+		(void)memcpy(buf, cp1, len);
+		buf[len] = '\0';
+		
+		for (cp1 = buf; *cp1 && !isspace(*cp1); ++cp1)
+			;
+		if (!*cp1)
+			break;
+		*cp1 = '\0';
+		if (!strcasecmp(buf, name)) {
+			while (isspace(*++cp1))
+				;
+			if (!*cp1)
+				break;
+			for (cp2 = cp1 + 1; *cp2 && !isspace(*cp2); ++cp2)
+				;
+			*cp2 = '\0';
+			strlcpy(abuf, cp1, sizeof(abuf));
+			fclose(fp);
+			return (abuf);
+		}
+	}
+	fclose(fp);
+	return (NULL);
+}
+@
+
+
+1.25
+log
+@Wrap some functions, labels, and variables in #ifdefs corresponding
+to #ifdefs where they are used.  Found by lint by bret dot lambert
+at gmail.
+
+OK deraadt@@.
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.24 2005/08/06 20:30:04 espie Exp $	*/
+d99 4
+a102 1
+	u_char buf[MAXPACKET];
+d118 1
+a118 1
+			buf, sizeof(buf));
+d121 1
+a121 1
+		n = res_opt(n, buf, sizeof(buf), anslen);
+d132 1
+a132 1
+	n = res_send(buf, n, answer, anslen);
+@
+
+
+1.24
+log
+@zap rcsid.
+split functions off res_debug.c so that getnetnamadr.c does not pull it
+all when it's used.
+
+okay deraadt@@, krw@@
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.23 2005/03/30 02:58:28 tedu Exp $	*/
+d321 1
+d323 1
+@
+
+
+1.23
+log
+@make the resolver stat resolv.conf and update if it changes.
+useful feedback and ok deraadt@@
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.22 2005/03/25 13:24:12 otto Exp $	*/
+a52 9
+
+#if defined(LIBC_SCCS) && !defined(lint)
+#if 0
+static char sccsid[] = "@@(#)res_query.c	8.1 (Berkeley) 6/4/93";
+static char rcsid[] = "$From: res_query.c,v 8.9 1996/09/22 00:13:28 vixie Exp $";
+#else
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.22 2005/03/25 13:24:12 otto Exp $";
+#endif
+#endif /* LIBC_SCCS and not lint */
+@
+
+
+1.22
+log
+@ansify. ok deraadt@@ moritz@@
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.21 2003/06/02 20:18:36 millert Exp $	*/
+d59 1
+a59 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.21 2003/06/02 20:18:36 millert Exp $";
+d114 1
+a114 1
+	if ((_resp->options & RES_INIT) == 0 && res_init() == -1) {
+d196 1
+a196 1
+	if ((_resp->options & RES_INIT) == 0 && res_init() == -1) {
+d335 1
+a335 1
+	if ((_resp->options & RES_INIT) == 0 && res_init() == -1) {
+@
+
+
+1.21
+log
+@Remove the advertising clause in the UCB license which Berkeley
+rescinded 22 July 1999.  Proofed by myself and Theo.
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.20 2003/01/28 04:58:00 marc Exp $	*/
+d59 1
+a59 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.20 2003/01/28 04:58:00 marc Exp $";
+d101 5
+a105 5
+res_query(name, class, type, answer, anslen)
+	const char *name;	/* domain name */
+	int class, type;	/* class and type of query */
+	u_char *answer;		/* buffer to put answer */
+	int anslen;		/* size of answer buffer */
+d109 1
+a109 1
+	register HEADER *hp = (HEADER *) answer;
+d183 5
+a187 5
+res_search(name, class, type, answer, anslen)
+	const char *name;	/* domain name */
+	int class, type;	/* class and type of query */
+	u_char *answer;		/* buffer to put answer */
+	int anslen;		/* size of answer */
+d189 1
+a189 1
+	register const char *cp, * const *domain;
+d323 6
+a328 5
+res_querydomain(name, domain, class, type, answer, anslen)
+	const char *name, *domain;
+	int class, type;	/* class and type of query */
+	u_char *answer;		/* buffer to put answer */
+	int anslen;		/* size of answer */
+d363 1
+a363 2
+hostalias(name)
+	register const char *name;
+d366 1
+a366 1
+	register char *cp1, *cp2;
+@
+
+
+1.20
+log
+@
+thread safer libc (note: safer, not safe)
+Access to the global _res structure replaced by pointers to a
+per thread instance.  If unthreaded the pointer is to the
+global structure.
+
+Also replaced a 64k stack array with malloc-ed memory so
+threaded aps (with a default 64k stack) have a chance at working.
+ok deraadt@@
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.19 2002/06/27 09:55:49 itojun Exp $	*/
+d17 1
+a17 5
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ * 	This product includes software developed by the University of
+ * 	California, Berkeley and its contributors.
+ * 4. Neither the name of the University nor the names of its contributors
+d59 1
+a59 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.19 2002/06/27 09:55:49 itojun Exp $";
+@
+
+
+1.19
+log
+@%d/%u mixup (in #ifdef DEBUG)
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.18 2002/05/24 21:22:37 deraadt Exp $	*/
+d63 1
+a63 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.18 2002/05/24 21:22:37 deraadt Exp $";
+d82 2
+d111 1
+d118 1
+a118 1
+	if ((_res.options & RES_INIT) == 0 && res_init() == -1) {
+d123 1
+a123 1
+	if (_res.options & RES_DEBUG)
+d129 2
+a130 2
+	if (n > 0 && ((_res.options & RES_USE_EDNS0) ||
+	    (_res.options & RES_USE_DNSSEC))) {
+d136 1
+a136 1
+		if (_res.options & RES_DEBUG)
+d145 1
+a145 1
+		if (_res.options & RES_DEBUG)
+d154 1
+a154 1
+		if (_res.options & RES_DEBUG)
+d194 1
+d200 1
+a200 1
+	if ((_res.options & RES_INIT) == 0 && res_init() == -1) {
+d224 1
+a224 1
+	if (dots >= _res.ndots) {
+d238 2
+a239 2
+	if ((!dots && (_res.options & RES_DEFNAMES)) ||
+	    (dots && !trailing_dot && (_res.options & RES_DNSRCH))) {
+d242 1
+a242 1
+		for (domain = (const char * const *)_res.dnsrch;
+d291 1
+a291 1
+			if (!(_res.options & RES_DNSRCH))
+d333 1
+d338 1
+a338 1
+	if ((_res.options & RES_INIT) == 0 && res_init() == -1) {
+d343 1
+a343 1
+	if (_res.options & RES_DEBUG)
+d369 1
+d377 1
+a377 1
+	if (_res.options & RES_NOALIASES)
+@
+
+
+1.18
+log
+@try to use strlcpy and snprintf more; ok various
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.17 2002/02/16 21:27:23 millert Exp $	*/
+d63 1
+a63 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.17 2002/02/16 21:27:23 millert Exp $";
+d152 1
+a152 1
+			printf(";; rcode = %d, ancount=%d\n", hp->rcode,
+@
+
+
+1.17
+log
+@Part one of userland __P removal.  Done with a simple regexp with some minor hand editing to make comments line up correctly.  Another pass is forthcoming that handles the cases that could not be done automatically.
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.16 2001/07/31 22:02:18 jakob Exp $	*/
+d63 1
+a63 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.16 2001/07/31 22:02:18 jakob Exp $";
+d354 2
+a355 1
+		sprintf(nbuf, "%.*s.%.*s", MAXDNAME, name, MAXDNAME, domain);
+@
+
+
+1.16
+log
+@add support for EDNS0 extended flag DNSSEC OK (aka DO). ok deraadt@@
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.15 2001/06/27 00:58:55 lebel Exp $	*/
+d63 1
+a63 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.15 2001/06/27 00:58:55 lebel Exp $";
+d88 1
+a88 1
+const char *hostalias __P((const char *));
+d90 1
+a90 1
+extern int res_opt __P((int, u_char *, int, int));
+@
+
+
+1.15
+log
+@use strlcpy vs strncpy+a[len-1]='\0'.  millert@@ ok.
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.14 2001/06/11 10:06:01 itojun Exp $	*/
+d63 1
+a63 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.14 2001/06/11 10:06:01 itojun Exp $";
+d126 2
+a127 1
+	if (n > 0 && (_res.options & RES_USE_EDNS0) != 0)
+d129 2
+@
+
+
+1.14
+log
+@support EDNS0 (RFC2671) buffer size notification on DNS queries.
+"options edns0" in /etc/resolv.conf will enable the behavior.  no behavior
+change if you don't have the line.  see resolv.conf(5) for more details.
+
+EDNS0 is useful for avoiding TCP DNS queries/replies on larger DNS responses.
+also, draft-ietf-dnsext-message-size-* plans to mandate EDNS0 support for DNS
+clients that support IPv6 transport.
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.13 1999/09/27 23:58:26 alex Exp $	*/
+d63 1
+a63 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.13 1999/09/27 23:58:26 alex Exp $";
+d393 2
+a394 2
+			strncpy(abuf, cp1, sizeof(abuf) - 1);
+			abuf[sizeof(abuf) - 1] = *cp2 = '\0';
+@
+
+
+1.13
+log
+@Correct buffer size.
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.12 1998/08/31 18:15:29 deraadt Exp $	*/
+d63 1
+a63 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.12 1998/08/31 18:15:29 deraadt Exp $";
+d90 1
+d126 2
+@
+
+
+1.12
+log
+@put back a security fix downsj removed ages ago
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.11 1998/03/16 05:07:02 millert Exp $	*/
+d63 1
+a63 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.11 1998/03/16 05:07:02 millert Exp $";
+d323 1
+a323 1
+	char nbuf[MAXDNAME*2+1];
+@
+
+
+1.11
+log
+@Use fgetln(3) instead of fgets(3) so we can easily recognize lines
+that are too long and ignore them instead of corrupting later entries.
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.10 1997/07/09 01:08:53 millert Exp $	*/
+d63 1
+a63 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.10 1997/07/09 01:08:53 millert Exp $";
+d323 1
+a323 1
+	char nbuf[MAXDNAME];
+@
+
+
+1.10
+log
+@Clean up some -Wall flowers.
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.9 1997/04/06 07:55:04 deraadt Exp $	*/
+d63 1
+a63 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.9 1997/04/06 07:55:04 deraadt Exp $";
+d362 1
+d370 8
+a377 2
+	buf[sizeof(buf) - 1] = '\0';
+	while (fgets(buf, sizeof(buf), fp)) {
+@
+
+
+1.9
+log
+@issetugid() this last getenv based open
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.8 1997/03/13 19:07:40 downsj Exp $	*/
+d63 1
+a63 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.8 1997/03/13 19:07:40 downsj Exp $";
+d80 1
+@
+
+
+1.8
+log
+@Integrate BIND 4.9.5 resolver and associated routines.
+
+Includes the DNS aware getnetby*() routines and IPv6 support.
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: res_query.c,v 1.1 1997/03/12 10:42:10 downsj Exp $	*/
+d63 1
+a63 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.1 1997/03/12 10:42:10 downsj Exp $";
+d365 1
+a365 1
+	if (file == NULL || (fp = fopen(file, "r")) == NULL)
+@
+
+
+1.7
+log
+@use strncpy correctly
+@
+text
+@d1 5
+a5 1
+/*-
+d7 2
+a8 2
+ *	The Regents of the University of California.  All rights reserved.
+ *
+d19 2
+a20 2
+ *	This product includes software developed by the University of
+ *	California, Berkeley and its contributors.
+d24 1
+a24 1
+ *
+d59 6
+a64 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.6 1996/08/24 09:32:20 deraadt Exp $";
+d67 1
+d72 2
+a75 1
+#include <stdio.h>
+d87 1
+a87 1
+char *__hostalias __P((const char *));
+d123 1
+a123 1
+	    buf, sizeof(buf));
+a141 1
+	hp = (HEADER *) answer;
+d149 15
+a163 15
+			case NXDOMAIN:
+				h_errno = HOST_NOT_FOUND;
+				break;
+			case SERVFAIL:
+				h_errno = TRY_AGAIN;
+				break;
+			case NOERROR:
+				h_errno = NO_DATA;
+				break;
+			case FORMERR:
+			case NOTIMP:
+			case REFUSED:
+			default:
+				h_errno = NO_RECOVERY;
+				break;
+d174 1
+a174 3
+ * is detected.  Error number is left in h_errno.
+ * Only useful for queries in the same name hierarchy as the local host
+ * (not, for example, for host address-to-name lookups in domain in-addr.arpa).
+d183 1
+a183 1
+	register char *cp, **domain;
+a192 2
+
+	got_nodata = 0;
+d196 2
+a197 4
+	for (cp = (char *)name; *cp; cp++) {
+		if (*cp == '.')
+			dots++;
+	}
+a212 1
+	tried_as_is = 0;
+d229 5
+a233 2
+		for (domain = _res.dnsrch; *domain; domain++) {
+			int done = 0;
+d236 1
+a236 1
+			    answer, anslen);
+d239 1
+d276 2
+a277 2
+			/*
+			 * if we got here for some reason other than DNSRCH,
+d281 1
+a281 4
+			        done++;
+
+			if (done)
+				break;
+d285 1
+a285 2
+	/*
+	 * if we have not already tried the name "as is", do that now.
+a292 1
+		saved_herrno = h_errno;
+d295 1
+a295 2
+	/*
+	 * if we got here, we didn't satisfy the search.
+d322 1
+a322 1
+	char nbuf[2*MAXDNAME+2];
+d333 1
+a333 1
+			name, domain?domain:"<Nil>", class, type);
+d347 1
+a347 2
+		(void)sprintf(nbuf, "%.*s.%.*s",
+		    MAXDNAME, name, MAXDNAME, domain);
+d352 2
+a353 2
+char *
+__hostalias(name)
+d382 1
+a382 1
+			(void)strncpy(abuf, cp1, sizeof(abuf) - 1);
+@
+
+
+1.6
+log
+@rely on RES_NOALIASES
+@
+text
+@d55 1
+a55 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.5 1996/08/19 17:45:21 deraadt Exp $";
+d382 1
+a383 1
+			(void)strncpy(abuf, cp1, sizeof(abuf) - 1);
+@
+
+
+1.5
+log
+@nasty typo by me
+@
+text
+@d55 1
+a55 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.4 1996/08/19 08:29:48 tholo Exp $";
+a362 2
+		return (NULL);
+	if (getuid() != geteuid())
+@
+
+
+1.4
+log
+@Fix RCS ids
+Make sure everything uses {SYS,}LIBC_SCCS properly
+@
+text
+@d55 1
+a55 1
+static char rcsid[] = "$OpenBSD: res_query.c,v 1.10 1996/02/02 15:22:34 mrg Exp $";
+d364 1
+a364 1
+	if (getuid() != setuid())
+@
+
+
+1.3
+log
+@if setuid, no env variables
+@
+text
+@a0 2
+/*	$NetBSD: res_query.c,v 1.10 1996/02/02 15:22:34 mrg Exp $	*/
+
+d55 1
+a55 6
+#if 0
+static char sccsid[] = "@@(#)res_query.c	8.1 (Berkeley) 6/4/93";
+static char rcsid[] = "$Id: res_query.c,v 8.6 1995/06/29 09:26:28 vixie Exp ";
+#else
+static char rcsid[] = "$NetBSD: res_query.c,v 1.10 1996/02/02 15:22:34 mrg Exp $";
+#endif
+@
+
+
+1.2
+log
+@netbsd: bind 4.9.3
+@
+text
+@d371 2
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+/*	$NetBSD: res_query.c,v 1.9 1995/02/25 06:58:58 cgd Exp $	*/
+d59 1
+a59 1
+static char rcsid[] = "$Id: res_query.c,v 1.1 1993/06/01 09:42:14 vixie Exp vixie ";
+d61 1
+a61 1
+static char rcsid[] = "$NetBSD: res_query.c,v 1.9 1995/02/25 06:58:58 cgd Exp $";
+d93 1
+d96 1
+d98 1
+a98 1
+	char *name;		/* domain name */
+d103 2
+a104 2
+	char buf[MAXPACKET];
+	HEADER *hp;
+d107 4
+a110 1
+	if ((_res.options & RES_INIT) == 0 && res_init() == -1)
+d112 1
+d117 2
+a118 1
+	n = res_mkquery(QUERY, name, class, type, (char *)NULL, 0, NULL,
+a119 1
+
+d128 1
+a128 1
+	n = res_send(buf, n, (char *)answer, anslen);
+d183 4
+a186 1
+	int dots, trailing_dot, ret, got_nodata, saved_herrno, tried_as_is;
+d188 2
+a189 1
+	if ((_res.options & RES_INIT) == 0 && res_init() == -1)
+d191 1
+d202 1
+a202 1
+	if ((cp > name) && (*--cp == '.'))
+d208 1
+a208 1
+	if (!dots && (cp = __hostalias(name)))
+d265 7
+d312 2
+d321 1
+d323 1
+a323 1
+	char *name, *domain;
+d329 1
+a329 1
+	char *longname = nbuf;
+d332 4
+d339 1
+a339 1
+		    name, domain, class, type);
+d365 1
+a365 1
+	char *file, *getenv(), *strcpy(), *strncpy();
+d369 2
+d374 1
+d377 2
+a378 1
+		for (cp1 = buf; *cp1 && !isspace(*cp1); ++cp1);
+d383 2
+a384 1
+			while (isspace(*++cp1));
+d387 2
+a388 1
+			for (cp2 = cp1 + 1; *cp2 && !isspace(*cp2); ++cp2);
+@
+
+
+1.1.1.1
+log
+@initial import of NetBSD tree
+@
+text
+@@
