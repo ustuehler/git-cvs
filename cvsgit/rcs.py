@@ -99,6 +99,10 @@ class RCSFile(object):
             branches = self.revs[revision][REV_BRANCHES]
             if revision == '1.1' and '1.1.1.1' in branches:
                 revision = '1.1.1.1'
+                # REV_NEXT will be 1.1.1.2, but this really is the end
+                # of the history on HEAD.
+                yield(revision)
+                break
 
             yield(revision)
             revision = self.revs[revision][REV_NEXT]
