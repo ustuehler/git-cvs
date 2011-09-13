@@ -10,6 +10,7 @@ from cvsgit.changeset import ChangeSetGenerator
 from cvsgit.rcs import RCSFile
 from cvsgit.i18n import _
 from cvsgit.term import NoProgress
+from cvsgit.utils import stripnl
 
 def split_cvs_source(dirname):
     """Split <dirname> into CVSROOT and module paths.
@@ -69,6 +70,7 @@ class CVS(object):
         self.parse_options()
 
         self.statcache = {}
+        self._rcs_log_keyword_re = re.compile('(.*)\$Log(?::[^$\r\n]+)?\$(.*)')
         self._rcs_keyword_re = re.compile('\$([A-Z][A-Za-z]+)(:[^$\r\n]+)?\$')
         self._rcs_headerfix_re = re.compile(' ([^ ]+,v) ')
         self._rcs_strip_attic_re = re.compile('(Attic/)?([^/]+),v$')
@@ -357,12 +359,42 @@ class CVS(object):
             return self.expand_keywords(blob, change, rcsfile, revision)
 
     def expand_keywords(self, blob, change, rcsfile, revision):
-        return self._rcs_keyword_re.sub(
+        returnflags = {'Log':False}
+        blob = self._rcs_keyword_re.sub(
             lambda match:
-                self.expand_keyword_match(match, change, rcsfile, revision),
+                self._expand_keyword_match(match, change, rcsfile, revision,
+                                           returnflags),
             blob)
+        if returnflags['Log']:
+            blob = self._rcs_log_keyword_re.sub(
+                lambda match:
+                    self._expand_log_keyword_match(match, change, rcsfile,
+                                                   revision),
+                blob)
+        return blob
 
-    def expand_keyword_match(self, match, change, rcsfile, revision):
+    def _expand_log_keyword_match(self, match, change, rcsfile, revision):
+        prefix = match.group(1)
+        suffix = match.group(2)
+
+        s = prefix + ('$Log: %s $%s\n' % (os.path.basename(rcsfile),
+                                          suffix))
+
+        timestamp = time.gmtime(change.timestamp)
+        timestamp = time.strftime('%Y/%m/%d %H:%M:%S', timestamp)
+        s += prefix + ('Revision %s  %s  %s\n' % (revision,
+                                                  timestamp,
+                                                  change.author))
+
+        log = stripnl(RCSFile(rcsfile).rcsfile.getlog(revision))
+        s += prefix + ('\n' + prefix).join(log.split('\n')) + '\n'
+
+        s += prefix.rstrip()
+
+        return s.encode('ascii')
+
+    def _expand_keyword_match(self, match, change, rcsfile, revision,
+                              returnflags):
         if match.group(1) == 'Id' or \
                 (self.localid and match.group(1) == self.localid):
             timestamp = time.gmtime(change.timestamp)
@@ -384,8 +416,12 @@ class CVS(object):
         elif match.group(1) == 'Author':
             return ('$Author: %s $' % change.author).encode('ascii')
         elif match.group(1) == 'Date':
-            return '$Date: %s $' % \
-                time.strftime('%Y/%m/%d %H:%M:%S', timestamp).encode('ascii')
+            timestamp = time.gmtime(change.timestamp)
+            return '$Date: %s $' % time.strftime('%Y/%m/%d %H:%M:%S',
+                                                 timestamp)
+        elif match.group(1) == 'Log':
+            returnflags['Log'] = True
+            return match.group(0)
         elif match.group(1) == 'Mdocdate':
             # This is for OpenBSD.
             timestamp = time.gmtime(change.timestamp)
