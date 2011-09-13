@@ -366,6 +366,10 @@ class CVS(object):
                  change.author, change.state)).encode('ascii')
         elif match.group(1) == 'Revision':
             return ('$Revision: %s $' % revision).encode('ascii')
+        elif match.group(1) == 'Source':
+            return ('$Source: %s $' % rcsfile).encode('ascii')
+        elif match.group(1) == 'Author':
+            return ('$Author: %s $' % change.author).encode('ascii')
         elif match.group(1) == 'Mdocdate':
             # This is for OpenBSD.
             timestamp = time.gmtime(change.timestamp)
