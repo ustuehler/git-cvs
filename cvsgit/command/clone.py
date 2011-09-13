@@ -5,8 +5,9 @@ import shutil
 
 from cvsgit.main import Command, Conduit
 from cvsgit.i18n import _
+from cvsgit.command.verify import Verify
 
-class clone(Command):
+class Clone(Command):
     __doc__ = _(
     """Clone a CVS repository or module into a Git repository.
 
@@ -28,6 +29,9 @@ class clone(Command):
             _("Stop importing after COUNT new commits."))
         self.add_option('--domain', metavar='DOMAIN', help=\
             _("Set the e-mail domain to use for unknown authors."))
+        self.add_option('--verify', action='store_true', help=\
+            _("Run the verify command after cloning (does not work "
+              "with --bare)."))
         self.add_quiet_option()
         self.add_verbose_option()
 
@@ -62,11 +66,18 @@ class clone(Command):
             if head_branch == 'refs/heads/master':
                 if self.options.bare:
                     git.check_command('branch', '-f', 'master', conduit.branch)
+                elif self.options.verify:
+                    first = git.rev_list('--all').split('\n')[-1]
+                    git.checkout(first)
+                    try:
+                        olddir = os.getcwd()
+                        os.chdir(git.git_work_tree)
+                        Verify().eval('--history', '--forward')
+                    finally:
+                        os.chdir(olddir)
                 else:
                     git.check_command('reset', '-q', '--hard', conduit.branch)
         except:
             shutil.rmtree(self.directory)
             raise
 
-if __name__ == '__main__':
-    clone()

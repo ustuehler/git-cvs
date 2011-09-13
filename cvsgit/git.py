@@ -172,6 +172,11 @@ class Git(object):
         """
         return self.check_command('rev-parse', *args, stdout=PIPE)
 
+    def rev_list(self, *args):
+        """Return the output of 'git rev-list <*args>'
+        """
+        return self.check_command('rev-list', *args, stdout=PIPE)
+
     def symbolic_ref(self, *args):
         """Return the output of 'git symbolic-ref <*args>'
         """

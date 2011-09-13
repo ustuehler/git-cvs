@@ -11,7 +11,7 @@ from cvsgit.i18n import _
 from cvsgit.main import Command, Conduit
 from cvsgit.utils import Tempdir, stripnl
 
-class verify(Command):
+class Verify(Command):
     __doc__ = _(
     """Verify the Git work tree against CVS.
 
@@ -105,6 +105,3 @@ class verify(Command):
         else:
             self.fatal(_("couldn't match Date: in output of '%s'") % \
                            ' '.join(command))
-
-if __name__ == '__main__':
-    verify()
