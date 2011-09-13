@@ -4,9 +4,9 @@ from shutil import rmtree
 import unittest
 
 from cvsgit.command.init import init
-from cvsgit.command.clone import clone
+from cvsgit.command.clone import Clone
 from cvsgit.command.pull import pull
-from cvsgit.command.verify import verify
+from cvsgit.command.verify import Verify
 from cvsgit.git import Git
 from cvsgit.utils import Tempdir
 
@@ -17,16 +17,16 @@ class Test(unittest.TestCase):
         """
         with Tempdir(cwd=True) as tempdir:
             source = join(dirname(__file__), 'data', 'greek', 'tree')
-            self.assertEquals(clone().eval('--quiet', source), 0)
+            self.assertEquals(Clone().eval('--quiet', source), 0)
             os.chdir('tree')
-            self.assertEquals(0, verify().eval())
+            self.assertEquals(0, Verify().eval())
 
     def test_clone_bare(self):
         """Clone the greek tree into a bare repository.
         """
         with Tempdir(cwd=True) as tempdir:
             source = join(dirname(__file__), 'data', 'greek', 'tree')
-            self.assertEquals(clone().eval('--quiet', '--bare', source), 0)
+            self.assertEquals(Clone().eval('--quiet', '--bare', source), 0)
             self.assertTrue(isfile(join(tempdir, 'tree', 'config')))
 
     def test_clone_with_zombie_rcs_file(self):
@@ -37,10 +37,10 @@ class Test(unittest.TestCase):
         """
         with Tempdir(cwd=True):
             source = join(dirname(__file__), 'data', 'zombie')
-            self.assertEquals(0, clone().eval('--quiet', source))
+            self.assertEquals(0, Clone().eval('--quiet', source))
             os.chdir('zombie')
             # FIXME: zombie repository fails verification
-            #self.assertEquals(0, verify().eval())
+            #self.assertEquals(0, Verify().eval())
 
     def test_clone_partial_alternative(self):
         """Calling "pull --limit" several times is basically the same
@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
         head1 = None
         with Tempdir(cwd=True) as tempdir:
             source = join(dirname(__file__), 'data', 'zombie')
-            self.assertEquals(0, clone().eval('--quiet', source))
+            self.assertEquals(0, Clone().eval('--quiet', source))
             os.chdir('zombie')
             head1 = Git().rev_parse('HEAD')
 
@@ -71,7 +71,7 @@ class Test(unittest.TestCase):
         head1 = None
         with Tempdir(cwd=True) as tempdir:
             source = join(dirname(__file__), 'data', 'zombie')
-            self.assertEquals(0, clone().eval('--quiet', source, 'test.git'))
+            self.assertEquals(0, Clone().eval('--quiet', source, 'test.git'))
             Git().check_command('clone', '--quiet', 'test.git')
             self.assertEquals(Git('test.git').rev_parse('HEAD'),
                               Git('test').rev_parse('HEAD'))
