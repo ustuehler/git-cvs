@@ -39,17 +39,21 @@ class Test(unittest.TestCase):
     def test_keyword_substitution_edge_cases(self):
         """Test edge cases where RCS keyword expansion might fail.
         """
-        f = RCSFile(join(dirname(__file__), 'data', 'dot.commonutils,v'))
-        c = f.change('1.1')
-        # FIXME: RCS should do keyword substitution, not CVS!
-        cvs = CVS(join(dirname(__file__), 'data', 'greek'), None)
-        blob = cvs.expand_keywords(f.blob('1.1'), c, 'dot.commonutils,v', '1.1')
+        blob = self.checkout('dot.commonutils,v', '1.1')
         s = '$Id: dot.commonutils,v 1.1 1995/10/18 08:37:54 deraadt Exp $'
         self.assertEqual(1651, blob.find(s))
 
-        f = RCSFile(join(dirname(__file__), 'data', 'res_query.c,v'))
-        c = f.change('1.1')
-        cvs = CVS(join(dirname(__file__), 'data', 'greek'), None)
-        blob = cvs.expand_keywords(f.blob('1.1'), c, 'res_query.c,v', '1.1')
+        blob = self.checkout('res_query.c,v', '1.1')
         s = '$Id: res_query.c,v 1.1 1993/06/01 09:42:14 vixie Exp vixie "'
         self.assertEqual(3091, blob.find(s))
+
+        f = RCSFile(join(dirname(__file__), 'data', 'pathnames.h,v'))
+        self.assertEqual(list(f.revisions())[-1], '1.1.1.1')
+
+    def checkout(self, filename, revision):
+        # FIXME: RCS should do keyword substitution, not CVS!
+        cvs = CVS(join(dirname(__file__), 'data', 'greek'), None)
+        f = RCSFile(join(dirname(__file__), 'data', filename))
+        c = f.change(revision)
+        blob = f.blob(revision)
+        return cvs.expand_keywords(blob, c, filename, revision)

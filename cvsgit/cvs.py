@@ -264,7 +264,7 @@ class CVS(object):
 
         self.metadb.update_statcache({rcsfile:identity})
 
-    def generate_changesets(self, progress=None):
+    def generate_changesets(self, progress=None, limit=None):
         """Convert changes stored in the meta database into sets of
         related changes and store the resulting changesets in the meta
         database as well.
@@ -281,15 +281,27 @@ class CVS(object):
                 count += 1
                 progress(_('Processing changes'), count, total)
                 for cs in csg.integrate(change):
+                    # XXX: not reflected in progress output, and ugly
+                    if limit:
+                        if limit > 0:
+                            limit -= 1
+                        else:
+                            return
                     self.metadb.add_changeset(cs)
             for cs in csg.finalize():
+                # XXX: not reflected in progress output, and ugly
+                if limit:
+                    if limit > 0:
+                        limit -= 1
+                    else:
+                        return
                 self.metadb.add_changeset(cs)
 
-    def fetch(self, progress=None):
+    def fetch(self, progress=None, limit=None):
         """Fetch new revisions and compute changesets.
         """
         self.fetch_changes(progress)
-        self.generate_changesets(progress)
+        self.generate_changesets(progress, limit)
 
     def changesets(self):
         """Yield new changesets computed earlier.
@@ -325,11 +337,12 @@ class CVS(object):
         # cvs has the odd behavior that it favors revision 1.1 over
         # 1.1.1.1 if it searches for a revision by date and the date
         # is after that of the initial revision even by one second.
-        if change.revision == '1.1.1.1' and \
-                change.timestamp < changeset.timestamp:
-            revision = '1.1'
-        else:
-            revision = change.revision
+        #if change.revision == '1.1.1.1' and \
+        #        change.timestamp < changeset.timestamp:
+        #    revision = '1.1'
+        #else:
+        #    revision = change.revision
+        revision = change.revision
 
         if not self.statcache:
             self.statcache = self.metadb.load_statcache()

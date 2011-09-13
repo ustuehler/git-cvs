@@ -117,7 +117,7 @@ class Conduit(object):
         else:
             progress = Progress()
 
-        self.cvs.fetch(progress=progress)
+        self.cvs.fetch(progress=progress, limit=limit)
         self.git.import_changesets(self.cvs.changesets(), self.branch,
                                    domain=self.domain,
                                    limit=limit,
