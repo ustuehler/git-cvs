@@ -6,6 +6,9 @@ from cvsgit.main import Command
 from cvsgit.rcs import RCSFile
 from cvsgit.i18n import _
 
+# FIXME: RCS should expand keywords, not CVS
+from cvsgit.cvs import CVS
+
 class Rcsdump(Command):
     __doc__ = _(
     """Dump all changes on the HEAD branch of an RCS file.
@@ -44,5 +47,8 @@ class Rcsdump(Command):
             rcsfile._print_revision(change.revision)
 
     def checkout(self, rcsfile, revision):
+        change = rcsfile.change(revision)
         size = os.stat(self.rcsfile).st_size
-        print rcsfile.blob(revision, size_hint=size)
+        blob = rcsfile.blob(revision, size_hint=size)
+        cvs = CVS(os.path.join(os.path.dirname(rcsfile.filename)), None)
+        print cvs.expand_keywords(blob, change, rcsfile.filename, revision)
