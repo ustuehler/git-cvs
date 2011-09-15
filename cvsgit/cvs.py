@@ -393,7 +393,8 @@ class CVS(object):
                                                   change.author))
 
         log = stripnl(RCSFile(rcsfile).rcsfile.getlog(revision))
-        s += prefix + ('\n' + prefix).join(log.split('\n')) + '\n'
+        for line in log.split('\n'):
+            s += (prefix + line).rstrip() + '\n'
 
         s += prefix.rstrip()
 
