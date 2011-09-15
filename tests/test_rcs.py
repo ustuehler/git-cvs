@@ -51,6 +51,10 @@ class Test(unittest.TestCase):
         s = '$OpenBSD: setjmp.h,v 1.2 2001/03/29 18:52:19 drahn Exp $'
         self.assertEqual(3, blob.find(s))
 
+        blob = self.checkout('test_cvs_import_01_seed1.txt,v,v', '1.1')
+        s = '$Id: seed1.txt,v 1.1 2007/06/05 05:49:41 niallo Exp $'
+        self.assertEqual(347, blob.find(s))
+
         f = RCSFile(join(dirname(__file__), 'data', 'pathnames.h,v'))
         self.assertEqual(list(f.revisions())[-1], '1.1.1.1')
 
@@ -61,4 +65,4 @@ class Test(unittest.TestCase):
         f = RCSFile(join(dirname(__file__), 'data', filename))
         c = f.change(revision)
         blob = f.blob(revision)
-        return cvs.expand_keywords(blob, c, filename, revision)
+        return cvs.expand_keywords(blob, c, f, revision)

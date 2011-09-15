@@ -84,6 +84,7 @@ class RCSFile(object):
 
     head = property(lambda self: self.rcsfile.head)
     branch = property(lambda self: self.rcsfile.branch)
+    expand = property(lambda self: self.rcsfile.expand)
     mode = property(lambda self: self.rcsfile.mode)
     revs = property(lambda self: self.rcsfile.revs)
 

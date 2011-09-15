@@ -352,13 +352,19 @@ class CVS(object):
             size_hint = self.statcache[filename][1]
         else:
             size_hint = None
-        blob = RCSFile(rcsfile).blob(revision, size_hint)
+        rcsfile = RCSFile(rcsfile)
+        blob = rcsfile.blob(revision, size_hint)
         if change.mode == 'b':
             return blob
         else:
             return self.expand_keywords(blob, change, rcsfile, revision)
 
     def expand_keywords(self, blob, change, rcsfile, revision):
+        if change.mode == 'b' or rcsfile.expand not in (None, '', 'kv'):
+            return blob
+        # XXX: changing variable type... boo!
+        rcsfile = rcsfile.filename
+
         returnflags = {'Log':False}
         blob = self._rcs_keyword_re.sub(
             lambda match:

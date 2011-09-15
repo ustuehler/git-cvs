@@ -51,4 +51,4 @@ class Rcsdump(Command):
         size = os.stat(self.rcsfile).st_size
         blob = rcsfile.blob(revision, size_hint=size)
         cvs = CVS(os.path.join(os.path.dirname(rcsfile.filename)), None)
-        print cvs.expand_keywords(blob, change, rcsfile.filename, revision)
+        print cvs.expand_keywords(blob, change, rcsfile, revision)
