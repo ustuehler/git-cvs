@@ -47,12 +47,17 @@ class Test(unittest.TestCase):
         s = '$Id: res_query.c,v 1.1 1993/06/01 09:42:14 vixie Exp vixie "'
         self.assertEqual(3091, blob.find(s))
 
+        blob = self.checkout('setjmp.h,v', '1.2')
+        s = '$OpenBSD: setjmp.h,v 1.2 2001/03/29 18:52:19 drahn Exp $'
+        self.assertEqual(3, blob.find(s))
+
         f = RCSFile(join(dirname(__file__), 'data', 'pathnames.h,v'))
         self.assertEqual(list(f.revisions())[-1], '1.1.1.1')
 
     def checkout(self, filename, revision):
         # FIXME: RCS should do keyword substitution, not CVS!
         cvs = CVS(join(dirname(__file__), 'data', 'greek'), None)
+        cvs.localid = 'OpenBSD'
         f = RCSFile(join(dirname(__file__), 'data', filename))
         c = f.change(revision)
         blob = f.blob(revision)
