@@ -1,0 +1,179 @@
+head	1.2;
+access;
+symbols
+	OPENBSD_2_1:1.1.1.1.0.2
+	OPENBSD_2_1_BASE:1.1.1.1
+	OPENBSD_2_2:1.1.1.1.0.4
+	OPENBSD_2_2_BASE:1.1.1.1
+	OPENBSD_2_3:1.1.1.1.0.6
+	OPENBSD_2_3_BASE:1.1.1.1
+	OPENBSD_2_4:1.1.1.1.0.8
+	OPENBSD_2_4_BASE:1.1.1.1
+	OPENBSD_2_5:1.1.1.1.0.10
+	OPENBSD_2_5_BASE:1.1.1.1
+	OPENBSD_2_6:1.1.1.1.0.12
+	OPENBSD_2_6_BASE:1.1.1.1
+	OPENBSD_2_7:1.1.1.1.0.16
+	OPENBSD_2_7_BASE:1.1.1.1
+	OPENBSD_2_8:1.1.1.1.0.18
+	OPENBSD_2_8_BASE:1.1.1.1
+	OPENBSD_2_9:1.2.0.2
+	OPENBSD_2_9_BASE:1.2
+	OPENBSD_3_0:1.2.0.4
+	OPENBSD_3_0_BASE:1.2
+	OPENBSD_3_1:1.2.0.8
+	OPENBSD_3_1_BASE:1.2
+	OPENBSD_3_2:1.2.0.10
+	OPENBSD_3_2_BASE:1.2
+	OPENBSD_3_3:1.2.0.12
+	OPENBSD_3_3_BASE:1.2
+	OPENBSD_3_4:1.2.0.14
+	OPENBSD_3_4_BASE:1.2
+	OPENBSD_3_5:1.2.0.16
+	OPENBSD_3_5_BASE:1.2
+	OPENBSD_3_6:1.2.0.18
+	OPENBSD_3_6_BASE:1.2
+	OPENBSD_3_7:1.2.0.20
+	OPENBSD_3_7_BASE:1.2
+	OPENBSD_3_8:1.2.0.22
+	OPENBSD_3_8_BASE:1.2
+	OPENBSD_3_9:1.2.0.24
+	OPENBSD_3_9_BASE:1.2
+	OPENBSD_4_0:1.2.0.26
+	OPENBSD_4_0_BASE:1.2
+	OPENBSD_4_1:1.2.0.28
+	OPENBSD_4_1_BASE:1.2
+	OPENBSD_4_2:1.2.0.30
+	OPENBSD_4_2_BASE:1.2
+	OPENBSD_4_3:1.2.0.32
+	OPENBSD_4_3_BASE:1.2
+	OPENBSD_4_4:1.2.0.34
+	OPENBSD_4_4_BASE:1.2
+	OPENBSD_4_5:1.2.0.36
+	OPENBSD_4_5_BASE:1.2
+	OPENBSD_4_6:1.2.0.40
+	OPENBSD_4_6_BASE:1.2
+	OPENBSD_4_7:1.2.0.38
+	OPENBSD_4_7_BASE:1.2
+	OPENBSD_4_8:1.2.0.42
+	OPENBSD_4_8_BASE:1.2
+	OPENBSD_4_9:1.2.0.44
+	OPENBSD_4_9_BASE:1.2
+	OPENBSD_5_0:1.2.0.46
+	OPENBSD_5_0_BASE:1.2
+	SMP:1.1.1.1.0.14
+	SMP_BASE:1.1.1.1
+	SMP_SYNC_A:1.2
+	SMP_SYNC_B:1.2
+	UBC:1.2.0.6
+	UBC_BASE:1.2
+	UBC_SYNC_A:1.2
+	UBC_SYNC_B:1.2
+	kame_19991208:1.1.1.1
+	powerpc_1:1.1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2001.03.29.18.52.19;	author drahn;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	96.12.21.20.35.55;	author rahnds;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	96.12.21.20.35.55;	author rahnds;	state Exp;
+branches
+	1.1.1.1.14.1;
+next	;
+
+1.1.1.1.14.1
+date	2001.04.18.16.13.04;	author niklas;	state Exp;
+branches;
+next	1.1.1.1.14.2;
+
+1.1.1.1.14.2
+date	2001.11.13.22.14.34;	author niklas;	state dead;
+branches;
+next	1.1.1.1.14.3;
+
+1.1.1.1.14.3
+date	2002.03.29.16.11.59;	author niklas;	state Exp;
+branches;
+next	;
+
+
+
+desc
+@@
+
+
+1.2
+log
+@Add OpenBSD tag to headers missing them.
+@
+text
+@/*	$OpenBSD:$	*/
+/*	$NetBSD: setjmp.h,v 1.1 1996/09/30 16:34:34 ws Exp $	*/
+
+#define	_JBLEN	100
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+@
+
+
+1.1.1.1
+log
+@Check-in of powerpc kernel support.
+NOTE: This will not work until the other pieces are checked in.
+This is primarily the NetBSD powerpc port, with modifications
+to support ELF. 
+@
+text
+@@
+
+
+1.1.1.1.14.1
+log
+@Update the SMP branch to -current, this breaks the SMP branch though.
+But it will be fixed soonish.  Note, nothing new has happened, this is just
+a merge of the trunk into this branch.
+@
+text
+@a0 1
+/*	$OpenBSD: setjmp.h,v 1.2 2001/03/29 18:52:19 drahn Exp $	*/
+@
+
+
+1.1.1.1.14.2
+log
+@repair
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: setjmp.h,v 1.1.1.1.14.1 2001/04/18 16:13:04 niklas Exp $	*/
+@
+
+
+1.1.1.1.14.3
+log
+@Re-add missing pieces
+@
+text
+@d1 1
+a1 1
+/*	$OpenBSD: setjmp.h,v 1.2 2001/03/29 18:52:19 drahn Exp $	*/
+@
