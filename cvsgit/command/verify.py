@@ -101,7 +101,7 @@ class Verify(Command):
             self.fatal(_("can't get commit date of %s" % commit))
         match = re.search('Date: +[^ ]+ (.*) \+0000', stdout)
         if match:
-            return match.group(1)
+            return '%s UTC' % match.group(1)
         else:
             self.fatal(_("couldn't match Date: in output of '%s'") % \
                            ' '.join(command))
