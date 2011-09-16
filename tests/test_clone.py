@@ -20,6 +20,7 @@ class Test(unittest.TestCase):
             self.assertEquals(Clone().eval('--quiet', source), 0)
             os.chdir('tree')
             self.assertEquals(0, Verify().eval())
+            self.assertEquals(0755, os.stat('A/mu').st_mode & 0777)
 
     def test_clone_bare(self):
         """Clone the greek tree into a bare repository.

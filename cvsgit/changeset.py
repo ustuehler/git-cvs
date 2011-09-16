@@ -117,6 +117,9 @@ class ChangeSet(object):
                     """anything but None marks the changeset as
                     integrated into the target VCS""")
 
+    def perm(self, change):
+        return self.provider.perm(change)
+
     def blob(self, change):
         return self.provider.blob(change, self)
 
@@ -210,6 +213,8 @@ class ChangeSetGenerator(object):
             if cs.integrate(change):
                 return
         self.changesets.append(ChangeSet(change))
+        # TODO: Is changeset ordering more stable with this?
+        #self.changesets.sort(key=lambda cs: cs.timestamp)
 
     def finalize(self):
         """Yield remaining changesets that have passed the "quiet

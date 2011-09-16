@@ -323,6 +323,34 @@ class CVS(object):
         return self.metadb.changes_by_timestamp(processed=processed,
                                                 reentrant=reentrant)
 
+    def rcsfilename(self, change):
+        """Return the RCS filename corresponding to <change>.
+        """
+        filename = change.filename + ',v'
+
+        result = os.path.join(self.prefix, filename)
+        if os.path.isfile(result):
+            return result
+
+        result = os.path.join(self.prefix,
+                              os.path.dirname(filename), 'Attic',
+                              os.path.basename(filename))
+        if os.path.isfile(result):
+            return result
+
+        raise RuntimeError, _('no RCS file found for %s') % \
+            change.filename
+
+    def rcsfile(self, change):
+        """Return an RCSFile object for <change>.
+        """
+        return RCSFile(self.rcsfilename(change))
+
+    def perm(self, change):
+        """Return the file permissions as a decimal number.
+        """
+        return os.stat(self.rcsfilename(change)).st_mode & 0777
+
     def blob(self, change, changeset):
         """Return the raw binary content of a file at the specified
         revision.

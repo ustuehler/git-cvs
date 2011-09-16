@@ -367,7 +367,9 @@ class GitFastImport(object):
                 self.write('D %s\n' % c.filename)
             else:
                 blob = changeset.blob(c)
-                self.write('M 644 inline %s\n' % c.filename)
+                self.write('M %o inline %s\n' % \
+                               # FIXME: be consistent with changeset vs change!
+                               (changeset.perm(c), c.filename))
                 self.data(blob)
 
     def close(self):

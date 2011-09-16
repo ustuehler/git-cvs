@@ -56,8 +56,8 @@ class ParseError(RCSError):
         self.rcsfile = rcsfile
 
 class CheckoutError(ParseError):
-    """Raised when the file content of a particular revision couldn't
-    be retrieved from an RCS file
+    """This exception is raised when the file content of a particular
+    revision couldn't be retrieved from an RCS file.
     """
 
     def __init__(self, rcsfile, revision):
