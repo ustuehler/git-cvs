@@ -367,9 +367,16 @@ class GitFastImport(object):
                 self.write('D %s\n' % c.filename)
             else:
                 blob = changeset.blob(c)
-                self.write('M %o inline %s\n' % \
-                               # FIXME: be consistent with changeset vs change!
-                               (changeset.perm(c), c.filename))
+                perm = changeset.perm(c)
+
+                # Git according to git-fast-import(1) only supports
+                # these two file modes for plain files.
+                if (perm & 0111) != 0:
+                    perm = 0755
+                else:
+                    perm = 0644
+
+                self.write('M %o inline %s\n' % (perm, c.filename))
                 self.data(blob)
 
     def close(self):
