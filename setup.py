@@ -5,10 +5,12 @@
 from distutils.core import setup
 
 setup(name='git-cvs',
-      version='0.1.0',
+      version='0.0.0',
       description='Import changesets from CVS into Git',
       author='Uwe Stuehler',
       author_email='uwe@bsdx.de',
-      url='http://bsdx.de/',
-      license='LICENSE',
-      packages=['cvsgit', 'cvsgit.command', 'cvsgit.rcsparse'])
+      url='https://github.com/ustuehler/git-cvs',
+      license='OpenBSD',
+      packages=['cvsgit', 'cvsgit.command'],
+      scripts=['scripts/git-cvs'],
+      data_files=[('/usr/local/libexec/git', ['scripts/git-cvs'])])
