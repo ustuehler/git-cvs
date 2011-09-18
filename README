@@ -35,9 +35,8 @@ ADVANTAGES OVER PLAIN CVS(1) AND CVSSYNC(1)
 DRAWBACKS
 =========
 
- * A full (not sparse) clone of the Git repository for src is about
-   2.5G big and that's in addition to the 780M for a complete checkout
-   and 1.8G for the mirror of /cvs/src.
+ * A full clone of the Git repository for src is about 450 MB after
+   "git repack -adF" in addition to the 780 MB for a complete checkout.
 
  * cvsync/rsync and cvsgit have to run somewhere, but that could be a
    dedicated server.
@@ -53,3 +52,8 @@ LIBRARIES FOR PARSING RCS FILES AND OTHER RESOURCES
  * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.151.8450
 
  * http://metalinguist.wordpress.com/2007/12/06/the-woes-of-git-gc-aggressive-and-how-git-deltas-work/
+
+WORKFLOW
+========
+
+ * From mutt: |cd /usr/src; git am --directory=sys/dev -p0
