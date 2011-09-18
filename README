@@ -56,4 +56,13 @@ LIBRARIES FOR PARSING RCS FILES AND OTHER RESOURCES
 WORKFLOW
 ========
 
+Repository creation
+
+ * cd /usr/src
+ * git-cvs init --domain=cvs.openbsd.org /cvs/src
+ * git-cvs pull
+
+Patch management
+
+ * git checkout -b somebody/patch-subject cvs/HEAD
  * From mutt: |cd /usr/src; git am --directory=sys/dev -p0
