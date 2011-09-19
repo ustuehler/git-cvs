@@ -5,7 +5,7 @@
 from distutils.core import setup
 
 setup(name='git-cvs',
-      version='0.0.0',
+      version='0.0.1',
       description='Import changesets from CVS into Git',
       author='Uwe Stuehler',
       author_email='uwe@bsdx.de',
