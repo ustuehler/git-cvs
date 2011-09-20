@@ -66,3 +66,9 @@ Patch management
 
  * git checkout -b somebody/patch-subject cvs/HEAD
  * From mutt: |cd /usr/src; git am --directory=sys/dev -p0
+
+Configuration hints (see git-config(1)):
+
+ * Automatically set rebase option for new branches with
+   branch.autosetuprebase always|remote
+ * Disable a/b prefix with diff.noprefix=true
