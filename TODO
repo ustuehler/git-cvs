@@ -1,5 +1,5 @@
 * Feature: Cloning from a particular date. (git-cvs clone -d now /cvs/src)
-* Install 'git-cvs' in Git's --exec-path (optional?).
+* Feature: Convert .cvsignore to gitignore(5)
 * Documentation: Write a man page.
   http://andialbrecht.wordpress.com/2009/03/17/creating-a-man-page-with-distutils-and-optparse/
 * Feature: Handle branches and tags.
