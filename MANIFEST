@@ -15,6 +15,7 @@ cvsgit/term.py
 cvsgit/utils.py
 cvsgit/command/__init__.py
 cvsgit/command/clone.py
+cvsgit/command/diff.py
 cvsgit/command/dump-changes.py
 cvsgit/command/dump-tree.py
 cvsgit/command/fetch-changes.py
