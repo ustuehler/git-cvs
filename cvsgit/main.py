@@ -30,9 +30,12 @@ class Command(Cmd):
                 if not line:
                     break
 
-                login, fullname = re.match(
-                    '([^\s]+)\s+(.+)', line).groups()
-                authors[login] = fullname
+                match = re.match('([^\s]+)\s+(.+)', line)
+                if match:
+                    login, fullname = match.groups()
+                    authors[login] = fullname
+                else:
+                    self.warn('invalid line in authors map: %s' % line)
             self.options.authors = authors
 
     def add_stop_on_unknown_author_option(self):

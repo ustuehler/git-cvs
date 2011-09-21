@@ -75,6 +75,9 @@ class Cmd(object):
     def usage_error(self, msg):
         self.option_parser.error(msg)
 
+    def warn(self, msg):
+        sys.stderr.write(_('%s: warning: %s\n') % (self.option_parser.prog, msg))
+
     def error(self, msg):
         sys.stderr.write(_('%s: error: %s\n') % (self.option_parser.prog, msg))
 
