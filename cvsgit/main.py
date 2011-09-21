@@ -2,6 +2,7 @@
 'git-cvs'."""
 
 import os.path
+import re
 
 from cvsgit.cmd import Cmd
 from cvsgit.error import Error
@@ -14,6 +15,29 @@ from cvsgit.term import Progress
 class Command(Cmd):
     """Base class for conduit commands
     """
+
+    def add_authors_option(self):
+        self.add_option('--authors', metavar='AUTHORS', help=\
+            _("Map CVS committer login names to fullnames."))
+
+    def finalize_authors_option(self):
+        if not self.options.authors:
+            return
+        authors = {}
+        with open(self.options.authors, 'r') as file:
+            while True:
+                line = file.readline().strip()
+                if not line:
+                    break
+
+                login, fullname = re.match(
+                    '([^\s]+)\s+(.+)', line).groups()
+                authors[login] = fullname
+            self.options.authors = authors
+
+    def add_stop_on_unknown_author_option(self):
+        self.add_option('--stop-on-unknown-author', action='store_true', help=\
+            _("Abort the operation if any author mapping is missing."))
 
     def add_quiet_option(self):
         self.add_option('--quiet', action='store_true', help=\
@@ -109,7 +133,8 @@ class Conduit(object):
         if domain:
             self.domain = domain
 
-    def fetch(self, limit=None, quiet=True, verbose=False):
+    def fetch(self, limit=None, quiet=True, verbose=False,
+              authors=None, stop_on_unknown_author=False):
         """Fetch new changesets into the CVS tracking branch.
         """
         if quiet or verbose:
@@ -123,10 +148,16 @@ class Conduit(object):
                                    limit=limit,
                                    verbose=verbose,
                                    progress=progress,
-                                   total=self.cvs.count_changesets())
+                                   total=self.cvs.count_changesets(),
+                                   authors=authors,
+                                   stop_on_unknown_author=\
+                                       stop_on_unknown_author)
 
-    def pull(self, limit=None, quiet=True, verbose=False):
-        self.fetch(limit=limit, quiet=quiet, verbose=verbose)
+    def pull(self, limit=None, quiet=True, verbose=False, authors=None,
+             stop_on_unknown_author=False):
+        self.fetch(limit=limit, quiet=quiet, verbose=verbose,
+                   authors=authors, stop_on_unknown_author=\
+                       stop_on_unknown_author)
 
         args = []
         if quiet:

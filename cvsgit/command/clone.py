@@ -34,6 +34,8 @@ class Clone(Command):
               "with --bare)."))
         self.add_quiet_option()
         self.add_verbose_option()
+        self.add_authors_option()
+        self.add_stop_on_unknown_author_option()
 
     def finalize_options(self):
         if len(self.args) < 1:
@@ -45,6 +47,8 @@ class Clone(Command):
             self.repository, self.directory = self.args
         else:
             self.usage_error(_('too many arguments'))
+
+        self.finalize_authors_option()
 
     def run(self):
         if os.path.exists(self.directory):
@@ -59,7 +63,10 @@ class Clone(Command):
         try:
             conduit.fetch(limit=self.options.limit,
                           quiet=self.options.quiet,
-                          verbose=self.options.verbose)
+                          verbose=self.options.verbose,
+                          authors=self.options.authors,
+                          stop_on_unknown_author=\
+                              self.options.stop_on_unknown_author)
 
             git = conduit.git
             head_branch = git.symbolic_ref('HEAD')

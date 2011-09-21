@@ -34,7 +34,8 @@ class GitCommandError(GitError):
     The 'command' attribute will be an array representing the
     command that failed and 'returncode' will contain the exit
     code of the command.  The 'stderr' member may contain the
-    error output from the command, but may also be None."""
+    error output from the command, but may also be None.
+    """
 
     def __init__(self, command, returncode, stderr=None):
         self.command = command
@@ -48,8 +49,29 @@ class GitCommandError(GitError):
                 (command[0], stderr)
         super(GitCommandError, self).__init__(msg)
 
+class MissingAuthorFullname(GitError):
+    """Raised when there is no known fullname for an author's login
+    name and --stop-on-missing-author was given on the command-line.
+    """
+
+    def __init__(self, author):
+        msg = 'missing fullname for author: %s' % author
+        super(GitError, self).__init__(msg)
+
 class Git(object):
     """Git repository and optional work tree.
+
+    def __init__(self, command, returncode, stderr=None):
+        self.command = command
+        self.returncode = returncode
+        self.stderr = stderr
+        msg = "'%s' exited with code %d" % \
+            (' '.join(command), returncode)
+        if stderr:
+            stderr = '\n  '.join(stripnl(stderr).split('\n'))
+            msg += '\n\nError output of %s command:\n  %s' % \
+                (command[0], stderr)
+        super(GitCommandError, self).__init__(msg)
 
     The Git repository may or may not already exist until the init()
     method is called, after which the repository will definitely
@@ -182,8 +204,19 @@ class Git(object):
         """
         return self.check_command('symbolic-ref', *args, stdout=PIPE)
 
+    def call(self, command, *args, **kwargs):
+        """Run a "git" subcommand with given arguments.
+
+        See subprocess.call for the list of available keyword
+        arguments.
+
+        Returns the command's exit code.
+        """
+        command = ['git', command] + list(args)
+        return subprocess.call(command, **kwargs)
+
     def check_command(self, command, *args, **kwargs):
-        """Run "git" subcommand with given arguments.
+        """Run a "git" subcommand with given arguments.
 
         Raises a GitCommandError if the subcommand does not return a
         zero exit code.
@@ -232,7 +265,8 @@ class Git(object):
 
     def import_changesets(self, changesets, branch, domain=None,
                           limit=None, verbose=False,
-                          progress=None, total=None):
+                          progress=None, total=None,
+                          authors=None, stop_on_unknown_author=False):
         """Loop over changesets and import them.
         """
         if progress == None:
@@ -240,10 +274,11 @@ class Git(object):
         with progress:
             self._import_changesets(changesets, branch, domain,
                                     limit, verbose, progress,
-                                    total)
+                                    total, authors, stop_on_unknown_author)
 
     def _import_changesets(self, changesets, branch, domain, limit,
-                           verbose, progress, total):
+                           verbose, progress, total, authors,
+                           stop_on_unknown_author):
         message = _('Importing changesets')
         def do_progress(count, total):
             progress(message, len(changesets_seen), total)
@@ -280,7 +315,9 @@ class Git(object):
         if limit != None and total != None and total > limit:
             total = limit
 
-        fi = GitFastImport(pipe, branch, domain=domain, verbose=verbose)
+        fi = GitFastImport(pipe, branch, domain=domain, verbose=verbose,
+                           authors=authors, stop_on_unknown_author=\
+                               stop_on_unknown_author)
         changesets_seen = []
         try:
             for changeset in changesets:
@@ -326,11 +363,14 @@ class Git(object):
                 changeset.set_mark(sha1)
 
 class GitFastImport(object):
-    def __init__(self, pipe, branch, domain=None, verbose=False):
+    def __init__(self, pipe, branch, domain=None, verbose=False,
+                 authors=None, stop_on_unknown_author=False):
         self.pipe = pipe
         self.branch = branch
         self.domain = domain
         self.verbose = verbose
+        self.authors = authors
+        self.stop_on_unknown_author = stop_on_unknown_author
         self.last_changeset = None
 
     def add_changeset(self, changeset):
@@ -393,6 +433,14 @@ class GitFastImport(object):
         return '%s +0000' % (seconds)
 
     def author_name(self, author):
+        # TODO: allow author name mappings to be defined for a
+        # certain time span, since CVS committer name could be
+        # reused.
+        if self.authors:
+            if self.authors.has_key(author):
+                return self.authors[author]
+            elif self.stop_on_unknown_author:
+                raise MissingAuthorFullname(author)
         return author
 
     def author_email(self, author):
