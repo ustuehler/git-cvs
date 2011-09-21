@@ -314,6 +314,6 @@ class MetaDb(object):
     def all_authors(self):
         """Return a list of all author login names.
         """
-        return self.dbh.execute("""
-            SELECT DISTINCT(author) FROM change
-        """).fetchall()
+        return map(lambda row: row[0], self.dbh.execute("""
+            SELECT DISTINCT(author) FROM change ORDER BY author
+        """).fetchall())

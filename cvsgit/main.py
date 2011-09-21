@@ -61,14 +61,14 @@ class NoSourceError(ConduitError):
         super(NoSourceError, self).__init__(
             _("'cvs.source' is unset; not a git-cvs repository?"))
 
-class MissingAuthorFullname(ConduitError):
+class UnknownAuthorFullnames(ConduitError):
     """Raised when there is no known fullname for an author's login
     name and --stop-on-missing-author was given on the command-line.
     """
 
-    def __init__(self, author):
-        msg = 'missing fullname for author: %s' % author
-        super(GitError, self).__init__(msg)
+    def __init__(self, authors):
+        msg = 'unknown authors: %s' % ', '.join(authors)
+        super(ConduitError, self).__init__(msg)
 
 class Conduit(object):
     """CVS-to-Git conduit logic
@@ -151,12 +151,17 @@ class Conduit(object):
         else:
             progress = Progress()
 
+        self.cvs.fetch(progress=progress, limit=limit)
+
+        # XXX: Should not access private self.cvs.metadb.
         if authors and stop_on_unknown_author:
+            unknown = []
             for author in self.cvs.metadb.all_authors():
                 if not authors.has_key(author):
-                    raise MissingAuthorFullname(author)
+                    unknown.append(author)
+            if len(unknown) > 0:
+                raise UnknownAuthorFullnames(unknown)
 
-        self.cvs.fetch(progress=progress, limit=limit)
         self.git.import_changesets(self.cvs.changesets(), self.branch,
                                    domain=self.domain,
                                    limit=limit,
