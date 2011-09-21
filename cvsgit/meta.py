@@ -310,3 +310,10 @@ class MetaDb(object):
         """
 	where = '%(changeset)s.mark IS NULL'
         return self._select_changesets(where)
+
+    def all_authors(self):
+        """Return a list of all author login names.
+        """
+        return self.dbh.execute("""
+            SELECT DISTINCT(author) FROM change
+        """).fetchall()
