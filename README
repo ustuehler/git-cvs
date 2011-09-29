@@ -56,7 +56,8 @@ LIBRARIES FOR PARSING RCS FILES AND OTHER RESOURCES
 WORKFLOW
 ========
 
-Repository creation
+Repository creation (assuming that /cvs/src is a local mirror of
+the OpenBSD src repository, maintained with CVSync):
 
  * cd /usr/src
  * git-cvs init --domain=cvs.openbsd.org /cvs/src
