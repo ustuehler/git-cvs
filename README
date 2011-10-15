@@ -35,6 +35,12 @@ ADVANTAGES OVER PLAIN CVS(1) AND CVSSYNC(1)
 DRAWBACKS
 =========
 
+ * Git, on purpose, does not manage the mtime of checked out files in
+   order to allow make(1) and similar tools to figure out which files
+   must be rebuilt after switching branches.  cvs sets the mtime to
+   the repository mtime whenever checkout/update creates a new file,
+   but not if the file already exists.
+
  * A full clone of the Git repository for src is about 450 MB after
    "git repack -adF" in addition to the 780 MB for a complete checkout.
 
