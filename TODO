@@ -1,3 +1,6 @@
+* Bugfix: From time to time now I'm seeing empty commits with a current
+  timestamp and an old commit message.  It doesn't hurt much because they
+  are empty, but it's still wrong.
 * Feature: Cloning from a particular date. (git-cvs clone -d now /cvs/src)
 * Feature: Convert .cvsignore to gitignore(5)
 * Feature: Take advantage of git diff --{src,dst}-prefix somehow
