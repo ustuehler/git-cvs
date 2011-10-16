@@ -74,6 +74,10 @@ Patch management
  * git checkout -b somebody/patch-subject cvs/HEAD
  * From mutt: |cd /usr/src; git am --directory=sys/dev -p0
 
+Generating patches that apply with -p0:
+
+ * git config diff.noprefix true
+
 Configuration hints (see git-config(1)):
 
  * Automatically set rebase option for new branches with
