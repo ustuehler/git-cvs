@@ -13,4 +13,7 @@ setup(name='git-cvs',
       license='OpenBSD',
       packages=['cvsgit', 'cvsgit.command'],
       scripts=['scripts/git-cvs'],
-      data_files=[('/usr/local/libexec/git', ['scripts/git-cvs'])])
+      data_files=[('/usr/local/libexec/git', ['scripts/git-cvs'])],
+      # XXX: a fairly recent version is required, but rcsparse
+      # doesn't maintain a package version
+      requires=['rcsparse'])
