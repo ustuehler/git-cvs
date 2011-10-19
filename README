@@ -47,17 +47,18 @@ DRAWBACKS
  * cvsync/rsync and cvsgit have to run somewhere, but that could be a
    dedicated server.
 
-LIBRARIES FOR PARSING RCS FILES AND OTHER RESOURCES
-===================================================
+INSTALLATION AND DEPENDENCIES
+=============================
 
- * rcsparse from cvs2svn (included here)
- * tparse from ViewVC
- * http://ww2.fs.ei.tum.de/~corecode/hg/rcsparse
- * http://ww2.fs.ei.tum.de/~corecode/hg/fromcvs
+You must have a fairly recent version of Simon Schubert's rcsparse
+library, available in either of these locations:
 
- * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.151.8450
+ * http://ww2.fs.ei.tum.de/~corecode/hg/rcsparse/archive/tip.tar.bz2
+ * https://gitorious.org/fromcvs/rcsparse/archive-tarball/master
 
- * http://metalinguist.wordpress.com/2007/12/06/the-woes-of-git-gc-aggressive-and-how-git-deltas-work/
+To install git-cvs, run ./setup.py:
+
+ $ sudo ./setup.py install
 
 WORKFLOW
 ========
@@ -83,3 +84,15 @@ Configuration hints (see git-config(1)):
  * Automatically set rebase option for new branches with
    branch.autosetuprebase always|remote
  * Disable a/b prefix with diff.noprefix=true
+
+LIBRARIES FOR PARSING RCS FILES AND OTHER RESOURCES
+===================================================
+
+ * rcsparse from cvs2svn (included here)
+ * tparse from ViewVC
+ * http://ww2.fs.ei.tum.de/~corecode/hg/rcsparse
+ * http://ww2.fs.ei.tum.de/~corecode/hg/fromcvs
+
+ * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.151.8450
+
+ * http://metalinguist.wordpress.com/2007/12/06/the-woes-of-git-gc-aggressive-and-how-git-deltas-work/
