@@ -1,9 +1,10 @@
-* Bugfix: From time to time now I'm seeing empty commits with a current
+* Feature: Verify in bare repository.
+* Bug: From time to time now I'm seeing empty commits with a current
   timestamp and an old commit message.  It doesn't hurt much because they
-  are empty, but it's still wrong.
-* Feature: Cloning from a particular date. (git-cvs clone -d now /cvs/src)
+  are empty, but it's still wrong.  (Update: There has been at least one
+  case where these spurious commits from the past have not been empty.)
+* Feature: Cloning from a particular date. (git-cvs clone -D now /cvs/src)
 * Feature: Convert .cvsignore to gitignore(5)
-* Feature: Take advantage of git diff --{src,dst}-prefix somehow
 * Documentation: Write a man page.
   http://andialbrecht.wordpress.com/2009/03/17/creating-a-man-page-with-distutils-and-optparse/
 * Feature: Handle branches and tags.
