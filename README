@@ -56,6 +56,10 @@ library, available in either of these locations:
  * http://ww2.fs.ei.tum.de/~corecode/hg/rcsparse/archive/tip.tar.bz2
  * https://gitorious.org/fromcvs/rcsparse/archive-tarball/master
 
+On top of that, you may have to apply the supplied patch (from the
+patches/ directory in the git-cvs source tree) to fix an issue with
+memory exhaustion during checkout.
+
 To install git-cvs, run ./setup.py:
 
  $ sudo ./setup.py install
@@ -88,11 +92,9 @@ Configuration hints (see git-config(1)):
 LIBRARIES FOR PARSING RCS FILES AND OTHER RESOURCES
 ===================================================
 
- * rcsparse from cvs2svn (included here)
+ * http://gitorious.org/fromcvs/rcsparse (used here)
+ * rcsparse from cvs2svn
  * tparse from ViewVC
- * http://ww2.fs.ei.tum.de/~corecode/hg/rcsparse
- * http://ww2.fs.ei.tum.de/~corecode/hg/fromcvs
-
+ * http://gitorious.org/parsecvs
  * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.151.8450
-
  * http://metalinguist.wordpress.com/2007/12/06/the-woes-of-git-gc-aggressive-and-how-git-deltas-work/

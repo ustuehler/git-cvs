@@ -72,7 +72,6 @@ class CVS(object):
         self.statcache = {}
         self._rcs_log_keyword_re = re.compile('(.*)\$Log(?::[^$\r\n]+)?\$(.*)')
         self._rcs_keyword_re = re.compile('\$([A-Z][A-Za-z]+)(:[^$\r\n]*)?\$')
-        self._rcs_headerfix_re = re.compile(' ([^ ]+,v) ')
         self._rcs_strip_attic_re = re.compile('(Attic/)?([^/]+),v$')
 
     def parse_options(self):
@@ -376,89 +375,103 @@ class CVS(object):
 
         rcsfile = RCSFile(rcsfile)
         blob = rcsfile.blob(revision)
-        if change.mode == 'b':
-            return blob
-        else:
-            return self.expand_keywords(blob, change, rcsfile, revision)
+        return self.expand_keywords(blob, change, rcsfile, revision)
 
-    def expand_keywords(self, blob, change, rcsfile, revision):
-        if change.mode == 'b' or rcsfile.expand not in (None, '', 'kv'):
-            return blob
-        # XXX: changing variable type... boo!
-        rcsfile = rcsfile.filename
-
-        returnflags = {'Log':False}
-        blob = self._rcs_keyword_re.sub(
-            lambda match:
-                self._expand_keyword_match(match, change, rcsfile, revision,
-                                           returnflags),
-            blob)
-        if returnflags['Log']:
-            blob = self._rcs_log_keyword_re.sub(
-                lambda match:
-                    self._expand_log_keyword_match(match, change, rcsfile,
-                                                   revision),
-                blob)
-        return blob
-
-    def _expand_log_keyword_match(self, match, change, rcsfile, revision):
-        prefix = match.group(1)
-        suffix = match.group(2)
-
-        s = prefix + ('$Log: %s $%s\n' % (os.path.basename(rcsfile),
-                                          suffix))
-
-        timestamp = time.gmtime(change.timestamp)
-        timestamp = time.strftime('%Y/%m/%d %H:%M:%S', timestamp)
-        s += prefix + ('Revision %s  %s  %s\n' % (revision,
-                                                  timestamp,
-                                                  change.author))
-
-        log = stripnl(RCSFile(rcsfile).rcsfile.getlog(revision))
-        for line in log.split('\n'):
-            s += (prefix + line).rstrip() + '\n'
-
-        s += prefix.rstrip()
-
-        return s.encode('ascii')
-
-    def _expand_keyword_match(self, match, change, rcsfile, revision,
-                              returnflags):
-        if match.group(1) == 'Id' or \
-                (self.localid and match.group(1) == self.localid):
-            timestamp = time.gmtime(change.timestamp)
-            return ('$%s: %s %s %s %s %s $' % \
-                (match.group(1), os.path.basename(rcsfile),
-                 revision,
-                 time.strftime('%Y/%m/%d %H:%M:%S', timestamp),
-                 change.author, change.state)).encode('ascii')
-        elif match.group(1) == 'Header':
-            timestamp = time.gmtime(change.timestamp)
-            return ('$Header: %s %s %s %s %s $' % \
-                (rcsfile, revision,
-                 time.strftime('%Y/%m/%d %H:%M:%S', timestamp),
-                 change.author, change.state)).encode('ascii')
-        elif match.group(1) == 'Revision':
-            return ('$Revision: %s $' % revision).encode('ascii')
-        elif match.group(1) == 'Source':
-            return ('$Source: %s $' % rcsfile).encode('ascii')
-        elif match.group(1) == 'Author':
-            return ('$Author: %s $' % change.author).encode('ascii')
-        elif match.group(1) == 'Date':
-            timestamp = time.gmtime(change.timestamp)
-            return '$Date: %s $' % time.strftime('%Y/%m/%d %H:%M:%S',
-                                                 timestamp)
-        elif match.group(1) == 'Log':
-            returnflags['Log'] = True
-            return match.group(0)
-        elif match.group(1) == 'Mdocdate':
-            # This is for OpenBSD.
+    def expand_keyword(self, change, rcsfile, revision, kw):
+        if kw == 'Id' or (self.localid and kw == self.localid):
+            return ('%s %s %s %s %s' %
+                    (os.path.basename(rcsfile.filename),
+                     revision, time.strftime('%Y/%m/%d %H:%M:%S',
+                     time.gmtime(change.timestamp)), change.author,
+                     change.state))
+        elif kw == 'Header':
+            return ('%s %s %s %s %s' %
+                    (rcsfile.filename, revision,
+                     time.strftime('%Y/%m/%d %H:%M:%S',
+                     time.gmtime(change.timestamp)), change.author,
+                     change.state))
+        elif kw == 'Date':
+            return time.strftime('%Y/%m/%d %H:%M:%S',
+                                 time.gmtime(change.timestamp))
+        elif kw == 'Revision':
+            return revision
+        elif kw == 'Source':
+            return rcsfile.filename
+        elif kw == 'Author':
+            return change.author
+        elif kw in 'RCSfile':
+            return os.path.basename(rcsfile.filename)
+        elif kw == 'Log':
+            # additional lines get inserted elsewhere
+            return os.path.basename(rcsfile.filename)
+        elif kw == 'State':
+            return change.state
+        elif kw in ('Locker', 'Name'):
+            return ''
+        elif kw == 'Mdocdate': # for OpenBSD
             timestamp = time.gmtime(change.timestamp)
             mdocdate = time.strftime('%B %e %Y', timestamp)
             mdocdate = mdocdate.replace('  ', ' ') # for %e
-            return ('$Mdocdate: %s $' % mdocdate)
+            return mdocdate
+
+    def expand_log_keyword(self, change, rcsfile, revision, prefix):
+        timestamp = time.gmtime(change.timestamp)
+        timestamp = time.strftime('%Y/%m/%d %H:%M:%S', timestamp)
+        s = prefix + ('Revision %s  %s  %s\n' %
+                      (revision, timestamp, change.author))
+        log = stripnl(rcsfile.rcsfile.getlog(revision))
+        for line in log.split('\n'):
+            s += (prefix + line).rstrip() + '\n'
+        s += prefix.rstrip()
+        return s
+
+    # Expand RCS keywords while avoiding to copy the whole file
+    # content into a new object when there's nothing to expand.
+    def expand_keywords(self, blob, change, rcsfile, revision):
+        # Skip keyword expansion for binary mode files.
+        if change.mode == 'b' or rcsfile.expand not in (None, '', 'kv'):
+            return blob
+
+        text = None
+        start = blob.find('$')
+
+        while start != -1:
+            end = blob.find('$', start + 1)
+            if end == -1:
+                break
+
+            s = blob[start:end + 1]
+            m = self._rcs_keyword_re.match(s)
+            if m:
+                kw = m.group(1)
+                s2 = self.expand_keyword(change, rcsfile, revision, kw)
+                if s2 != None:
+                    #print '%s: >>>%s<<<' % (rcsfile.filename, s2)
+                    if text == None:
+                        text = blob[0:start]
+                    text += '$' + kw + ': ' + s2.encode('ascii') + ' '
+                    if kw == 'Log':
+                        end += 1
+                        text += '$\n'
+                        prefix = blob[blob.rfind('\n', 0, start) + 1:start]
+                        text += self.expand_log_keyword(
+                            change, rcsfile, revision, prefix
+                            ).encode('ascii')
+                elif text != None:
+                    text += blob[start:end]
+            elif text != None:
+                text += blob[start:end]
+
+            start = end
+
+        if text != None:
+            text += blob[start:]
+
+        # Return the original input string or expanded version.
+        if text == None:
+            return blob
         else:
-            return match.group(0)
+            return text
 
     def mark_changeset(self, changeset):
         """Mark 'changeset' as having been committed to "the other
