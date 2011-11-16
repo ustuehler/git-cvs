@@ -155,12 +155,12 @@ class MetaDb(object):
                 """ % id)
             raise
 
-    def mark_changeset(self, changeset):
+    def mark_changeset(self, id, mark):
         """Mark 'changeset' as having been integrated.
         """
-        assert(changeset.id != None)
+        assert(id != None)
         sql = 'UPDATE changeset SET mark=? WHERE id=?'
-        self.dbh.execute(sql, (changeset.mark, changeset.id,))
+        self.dbh.execute(sql, (mark, id,))
         self.dbh.commit()
 
     def begin_transaction(self):

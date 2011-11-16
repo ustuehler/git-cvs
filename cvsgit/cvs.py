@@ -465,7 +465,7 @@ class CVS(object):
         VCS"."""
 
         assert(changeset.mark != None)
-        self.metadb.mark_changeset(changeset)
+        self.metadb.mark_changeset(changeset.id, changeset.mark)
 
     def count_changesets(self):
         return self.metadb.count_changesets()

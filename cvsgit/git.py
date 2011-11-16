@@ -281,7 +281,7 @@ class Git(object):
                            stop_on_unknown_author):
         message = _('Importing changesets')
         def do_progress(count, total):
-            progress(message, len(changesets_seen), total)
+            progress(message, count, total)
 
         class SignalIndicator():
             def __init__(self):
@@ -318,15 +318,17 @@ class Git(object):
         fi = GitFastImport(pipe, branch, domain=domain, verbose=verbose,
                            authors=authors, stop_on_unknown_author=\
                                stop_on_unknown_author)
-        changesets_seen = []
+        changeset_ids = []
+        db = None
         try:
             for changeset in changesets:
-                if limit != None and len(changesets_seen) >= limit:
+                if limit != None and len(changeset_ids) >= limit:
                     break
 
-                changesets_seen.append(changeset)
                 fi.add_changeset(changeset)
-                do_progress(len(changesets_seen), total)
+                if db == None: db = changeset.provider.metadb # FIXME
+                changeset_ids.append(changeset.id)
+                do_progress(len(changeset_ids), total)
 
                 if sigaction.isset(SIGINT):
                     raise KeyboardInterrupt()
@@ -336,14 +338,14 @@ class Git(object):
             try:
                 fi.close()
             finally:
-                self.mark_changesets(changesets_seen)
+                self.mark_changesets(db, changeset_ids)
                 for signalnum in signalset:
                     signal(signalnum, old_sigaction[signalnum])
 
         if fi.returncode != 0:
             raise RuntimeError, _('git fast-import failed')
 
-    def mark_changesets(self, changesets):
+    def mark_changesets(self, db, changeset_ids):
         filename = os.path.join(self.git_dir, 'cvsgit.marks')
         if not os.path.isfile(filename):
             return
@@ -357,10 +359,10 @@ class Git(object):
         finally:
             f.close()
 
-        for changeset in changesets:
-            if marks.has_key(changeset.id):
-                sha1 = marks[changeset.id]
-                changeset.set_mark(sha1)
+        for id in changeset_ids:
+            if marks.has_key(id):
+                sha1 = marks[id]
+                db.mark_changeset(id, sha1)
 
 class GitFastImport(object):
     def __init__(self, pipe, branch, domain=None, verbose=False,
