@@ -17,7 +17,6 @@ import rcsparse
 #    second or more after the exact date of the import.
 
 import os.path
-import subprocess
 import sys
 
 from cvsgit.changeset import Change, FILE_ADDED, FILE_MODIFIED, \
@@ -32,12 +31,6 @@ REV_STATE = 3
 REV_BRANCHES = 4
 REV_NEXT = 5
 REV_MODE = 6
-
-# Simon Schubert's rcsparse library has a large memory footprint
-# compared to co(1).  If we check out revisions with his parser we
-# risk blowing up the whole process, so we resort to a slow checkout
-# using an external process for large files. :-/
-FAST_CHECKOUT_SIZE_LIMIT = 800000
 
 class RCSError(Error):
     """Base class for exceptions from the cvsgit.rcs module
@@ -167,31 +160,13 @@ class RCSFile(object):
                       state=rev[REV_STATE],
                       mode=mode)
 
-    def blob(self, revision, size_hint=None):
+    def blob(self, revision):
         """Returns the revision's file content.
         """
         try:
-            if size_hint and size_hint > FAST_CHECKOUT_SIZE_LIMIT:
-                # calls co(1)
-                # XXX: need better handling of warnings
-                print _("warning: %s is too big for fast checkout (%s)") % \
-                    (self.filename, size_hint)
-                return self.big_blob(revision)
-            else:
-                # fast path
-                return self.rcsfile.checkout(revision)
+            return self.rcsfile.checkout(revision)
         except RuntimeError:
             raise CheckoutError(self, revision)
-
-    def big_blob(self, revision):
-        """Check out a revision from a very big file.
-        """
-        command = ['co', '-q', '-p' + revision, self.filename]
-        pipe = subprocess.Popen(command, stdout=subprocess.PIPE)
-        data = pipe.communicate()[0]
-        if pipe.returncode != 0:
-            raise CheckoutError(self, revision)
-        return data
 
     # XXX only for debugging; remove later
     def _print_revision(self, revision):
