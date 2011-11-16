@@ -73,18 +73,20 @@ class Clone(Command):
             if head_branch == 'refs/heads/master':
                 if self.options.bare:
                     git.check_command('branch', '-f', 'master', conduit.branch)
-                elif self.options.verify:
-                    first = git.rev_list('--all').split('\n')[-1]
-                    git.checkout(first)
-                    try:
-                        olddir = os.getcwd()
-                        os.chdir(git.git_work_tree)
-                        Verify().eval('--history', '--forward')
-                    finally:
-                        os.chdir(olddir)
                 else:
                     git.check_command('reset', '-q', '--hard', conduit.branch)
         except:
             shutil.rmtree(self.directory)
             raise
 
+        # Verify after the above rmtree, because someone likely wants
+        # to inspect the repository if the verification fails.
+        if self.options.verify:
+            first = git.rev_list('--all').split('\n')[-1]
+            git.checkout(first)
+            try:
+                olddir = os.getcwd()
+                os.chdir(git.git_work_tree)
+                Verify().eval('--history', '--forward')
+            finally:
+                os.chdir(olddir)
