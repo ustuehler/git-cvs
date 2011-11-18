@@ -1,16 +1,18 @@
 * Bug: Changeset order unstable when CVS changes overlap in time.
-* Feature: Verify in bare repository.
+* Bug: Changeset timestamp is off by one second (see changeset.py)
+* Bug: File deletions inside the CVS repository should be detected.
 * Bug: From time to time now I'm seeing empty commits with a current
   timestamp and an old commit message.  It doesn't hurt much because they
   are empty, but it's still wrong.  (Update: There has been at least one
   case where these spurious commits from the past have not been empty.)
 * Feature: Convert .cvsignore to gitignore(5)
+* Feature: Verify in bare repository.
 * Feature: More details in --authors file in case account owners changed.
 * Feature: Cloning from a particular date. (git-cvs clone -D now /cvs/src)
 * Documentation: Write a man page.
   http://andialbrecht.wordpress.com/2009/03/17/creating-a-man-page-with-distutils-and-optparse/
 * Feature: Handle branches and tags.
 * Refactor: Rename cvsgit.meta package.
-* Refactor: Rename 'cvsgit' to 'git-cvs' to mimmic the 'git-svn' bridge command,
-  or even turn this into a 'CVS post-processor' (cvspps?) that is less attached
-  to Git.
+* Refactor: Rename 'cvsgit' to 'git-cvs' to mimmic the 'git-svn'
+  bridge command, or even turn this into a 'CVS post-processor'
+  (cvspps?) that is less attached to Git.
