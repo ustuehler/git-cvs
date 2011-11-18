@@ -1,3 +1,4 @@
+* Bug: Changeset order unstable when CVS changes overlap in time.
 * Feature: Verify in bare repository.
 * Bug: From time to time now I'm seeing empty commits with a current
   timestamp and an old commit message.  It doesn't hurt much because they
