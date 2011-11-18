@@ -1,5 +1,6 @@
 """Command to compare a Git tree against CVS."""
 
+import os
 import re
 import subprocess
 from subprocess import PIPE
@@ -77,7 +78,17 @@ class Verify(Command):
                    '-P', '-D', date, '-d', self.tempdir, self.module]
         if not self.options.quiet:
             print "(%s) '%s'" % (head, "' '".join(command))
-        subprocess.check_call(command)
+        # At least with OpenBSD's version of GNU CVS it is not
+        # possible to run "cvs checkout" from a directory that's
+        # inside the CVS repository.  This should avoid the
+        # issue... *grrrr* The error is: cvs [checkout aborted]:
+        # Cannot check out files into the repository itself
+        try:
+            owd = os.getcwd()
+            os.chdir('/')
+            subprocess.check_call(command)
+        finally:
+            os.chdir(owd)
         command = ['diff', '-r', self.tempdir, self.git.git_work_tree]
         pipe = subprocess.Popen(command, stdout=PIPE, stderr=PIPE)
         stdout, dummy = pipe.communicate()
