@@ -211,7 +211,7 @@ class MetaDb(object):
                        revision, state, mode
                 FROM change
                 WHERE %s
-                ORDER BY timestamp""" % where):
+                ORDER BY timestamp, filename, revision""" % where):
                 yield(mkchange(row))
             return
 
@@ -269,7 +269,7 @@ class MetaDb(object):
             FROM changeset cs
             INNER JOIN change c ON c.changeset_id = cs.id
             WHERE %s
-            ORDER BY cs.start_time, cs.id""" % where
+            ORDER BY cs.end_time, cs.id""" % where
 
         changeset = None
         for row in self.dbh.execute(sql):
