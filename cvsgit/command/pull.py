@@ -2,6 +2,7 @@
 
 from cvsgit.main import Command, Conduit
 from cvsgit.i18n import _
+from cvsgit.command.verify import Verify
 
 class pull(Command):
     __doc__ = _(
@@ -20,6 +21,10 @@ class pull(Command):
             _("Only report error and warning messages."))
         self.add_option('--verbose', action='store_true', help=\
             _("Display each changeset as it is imported."))
+        self.add_option('--verify', action='store_true', help=\
+            _("Verify the new HEAD revision and work tree against "
+              "a fresh CVS checkout (does not work in a bare "
+              "repository.)"))
         self.add_authors_option()
         self.add_stop_on_unknown_author_option()
 
@@ -37,6 +42,11 @@ class pull(Command):
                      authors=self.options.authors,
                      stop_on_unknown_author=\
                          self.options.stop_on_unknown_author)
+
+        # Optionally verify the new HEAD revision and work tree
+        # against a fresh CVS checkout.
+        if self.options.verify:
+            Verify().eval()
 
 if __name__ == '__main__':
     pull()

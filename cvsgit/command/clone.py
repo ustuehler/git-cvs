@@ -82,11 +82,9 @@ class Clone(Command):
         # Verify after the above rmtree, because someone likely wants
         # to inspect the repository if the verification fails.
         if self.options.verify:
-            first = git.rev_list('--all').split('\n')[-1]
-            git.checkout(first)
             try:
                 olddir = os.getcwd()
                 os.chdir(git.git_work_tree)
-                Verify().eval('--history', '--forward')
+                Verify().eval()
             finally:
                 os.chdir(olddir)
