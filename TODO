@@ -3,8 +3,9 @@
   timestamp and an old commit message.  It doesn't hurt much because they
   are empty, but it's still wrong.  (Update: There has been at least one
   case where these spurious commits from the past have not been empty.)
-* Feature: Cloning from a particular date. (git-cvs clone -D now /cvs/src)
 * Feature: Convert .cvsignore to gitignore(5)
+* Feature: More details in --authors file in case account owners changed.
+* Feature: Cloning from a particular date. (git-cvs clone -D now /cvs/src)
 * Documentation: Write a man page.
   http://andialbrecht.wordpress.com/2009/03/17/creating-a-man-page-with-distutils-and-optparse/
 * Feature: Handle branches and tags.
