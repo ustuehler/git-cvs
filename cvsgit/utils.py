@@ -3,6 +3,7 @@
 import os
 import shutil
 import tempfile
+import textwrap
 
 class Tempdir(object):
     """Manage a tempoarary directory
@@ -81,3 +82,12 @@ def stripnl(string):
         return string[0:-1]
     else:
         raise RuntimeError("string doesn't end in newline: %s" % string)
+
+def dedent(docstring):
+    """Dedent a Python docstring treating the first line special.
+
+    This function uses textwrap.dedent() but assumes that the first
+    line is not indented.
+    """
+    lines = docstring.splitlines()
+    return '\n'.join((lines[0], textwrap.dedent('\n'.join(lines[1:])),))

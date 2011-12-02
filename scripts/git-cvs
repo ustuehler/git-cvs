@@ -6,14 +6,13 @@ import os
 import re
 import string
 import sys
-import textwrap
 import traceback
 
 from cvsgit.cmd import Cmd
 from cvsgit.i18n import _
 from cvsgit.error import Error
-from cvsgit.utils import stripnl
 import cvsgit.command
+import cvsgit.utils
 
 class CLI(Cmd):
     """Operate on a CVS repository using Git.
@@ -57,7 +56,7 @@ class CLI(Cmd):
                 if type(e).__doc__:
                     print '-'*72
                     print type(e).__name__ + ':',
-                    print textwrap.dedent(type(e).__doc__.rstrip())
+                    print cvsgit.utils.dedent(type(e).__doc__).rstrip()
                     print '-'*72
             else:
                 self.error(str(e) + ' (--detailed-errors for more information)')

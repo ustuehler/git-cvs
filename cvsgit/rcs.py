@@ -33,11 +33,11 @@ REV_NEXT = 5
 REV_MODE = 6
 
 class RCSError(Error):
-    """Base class for exceptions from the cvsgit.rcs module
+    """Base class for exceptions from the cvsgit.rcs module.
     """
 
 class ParseError(RCSError):
-    """Raised when an RCS file couldn't be parsed correctly
+    """Raised when an RCS file couldn't be parsed correctly.
     """
 
     def __init__(self, message, rcsfile):
@@ -49,8 +49,14 @@ class ParseError(RCSError):
         self.rcsfile = rcsfile
 
 class CheckoutError(ParseError):
-    """This exception is raised when the file content of a particular
-    revision couldn't be retrieved from an RCS file.
+    """Extraction of fulltext from RCS file failed.
+
+    This exception indicates that the fulltext of a particular
+    revision was requested but couldn't be retrieved from the
+    RCS file because the revision does not exist, for example.
+
+    It likely indicates that an invalid argument was passed to
+    the RCSFile.blob method.
     """
 
     def __init__(self, rcsfile, revision):
@@ -65,7 +71,8 @@ class CheckoutError(ParseError):
         self.revision = revision
 
 class RCSFile(object):
-    "Represents a single RCS file."
+    """Represents a single RCS file.
+    """
 
     def __init__(self, filename, encoding='iso8859-1'):
         """'encoding' sets the encoding assumed of log messages and
