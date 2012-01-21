@@ -62,18 +62,6 @@ class MissingAuthorFullname(GitError):
 class Git(object):
     """Git repository and optional work tree.
 
-    def __init__(self, command, returncode, stderr=None):
-        self.command = command
-        self.returncode = returncode
-        self.stderr = stderr
-        msg = "'%s' exited with code %d" % \
-            (' '.join(command), returncode)
-        if stderr:
-            stderr = '\n  '.join(stripnl(stderr).split('\n'))
-            msg += '\n\nError output of %s command:\n  %s' % \
-                (command[0], stderr)
-        super(GitCommandError, self).__init__(msg)
-
     The Git repository may or may not already exist until the init()
     method is called, after which the repository will definitely
     exist, if the call returns successfully.
