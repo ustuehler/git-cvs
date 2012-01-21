@@ -23,6 +23,7 @@ def safe_environ():
     for k in env.keys():
         if k.startswith('GIT_'):
             del env[k]
+    return env
 
 class GitError(Error):
     """Base exception for errors in the cvsgit.git module"""
