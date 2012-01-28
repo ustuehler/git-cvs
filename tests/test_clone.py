@@ -20,7 +20,12 @@ class Test(unittest.TestCase):
             self.assertEquals(Clone().eval('--quiet', source), 0)
             os.chdir('tree')
             self.assertEquals(0, Verify().eval())
-            self.assertEquals(0755, os.stat('A/mu').st_mode & 0777)
+
+            # A/mu inherits the executable bits from the RCS file.
+            rcs_mode = os.stat(join(source, 'A/mu,v')).st_mode
+            wc_mode = os.stat('A/mu').st_mode
+            self.assertTrue((rcs_mode & 0111) != 0)
+            self.assertEquals(rcs_mode, wc_mode)
 
     def test_clone_bare(self):
         """Clone the greek tree into a bare repository.
