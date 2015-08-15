@@ -49,9 +49,11 @@ class Test(unittest.TestCase):
             #self.assertEquals(0, Verify().eval())
 
     def test_clone_partial_alternative(self):
-        """Calling "pull --limit=<limit>" several times is basically
-        the same as cloning everything (given that it's done enough
-        times or that <limit> is high enough.)
+        """Using --limit several times is the same as cloning.
+        
+        Calling "pull --limit=<n>" several times is basically the same as
+        cloning everything (given that it's done enough times or that <limit>
+        is high enough.)
         """
         head1 = None
         with Tempdir(cwd=True) as tempdir:
