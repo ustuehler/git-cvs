@@ -67,25 +67,32 @@ class CVS(object):
             self.prefix = os.path.join(self.root, self.module)
 
         self.localid = None
-        self.parse_options()
+        self.parse_config()
 
         self.statcache = {}
         self._rcs_log_keyword_re = re.compile('(.*)\$Log(?::[^$\r\n]+)?\$(.*)')
         self._rcs_keyword_re = re.compile('\$([A-Z][A-Za-z]+)(:[^$\r\n]*)?\$')
         self._rcs_strip_attic_re = re.compile('(Attic/)?([^/]+),v$')
 
-    def parse_options(self):
-        """Extract relevant information from the CVSROOT/options file,
+    def parse_config(self):
+        """Extract relevant information from the CVSROOT/config file,
         if it exsits.  At the moment, the only information that is
         used from the file is the custom Id tag keyword 'tag'."""
 
-        filename = os.path.join(self.root, 'CVSROOT', 'options')
+        filename = os.path.join(self.root, 'CVSROOT', 'config')
         if not os.path.isfile(filename):
             return
 
         f = file(filename, 'r')
         try:
             for line in f.readlines():
+                # Skip empty and comment-only lines.
+                if re.match('^\s*(#.*)?$', line) != None:
+                    continue
+
+                # Remaining lines must be "key=value" pairs.  split() will
+                # fail otherwise.
+                print line
                 option, value = line.split('=', 2)
                 if option == 'tag':
                     self.localid = value.strip()
