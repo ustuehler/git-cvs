@@ -1,0 +1,27 @@
+#!/bin/sh -ex
+
+basedir=`dirname $0`/../tmp
+basedir=`cd $basedir && pwd`
+
+cvsroot=$basedir/cvs
+worktree=$basedir/src
+
+rm -f $basedir/*.tar
+rm -rf $cvsroot
+rm -rf $worktree
+
+mkdir $worktree
+cd $worktree
+
+cvs -d $cvsroot init
+tar -cf $basedir/cvsroot.tar -C $cvsroot CVSROOT
+
+touch file_a
+cvs -d $cvsroot import -m 'Initial import' `basename $worktree` vendor-tag release-tag
+tar -cf $basedir/import.tar -C $cvsroot src
+cvs -d $cvsroot co -P -d . src
+
+touch file_b
+cvs -d $cvsroot add file_b
+cvs -d $cvsroot commit -m 'Add file_b'
+tar -cf $basedir/add-file_b.tar -C $cvsroot src
