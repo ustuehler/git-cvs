@@ -6,3 +6,6 @@ coverage.xml
 nosetests.xml
 pylint.txt
 dist/
+
+# used by scripts/make-pull-data
+/tmp/
