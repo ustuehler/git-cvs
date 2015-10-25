@@ -92,7 +92,6 @@ class CVS(object):
 
                 # Remaining lines must be "key=value" pairs.  split() will
                 # fail otherwise.
-                print line
                 option, value = line.split('=', 2)
                 if option == 'tag':
                     self.localid = value.strip()
