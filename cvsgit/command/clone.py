@@ -32,6 +32,9 @@ class Clone(Command):
         self.add_option('--verify', action='store_true', help=\
             _("Run the verify command after cloning (does not work "
               "with --bare)."))
+        self.add_option('--no-repack', action='store_true', help=\
+            _("Don't run \"git repack -adF\" after cloning (so you "
+              "end up with an uncompressed pack file)."))
         self.add_quiet_option()
         self.add_verbose_option()
         self.add_authors_option()
@@ -69,6 +72,10 @@ class Clone(Command):
                               self.options.stop_on_unknown_author)
 
             git = conduit.git
+
+            if not self.options.no_repack:
+                git.check_command('repack', '-adF')
+
             head_branch = git.symbolic_ref('HEAD')
             if head_branch == 'refs/heads/master':
                 if self.options.bare:
