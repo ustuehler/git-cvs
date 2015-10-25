@@ -185,7 +185,10 @@ class Conduit(object):
         if quiet:
             args.append('--quiet')
 
-        # XXX: --quiet is not enough if branch.<branch>.rebase is true
-        #self.git.pull(*args)
-        import subprocess
-        self.git.check_command('pull', *args, stdout=subprocess.PIPE)
+        if self.git.is_bare():
+          self.git.check_command('branch', '-f', 'master', self.branch)
+        else:
+          # XXX: --quiet is not enough if branch.<branch>.rebase is true
+          #self.git.pull(*args)
+          import subprocess
+          self.git.check_command('pull', *args, stdout=subprocess.PIPE)
