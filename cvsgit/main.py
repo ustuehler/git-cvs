@@ -50,6 +50,10 @@ class Command(Cmd):
         self.add_option('--verbose', action='store_true', help=\
             _("Display each changeset as it is imported."))
 
+    def add_no_skip_latest_option(self):
+        self.add_option('--no-skip-latest', action='store_true', help=\
+            _("Import potentially incomplete changesets instead of retaining them for the next incremental import."))
+
 class ConduitError(Error):
     """Base exception for errors in the cvsgit.main module
     """
@@ -146,7 +150,7 @@ class Conduit(object):
             self.domain = domain
 
     def fetch(self, limit=None, quiet=True, verbose=False,
-              authors=None, stop_on_unknown_author=False):
+              flush=False, authors=None, stop_on_unknown_author=False):
         """Fetch new changesets into the CVS tracking branch.
         """
         if quiet or verbose:
@@ -154,7 +158,7 @@ class Conduit(object):
         else:
             progress = Progress()
 
-        self.cvs.fetch(progress=progress, limit=limit)
+        self.cvs.fetch(progress=progress, limit=limit, flush=flush)
 
         # XXX: Should not access private self.cvs.metadb.
         if authors and stop_on_unknown_author:
@@ -175,11 +179,11 @@ class Conduit(object):
                                    stop_on_unknown_author=\
                                        stop_on_unknown_author)
 
-    def pull(self, limit=None, quiet=True, verbose=False, authors=None,
-             stop_on_unknown_author=False):
+    def pull(self, limit=None, quiet=True, verbose=False, flush=False,
+             authors=None, stop_on_unknown_author=False):
         self.fetch(limit=limit, quiet=quiet, verbose=verbose,
-                   authors=authors, stop_on_unknown_author=\
-                       stop_on_unknown_author)
+                   flush=flush, authors=authors, stop_on_unknown_author=
+                   stop_on_unknown_author)
 
         args = []
         if quiet:

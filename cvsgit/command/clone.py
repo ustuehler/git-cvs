@@ -37,6 +37,7 @@ class Clone(Command):
               "end up with an uncompressed pack file)."))
         self.add_quiet_option()
         self.add_verbose_option()
+        self.add_no_skip_latest_option()
         self.add_authors_option()
         self.add_stop_on_unknown_author_option()
 
@@ -67,6 +68,7 @@ class Clone(Command):
             conduit.fetch(limit=self.options.limit,
                           quiet=self.options.quiet,
                           verbose=self.options.verbose,
+                          flush=self.options.no_skip_latest,
                           authors=self.options.authors,
                           stop_on_unknown_author=\
                               self.options.stop_on_unknown_author)

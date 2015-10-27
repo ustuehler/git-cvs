@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
         """
         with Tempdir(cwd=True) as tempdir:
             source = join(dirname(__file__), 'data', 'greek', 'tree')
-            self.assertEquals(Clone().eval('--quiet', source), 0)
+            self.assertEquals(Clone().eval('--quiet', '--no-skip-latest', source), 0)
             os.chdir('tree')
             self.assertEquals(0, Verify().eval())
 
@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
         """
         with Tempdir(cwd=True) as tempdir:
             source = join(dirname(__file__), 'data', 'greek', 'tree')
-            self.assertEquals(Clone().eval('--quiet', '--bare', source), 0)
+            self.assertEquals(Clone().eval('--quiet', '--no-skip-latest', '--bare', source), 0)
             self.assertTrue(isfile(join(tempdir, 'tree', 'config')))
 
     def test_clone_with_zombie_rcs_file(self):
@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
         """
         with Tempdir(cwd=True):
             source = join(dirname(__file__), 'data', 'zombie')
-            self.assertEquals(0, Clone().eval('--quiet', source))
+            self.assertEquals(0, Clone().eval('--quiet', '--no-skip-latest', source))
             os.chdir('zombie')
             # FIXME: zombie repository fails verification
             #self.assertEquals(0, Verify().eval())
@@ -58,7 +58,7 @@ class Test(unittest.TestCase):
         head1 = None
         with Tempdir(cwd=True) as tempdir:
             source = join(dirname(__file__), 'data', 'zombie')
-            self.assertEquals(0, Clone().eval('--quiet', source))
+            self.assertEquals(0, Clone().eval('--quiet', '--no-skip-latest', source))
             os.chdir('zombie')
             head1 = Git().rev_parse('HEAD')
 
@@ -66,11 +66,11 @@ class Test(unittest.TestCase):
         with Tempdir(cwd=True) as tempdir:
             source = join(dirname(__file__), 'data', 'zombie')
             self.assertEquals(0, init().eval('--quiet', source))
-            self.assertEquals(0, pull().eval('--quiet', '--limit=1'))
+            self.assertEquals(0, pull().eval('--quiet', '--no-skip-latest', '--limit=1'))
             self.assertNotEqual(head1, Git().rev_parse('HEAD'))
-            self.assertEquals(0, pull().eval('--quiet', '--limit=2'))
+            self.assertEquals(0, pull().eval('--quiet', '--no-skip-latest', '--limit=2'))
             self.assertNotEqual(head1, Git().rev_parse('HEAD'))
-            self.assertEquals(0, pull().eval('--quiet', '--limit=3'))
+            self.assertEquals(0, pull().eval('--quiet', '--no-skip-latest', '--limit=3'))
             self.assertEqual(head1, Git().rev_parse('HEAD'))
 
     def test_git_clone_from_cvs_clone(self):

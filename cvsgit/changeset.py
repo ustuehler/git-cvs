@@ -1,7 +1,5 @@
 """Changeset reconstruction logic for CVSGit."""
 
-import time
-
 QUIET_PERIOD = 60
 
 FILE_ADDED = 'A'
@@ -178,18 +176,37 @@ class ChangeSetGenerator(object):
     have likely been committed together.  The individual changes must
     be presented in ascending order of their timestamp."""
 
-    def __init__(self, quiet_period=QUIET_PERIOD):
+    def __init__(self, quiet_period=QUIET_PERIOD, limit=None):
         """Construct a new ChangeSetGenerator instance.
 
-        We don't want CVS commits spanning multiple files that were
-        not finished while we synced the CVS mirror to be accepted
-        as complete changesets.  The "quiet period" guards against
-        such incomplete change sets by requiring that any CVS change
-        must be older than the current system time minus the quiet
-        period (in seconds).  (Assuming that the system time and
-        CVS time stamps are not totally bogus, of course.)"""
+        The ChangeSetGenerator should only return complete ChangeSets
+        and retain possibly incomplete ChangeSets.  If limit is given,
+        only return as many changesets and retain all others.
+
+        Major reasons for incomplete ChangeSets:
+
+        1. When importing Changes directly from a writable CVS
+           repository (without locking against CVS clients) we could
+           be racing against "cvs commit" and other operations.
+
+        2. When importing from a CVS repository mirror, the mirroring
+           may have overlapped with a "cvs commit" or other operation,
+           again unless CVS clients were locked out for that time.
+
+        3. If the CVS mirror operation was interrupted, some RCS files
+           belonging to a ChangeSet may have been updated while others
+           have not.
+
+        To guard against all of the above, the ChangeSetGenerator
+        defines a ChangeSet `X' as being complete only if there is
+        another ChangeSet `Y' and `Y.start_time - X.end_time >
+        quiet_period`, i.e., after the complete ChangeSet there is at
+        least one significantly younger one.
+        """
 
         self.quiet_period = quiet_period
+        self.limit = limit
+        self.count = 0
         self.changesets = []
 
     def integrate(self, change):
@@ -199,13 +216,18 @@ class ChangeSetGenerator(object):
 
         # Yield changesets that have passed the "quiet period".
         changesets = []
+        count = self.count
         for cs in self.changesets:
             delta = change.timestamp - cs.end_time
             if delta >= self.quiet_period:
+                if self.limit and count >= self.limit:
+                    return
+                count += 1
                 yield(cs)
             else:
                 changesets.append(cs)
         self.changesets = changesets
+        self.count = count
 
         # For all remaining changesets, try to find one that can
         # integrate the change.  Otherwise, open a new changeset.
@@ -213,23 +235,19 @@ class ChangeSetGenerator(object):
             if cs.integrate(change):
                 return
         self.changesets.append(ChangeSet(change))
+
         # TODO: Is changeset ordering more stable with this?
         #self.changesets.sort(key=lambda cs: cs.timestamp)
 
-    def finalize(self):
-        """Yield remaining changesets that have passed the "quiet
-        period", relative to the current system time.  Changesets that
-        are still within the quiet period will be kept back until
-        further changes are integrated with integrate() or until
-        finalize() is called again when some time has passed."""
+    def flush(self):
+        """Yield remaining changesets up to the limit (if one was set),
+        even potentially incomplete ones."""
 
-        #FIXME: time zones aren't handled correctly - need unit tests!
-        now = int(time.time())
-        changesets = []
+        count = self.count
         for cs in self.changesets:
-            delta = now - cs.end_time
-            if delta >= self.quiet_period:
-                yield(cs)
-            else:
-                changesets.append(cs)
-        self.changesets = changesets
+            if self.limit and count >= self.limit:
+                return
+            count += 1
+            yield(cs)
+        self.changesets = []
+        self.count = count

@@ -271,44 +271,52 @@ class CVS(object):
 
         self.metadb.update_statcache({rcsfile:identity})
 
-    def generate_changesets(self, progress=None, limit=None):
+    def generate_changesets(self, progress=None, limit=None, flush=False):
         """Convert changes stored in the meta database into sets of
         related changes and store the resulting changesets in the meta
         database as well.
+
+        If limit is given, only that many changesets will be imported and
+        all others will be retained.  This can be used to import changesets
+        in small batches.
+
+        If flush is True, all changesets produced by the ChangeSetGenerator
+        are imported; otherwise, potentially incomplete changesets may be
+        retained for the next incremental import.  Use this flag if you can
+        be sure that the CVS repository is consistent and is not going to be
+        modified during the import.
         """
         if progress == None:
             progress = NoProgress()
 
         with progress:
             count = 0
-            csg = ChangeSetGenerator()
+            csg = ChangeSetGenerator(limit=limit)
             total = self.metadb.count_changes()
             progress(_('Processing changes'), 0, total)
+
             for change in self.changes(processed=False, reentrant=True):
                 count += 1
                 progress(_('Processing changes'), count, total)
                 for cs in csg.integrate(change):
-                    # XXX: not reflected in progress output, and ugly
-                    if limit:
-                        if limit > 0:
-                            limit -= 1
-                        else:
-                            return
                     self.metadb.add_changeset(cs)
-            for cs in csg.finalize():
-                # XXX: not reflected in progress output, and ugly
-                if limit:
-                    if limit > 0:
-                        limit -= 1
-                    else:
-                        return
-                self.metadb.add_changeset(cs)
 
-    def fetch(self, progress=None, limit=None):
+        if flush:
+            # All changesets are assumed to be complete and will be
+            # imported.  Note that the ChangeSetGenerator still counts
+            # changesets from flush() against the specified limit.
+            for cs in csg.flush():
+                self.metadb.add_changeset(cs)
+        elif len(csg.changesets) > 0:
+            # The ChangeSetGenerator retained some changesets because
+            # they are potentially incomplete.
+            progress(_('Retained changesets'), len(csg.changesets))
+
+    def fetch(self, progress=None, limit=None, flush=False):
         """Fetch new revisions and compute changesets.
         """
         self.fetch_changes(progress)
-        self.generate_changesets(progress, limit)
+        self.generate_changesets(progress, limit, flush)
 
     def changesets(self):
         """Yield new changesets computed earlier.

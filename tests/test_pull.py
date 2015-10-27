@@ -2,6 +2,7 @@ from StringIO import StringIO
 from contextlib import contextmanager
 from os import chdir, getcwd, mkdir
 from os.path import dirname, join, isdir, isfile, exists
+from string import split, strip
 from subprocess import PIPE, Popen, call
 
 import re
@@ -66,18 +67,29 @@ class Test(unittest.TestCase):
         TarFile('cvsroot').extract(self.cvsroot)
         TarFile('import').extract(self.cvsroot)
         chdir(self.tempdir)
-        self.assertEquals(Clone().eval('--quiet', join(self.cvsroot, 'src'),
-            self.worktree), 0)
+        self.assertEquals(Clone().eval('--quiet', '--no-skip-latest',
+            join(self.cvsroot, 'src'), self.worktree), 0)
 
         # Enter the work tree and make sure the clone was successful before
         # running the actual test case.
         chdir(self.worktree)
         self.assertEquals(Verify().eval(), 0)
 
+        # Verify the intial Git state after cloning from "cvs import".
+        self.git = Git(self.worktree)
+        self.assertEquals(
+            ['21d3c522acefc5d240848876968504d8ea85347f'],
+            split(self.git.rev_list('HEAD')))
+
     def tearDown(self):
         """Return to the original working directory and remove the whole
         temporary directory.
         """
+        # Ensure that the working copy is the same as cloning from CVS at
+        # the end of each test fixture.
+        self.assertEquals(Verify().eval(), 0)
+
+        # Restore the original working directory.
         chdir(self.oldcwd)
         if isdir(self.tempdir):
             shutil.rmtree(self.tempdir)
@@ -92,7 +104,7 @@ class Test(unittest.TestCase):
         touch_existing(join(self.cvsroot, 'src', 'file_a,v'))
         old_content = directory_listing(self.worktree)
         with redirect_stdout() as stdout:
-            self.assertEquals(pull().eval(), 0)
+            self.assertEquals(pull().eval('--no-skip-latest'), 0)
             self.assertEquals(stdout.getvalue(),
                 re.sub('^\s*', '', """\
                 Collecting RCS files: 1
@@ -101,7 +113,6 @@ class Test(unittest.TestCase):
                 """, 0, re.MULTILINE))
         new_content = directory_listing(self.worktree)
         self.assertEquals(old_content, new_content)
-        self.assertEquals(Verify().eval(), 0)
 
     def test_pull_new_file(self):
         """Pull a change that adds a new file.
@@ -110,17 +121,46 @@ class Test(unittest.TestCase):
         self.assertEquals(isfile('file_a'), True)
         self.assertEquals(isfile('file_b'), False)
         with redirect_stdout() as stdout:
-            self.assertEquals(pull().eval(), 0)
-            self.assertEquals(stdout.getvalue(),
+            self.assertEquals(pull().eval('--no-skip-latest'), 0)
+            self.assertEquals(
                 re.sub('^\s*', '', """\
                 Collecting RCS files: 2
                 Parsing RCS files: done. (1/1)
                 Processing changes: done. (1/1)
                 Importing changesets: done. (1/1)
-                """, 0, re.MULTILINE))
+                """, 0, re.MULTILINE),
+                stdout.getvalue())
         self.assertEquals(isfile('file_b'), True)
-        self.assertEquals(Verify().eval(), 0)
+        self.assertEquals(
+            ['675ccc10b5cdca1ead0eec6020a16e3d51b8e548',
+             '21d3c522acefc5d240848876968504d8ea85347f'],
+            split(self.git.rev_list('HEAD')))
 
+    def test_incomplete_commit(self):
+        """Incomplete change sets are ignored by default.
+        """
+        TarFile('add-file_b').extract(self.cvsroot)
+        TarFile('split-commit-part1').extract(self.cvsroot)
+        with redirect_stdout() as stdout:
+            self.assertEquals(pull().eval(), 0)
+            self.assertEquals(
+                ['Collecting RCS files: 2',
+                 'Parsing RCS files: done. (2/2)',
+                 'Processing changes: done. (3/3)',
+                 'Retained changesets: 1',
+                 'Importing changesets:  50% (1/2)',
+                 'Importing changesets: done. (2/2)'],
+                splitlines(stdout.getvalue()))
+        self.assertEquals(
+            ['24231f1cd29a5e1caaf9c0167283b8aa5955ea7f',
+             '8d60be7401bafc50256ec624d1aa2ef3b63a2a41',
+             '21d3c522acefc5d240848876968504d8ea85347f'],
+            split(self.git.rev_list('HEAD')))
+
+def splitlines(s):
+    """Split string `s' into lines and trim whitespace.
+    """
+    return map(lambda l: strip(l), s.splitlines())
 
 @contextmanager
 def redirect_stdout():

@@ -25,3 +25,18 @@ touch file_b
 cvs -d $cvsroot add file_b
 cvs -d $cvsroot commit -m 'Add file_b'
 tar -cf $basedir/add-file_b.tar -C $cvsroot src
+
+# Wait more than QUIET_TIME, so that the partial commits happen long enough
+# after the initial import and adding file_b.
+sleep 61
+
+# Simulate a commit which affected multiple files but took so long to complete
+# that a cvsync run didn't catch all of the affected RCS files.
+echo 'this is file_a' > file_a
+echo 'this is file_b' > file_b
+cvs -d $cvsroot commit -m 'Update file_a and file_b'
+tar -cf $basedir/split-commit-part1.tar -C $cvsroot src/file_a,v
+tar -cf $basedir/split-commit-part2.tar -C $cvsroot src/file_b,v
+
+# XXX: currently the maintainer's login name is used
+#find $cvsroot -type f -exec perl -pi -e "s/author $LOGNAME;/author test;/" {} \;
