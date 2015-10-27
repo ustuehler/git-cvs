@@ -32,7 +32,6 @@ class Command(Cmd):
 
                 match = re.match('^([^\s=]+)(?:\s*=\s*|\s+)(.+?)(?:\s+<(.+)>)?$', line)
                 if match:
-                    print str(match.groups())
                     login, fullname, email = match.groups()
                     authors[login] = (fullname, email)
                 else:
