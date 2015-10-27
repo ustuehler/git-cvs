@@ -429,13 +429,17 @@ class GitFastImport(object):
         # reused.
         if self.authors:
             if self.authors.has_key(author):
-                return self.authors[author]
+                return self.authors[author][0]
             elif self.stop_on_unknown_author:
                 raise MissingAuthorFullname(author)
         return author
 
     def author_email(self, author):
-        if self.domain:
+        if (self.authors and
+                self.authors.has_key(author) and
+                self.authors[author][1] is not None):
+            return self.authors[author][1]
+        elif self.domain:
             return '%s@%s' % (author, self.domain)
         else:
             return author

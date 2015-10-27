@@ -30,10 +30,11 @@ class Command(Cmd):
                 if not line:
                     break
 
-                match = re.match('([^\s]+)\s+(.+)', line)
+                match = re.match('^([^\s=]+)(?:\s*=\s*|\s+)(.+?)(?:\s+<(.+)>)?$', line)
                 if match:
-                    login, fullname = match.groups()
-                    authors[login] = fullname
+                    print str(match.groups())
+                    login, fullname, email = match.groups()
+                    authors[login] = (fullname, email)
                 else:
                     self.warn('invalid line in authors map: %s' % line)
             self.options.authors = authors
