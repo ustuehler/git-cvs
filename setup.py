@@ -2,10 +2,10 @@
 
 """Python Distutils setup script for 'git-cvs'."""
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(name='git-cvs',
-      version='0.0.1',
+      version='0.1.0',
       description='Import changesets from CVS into Git',
       author='Uwe Stuehler',
       author_email='uwe@bsdx.de',
@@ -16,4 +16,6 @@ setup(name='git-cvs',
       data_files=[('/usr/local/libexec/git', ['scripts/git-cvs'])],
       # XXX: a fairly recent version is required, but rcsparse
       # doesn't maintain a package version
-      requires=['rcsparse'])
+      requires=['rcsparse'],
+      test_suite='nose.collector',
+      setup_requires=['nose>=1.0'])
