@@ -6,7 +6,7 @@ import time
 
 from subprocess import Popen, PIPE
 
-from cvsgit.changeset import ChangeSetGenerator
+from cvsgit.changeset import ChangeSetGenerator, FILE_DELETED
 from cvsgit.rcs import RCSFile
 from cvsgit.i18n import _
 from cvsgit.term import NoProgress
@@ -390,6 +390,14 @@ class CVS(object):
         rcsfile = RCSFile(rcsfile)
         blob = rcsfile.blob(revision)
         return self.expand_keywords(blob, change, rcsfile, revision)
+
+    def note(self, change, changeset):
+        """Return a note that identies the revision.
+        """
+        if change.filestatus == FILE_DELETED:
+            return change.filename + ' ' + change.revision + ' dead'
+        else:
+            return change.filename + ' ' + change.revision
 
     def expand_keyword(self, change, rcsfile, revision, kw):
         if kw == 'Id' or (self.localid and kw == self.localid):

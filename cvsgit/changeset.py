@@ -121,6 +121,9 @@ class ChangeSet(object):
     def blob(self, change):
         return self.provider.blob(change, self)
 
+    def note(self, change):
+        return self.provider.note(change, self)
+
     def get_timestamp(self):
         # At first, this method returned start_time, but it makes more
         # sense to return end_time, which is when the last RCS change

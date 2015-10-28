@@ -363,6 +363,7 @@ class GitFastImport(object):
         self.authors = authors
         self.stop_on_unknown_author = stop_on_unknown_author
         self.last_changeset = None
+        self.write('feature notes\n')
 
     def add_changeset(self, changeset):
         name = self.author_name(changeset.author)
@@ -383,22 +384,24 @@ class GitFastImport(object):
         self.write('committer %s <%s> %s\n' % (name, email, when))
         self.data(changeset.log.encode('utf-8'))
 
+        # FIXME: this is a hack; find out if the branch exists
         if changeset.id != 1:
-            # FIXME: this is a hack; find out if the branch exists
             if self.last_changeset is None:
                 self.write('from %s^0\n' % self.branch)
             else:
                 self.write('from :%s\n' % self.last_changeset.id)
-        self.last_changeset = changeset
+
+        note = ''
 
         for c in changeset.changes:
             if self.verbose:
                 print '\t%s %s %s' % (c.filestatus, c.filename, c.revision)
+
             if c.filestatus == FILE_DELETED:
                 self.write('D %s\n' % c.filename)
             else:
-                blob = changeset.blob(c)
                 perm = changeset.perm(c)
+                blob = changeset.blob(c)
 
                 # Git according to git-fast-import(1) only supports
                 # these two file modes for plain files.
@@ -409,6 +412,21 @@ class GitFastImport(object):
 
                 self.write('M %o inline %s\n' % (perm, c.filename))
                 self.data(blob)
+
+            note += str(changeset.note(c)) + '\n'
+
+        notes_ref = 'refs/notes/cvs'
+        self.write('commit refs/notes/cvs\n')
+        self.write('committer %s <%s> %s\n' % ('git-cvs', '', when))
+        self.data('')
+        # FIXME: this is a hack; find out if the branch exists
+        if changeset.id != 1:
+            if self.last_changeset is None:
+                self.write('from %s^0\n' % notes_ref)
+        self.write('N inline :%s\n' % changeset.id)
+        self.data(note)
+
+        self.last_changeset = changeset
 
     def close(self):
         try:

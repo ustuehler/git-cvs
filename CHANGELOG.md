@@ -1,3 +1,8 @@
+# 0.2.0 (unreleased)
+
+* Track RCS revisions for each commit in refs/notes/cvs. This can be used
+  to construct an entire CVS working copy.
+
 # 0.1.0
 
 * Clone, fetch and pull will ignore the very last changesets because those
