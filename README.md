@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ustuehler/git-cvs.svg?branch=master)](http://travis-ci.org/ustuehler/git-cvs)
+
 ADVANTAGES OVER PLAIN CVS(1) AND CVSSYNC(1)
 ===========================================
 
