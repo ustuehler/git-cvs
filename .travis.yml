@@ -1,4 +1,9 @@
-language: python
+---
 sudo: false
-install: python setup.py -q install --user
-script: nosetests
+addons:
+  apt:
+    packages:
+      - cvs
+language: python
+install: pip install -e git+https://github.com/corecode/rcsparse.git#egg=rcsparse
+script: python setup.py nosetests
