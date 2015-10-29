@@ -1,102 +1,49 @@
+Reproducible incremental CVS-to-Git conversion
+==============================================
+
 [![Build Status](https://travis-ci.org/ustuehler/git-cvs.svg?branch=master)](http://travis-ci.org/ustuehler/git-cvs)
 
-ADVANTAGES OVER PLAIN CVS(1) AND CVSSYNC(1)
-===========================================
+Installation
+------------
 
- * Easy viewing of committed diffs.  With cvsync(1) or by monitoring
-   source-changes@ you get ChangeLog entries but they only contain the
-   list of affected files and a log message, without even the revision
-   numbers of the affected files.  In Git you can do
+There is a port of git-cvs for OpenBSD. Run `pkg_add git-cvs` to install the
+package.
 
-   $ git log
+To install git-cvs from source, ensure that you have a recent version of Simon
+Schubert's [rcsparse library](https://github.com/corecode/rcsparse) installed
+and then run setup.py:
 
-   to get what you get from the ChangeLog entries and
+```text
+sudo ./setup.py install
+```
 
-   $ git show HEAD~1
+Usage
+-----
 
-   to show the diff for the second to last commit.
+**Clone a local CVS repository into a Git repository.**
 
- * See all subtree changes.
+```text
+git cvs clone /cvs/src
+```
 
-   $ git log -p sys/arch/i386
+This will parse all RCS files, generate changesets and import those changesets
+into Git.  Some metadata will be stored in `.git/cvsgit.db` and is required for
+further incremental runs.
 
- * Check the status of the working copy really fast.  "cvs status" in
-   /usr/src takes about X minutes on my laptop while "git status" takes
-   only 1.2 seconds.
+**Update the Git repository with recent changesets from CVS.**
 
- * Pull upstream changes really fast.  "cvs update" in /usr/src takes
-   X minutes on my laptop while a "git pull" takes only Y seconds.
+```text
+git cvs pull
+```
 
- * To see what's new after a "git pull", including the actual diffs,
-   you can use
+The CVSROOT for this command is the same as when the repository was cloned
+initially.  You can change the CVS repository location by modifying the
+`cvs.source` option with git-config(1).
 
-   $ git log --stat -p ORIG_HEAD..
+Caveats
+-------
 
-   This isn't possible with cvs(1) at all.
-
-DRAWBACKS
-=========
-
- * Git, on purpose, does not manage the mtime of checked out files in
-   order to allow make(1) and similar tools to figure out which files
-   must be rebuilt after switching branches.  cvs sets the mtime to
-   the repository mtime whenever checkout/update creates a new file,
-   but not if the file already exists.
-
- * A full clone of the Git repository for src is about 450 MB after
-   "git repack -adF" in addition to the 780 MB for a complete checkout.
-
- * cvsync/rsync and cvsgit have to run somewhere, but that could be a
-   dedicated server.
-
-INSTALLATION AND DEPENDENCIES
-=============================
-
-You must have a fairly recent version of Simon Schubert's rcsparse
-library, available in either of these locations:
-
- * http://ww2.fs.ei.tum.de/~corecode/hg/rcsparse/archive/tip.tar.bz2
- * https://gitorious.org/fromcvs/rcsparse/archive-tarball/master
-
-On top of that, you may have to apply the supplied patch (from the
-patches/ directory in the git-cvs source tree) to fix an issue with
-memory exhaustion during checkout.
-
-To install git-cvs, run ./setup.py:
-
- $ sudo ./setup.py install
-
-WORKFLOW
-========
-
-Repository creation (assuming that /cvs/src is a local mirror of
-the OpenBSD src repository, maintained with CVSync):
-
- * cd /usr/src
- * git-cvs init --domain=cvs.openbsd.org /cvs/src
- * git-cvs pull
-
-Patch management
-
- * git checkout -b somebody/patch-subject cvs/HEAD
- * From mutt: |cd /usr/src; git am --directory=sys/dev -p0
-
-Generating patches that apply with -p0:
-
- * git config diff.noprefix true
-
-Configuration hints (see git-config(1)):
-
- * Automatically set rebase option for new branches with
-   branch.autosetuprebase always|remote
- * Disable a/b prefix with diff.noprefix=true
-
-LIBRARIES FOR PARSING RCS FILES AND OTHER RESOURCES
-===================================================
-
- * http://gitorious.org/fromcvs/rcsparse (used here)
- * rcsparse from cvs2svn
- * tparse from ViewVC
- * http://gitorious.org/parsecvs
- * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.151.8450
- * http://metalinguist.wordpress.com/2007/12/06/the-woes-of-git-gc-aggressive-and-how-git-deltas-work/
+Git, on purpose, does not manage the mtime of checked out files in order to
+allow make(1) and similar tools to figure out which files must be rebuilt after
+switching branches.  cvs sets the mtime to the repository mtime whenever
+checkout/update creates a new file, but not if the file already exists.
